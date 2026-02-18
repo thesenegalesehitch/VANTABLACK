@@ -124,6 +124,45 @@ def edge_preset(host, port):
         console.print(f"[red]Edge preset unavailable: {e}[/red]")
         console.print("[blue]Install optional dependency: mitmproxy[/blue]")
 
+@cli.command("edge-run")
+@click.option("--name", help="Nom du phishlet dans ./phishlets (sans .yaml)")
+@click.option("--path", help="Chemin vers un phishlet YAML")
+@click.option("--host", default="0.0.0.0")
+@click.option("--port", default=8443, type=int)
+def edge_run(name, path, host, port):
+    try:
+        from core.edge.proxy import EdgeProxy, EdgeConfig
+        import asyncio
+        if not path and name:
+            path = os.path.join("phishlets", f"{name}.yaml")
+        if not path:
+            console.print("[red]Spécifie --name ou --path[/red]")
+            return
+        with open(path, "r") as f:
+            ph_yaml = f.read()
+        cfg = EdgeConfig(listen_host=host, listen_port=port)
+        proxy = EdgeProxy(cfg)
+        console.print(f"[yellow]Starting Edge with {path}[/yellow]")
+        asyncio.run(proxy.start(ph_yaml))
+    except Exception as e:
+        console.print(f"[red]Edge run failed: {e}[/red]")
+        console.print("[blue]Install optional dependency: mitmproxy[/blue]")
+
+@cli.command("phishlets-list")
+def phishlets_list():
+    files = []
+    try:
+        for fn in os.listdir("phishlets"):
+            if fn.endswith(".yaml"):
+                files.append(fn[:-5])
+    except Exception:
+        pass
+    table = Table(title="Phishlets disponibles")
+    table.add_column("Nom")
+    for n in sorted(files):
+        table.add_row(n)
+    console.print(table)
+
 @cli.command()
 @click.option("--open-server", is_flag=True, help="Start demo server after run")
 def lunar(open_server):
