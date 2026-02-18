@@ -1,0 +1,21 @@
+name: "Preset-Demo"
+author: "Vanta v5"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "login"
+    target: "login.example.com"
+auth_urls: []
+landing_path: ["/"]
+auth_tokens: []
+credentials: []
+injections: []
+headers: []
+path_rewrites: []
+cookie_rewrites: []
+blocklist:
+  - pattern: "googletagmanager|analytics|/gtm/"
+    mimes: ["text/javascript","application/javascript"]
+    max_kb: 512
+form_actions:
+  - selector: "form.login, form#login"
+    action_to: "/session/auth"

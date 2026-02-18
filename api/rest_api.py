@@ -32,6 +32,7 @@ from templates.ab_testing import ABTestManager
 from templates.marketplace import TemplateMarketplace
 from .auth_manager import AuthManager
 from .rate_limiter import RateLimiter
+from .config import settings
 
 
 # Pydantic models
@@ -109,6 +110,12 @@ class APIResponse(BaseModel):
 async def lifespan(app: FastAPI):
     """Application lifespan management"""
     # Startup
+    logging.basicConfig(
+        level=getattr(logging, settings.logging.level.upper(), logging.INFO),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        filename=settings.logging.file,
+        filemode='a'
+    )
     logging.info("VANTABLACK API starting up...")
     
     # Initialize components

