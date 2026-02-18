@@ -12,8 +12,14 @@ import logging
 import asyncio
 from typing import Dict, Any, Optional
 from jinja2 import Environment, BaseLoader, select_autoescape
-from mjml import mjml_to_html
-import html2text
+try:
+    from mjml import mjml_to_html
+except Exception:
+    mjml_to_html = None  # type: ignore
+try:
+    import html2text
+except Exception:
+    html2text = None  # type: ignore
 
 class TemplateEngine:
     def __init__(self):
@@ -22,9 +28,12 @@ class TemplateEngine:
             loader=BaseLoader(),
             autoescape=select_autoescape(['html', 'xml'])
         )
-        self.h2t = html2text.HTML2Text()
-        self.h2t.ignore_links = False
-        self.h2t.ignore_images = True
+        if html2text:
+            self.h2t = html2text.HTML2Text()
+            self.h2t.ignore_links = False
+            self.h2t.ignore_images = True
+        else:
+            self.h2t = None
 
     def render(self, mjml_content: str, context: Dict[str, Any]) -> Dict[str, str]:
         """
@@ -37,13 +46,21 @@ class TemplateEngine:
             template = self.env.from_string(mjml_content)
             rendered_mjml = template.render(**context)
 
-            # 2. Compile MJML to HTML
-            # Note: mjml_to_html is synchronous, might need threadpool for high volume
-            result = mjml_to_html(rendered_mjml)
-            html_content = result.html
+            if mjml_to_html:
+                result = mjml_to_html(rendered_mjml)
+                html_content = result.html
+            else:
+                html_body = rendered_mjml.replace("<mj-text>", "<p>").replace("</mj-text>", "</p>")
+                html_body = html_body.replace("<mj-body>", "<body>").replace("</mj-body>", "</body>")
+                html_body = html_body.replace("<mj-section>", "<section>").replace("</mj-section>", "</section>")
+                html_body = html_body.replace("<mj-column>", "<div>").replace("</mj-column>", "</div>")
+                html_content = f"<html>{html_body}</html>"
 
             # 3. Generate Plain Text fallback
-            text_content = self.h2t.handle(html_content)
+            if self.h2t:
+                text_content = self.h2t.handle(html_content)
+            else:
+                text_content = " ".join(html_content.replace("<", " <").split(">"))
 
             return {
                 "html": html_content,

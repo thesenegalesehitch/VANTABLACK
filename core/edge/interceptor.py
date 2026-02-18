@@ -12,7 +12,14 @@ Core mitmproxy addon that handles:
 
 import logging
 import re
-from mitmproxy import http, ctx
+try:
+    from mitmproxy import http, ctx
+except Exception:
+    class http:  # type: ignore
+        class HTTPFlow:  # type: ignore
+            pass
+    class ctx:  # type: ignore
+        pass
 from core.edge.phishlets import PhishletConfig, PhishletLoader
 from core.edge.session import SessionManager
 

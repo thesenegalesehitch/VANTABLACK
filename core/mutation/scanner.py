@@ -30,6 +30,9 @@ class DetectionScanner:
         score = 0.0
         matches = []
 
+        if "<script" in content.lower():
+            score += 0.2
+
         for name, regex in self.signatures.items():
             if re.search(regex, content, re.IGNORECASE):
                 score += 0.2

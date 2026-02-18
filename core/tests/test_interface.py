@@ -26,6 +26,16 @@ def test_mutation_endpoint():
     assert response.status_code == 200
     assert "test" not in response.json()["mutated"]  # Class should be renamed
 
+def test_api_config():
+    response = client.get("/v5/config")
+    assert response.status_code == 200
+    assert "config" in response.json()
+
+def test_api_guide():
+    response = client.get("/v5/guide")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+
 # --- CLI Tests ---
 def test_cli_help():
     runner = CliRunner()
@@ -43,3 +53,9 @@ def test_cli_mutate_error():
     runner = CliRunner()
     result = runner.invoke(cli, ["mutate", "--file", "nonexistent.html"])
     assert "Error" in result.output
+
+def test_cli_doctor_runs():
+    runner = CliRunner()
+    result = runner.invoke(cli, ["doctor"])
+    assert result.exit_code == 0
+    assert "Environment Check" in result.output

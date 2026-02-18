@@ -15,6 +15,10 @@ from rich.console import Console
 from rich.table import Table
 from core.mutation.engine import MutationEngine
 from core.mutation.scanner import DetectionScanner
+from core.common import config
+import subprocess
+import sys
+import os
 
 console = Console()
 
@@ -22,6 +26,63 @@ console = Console()
 def cli():
     """Vantablack Core v5 - Red Team Operations Suite"""
     logging.basicConfig(level=logging.INFO)
+
+@cli.command()
+def init():
+    """Interactive environment initialization"""
+    console.print("[cyan]Initializing environment[/cyan]")
+    db_url = click.prompt("DB_URL", default=config.get("DB_URL"))
+    smtp_host = click.prompt("SMTP_HOST", default=config.get("SMTP_HOST"))
+    smtp_port = click.prompt("SMTP_PORT", default=config.get("SMTP_PORT"))
+    smtp_user = click.prompt("SMTP_USER", default=config.get("SMTP_USER"))
+    smtp_pass = click.prompt("SMTP_PASS", default=config.get("SMTP_PASS"), hide_input=True)
+    edge_enabled = click.prompt("EDGE_ENABLED [true/false]", default=config.get("EDGE_ENABLED"))
+    env_path = ".env"
+    with open(env_path, "w") as f:
+        f.write(f"DB_URL={db_url}\n")
+        f.write(f"SMTP_HOST={smtp_host}\n")
+        f.write(f"SMTP_PORT={smtp_port}\n")
+        f.write(f"SMTP_USER={smtp_user}\n")
+        f.write(f"SMTP_PASS={smtp_pass}\n")
+        f.write(f"EDGE_ENABLED={edge_enabled}\n")
+    console.print(f"[green]Written {env_path}[/green]")
+
+@cli.command()
+def doctor():
+    """Environment diagnostics"""
+    table = Table(title="Environment Check")
+    table.add_column("Item")
+    table.add_column("Status")
+    try:
+        import fastapi  # noqa
+        table.add_row("fastapi", "OK")
+    except Exception:
+        table.add_row("fastapi", "MISSING")
+    try:
+        import mitmproxy  # noqa
+        table.add_row("mitmproxy", "OK")
+    except Exception:
+        table.add_row("mitmproxy", "OPTIONAL")
+    try:
+        import aiosmtplib  # noqa
+        table.add_row("aiosmtplib", "OK")
+    except Exception:
+        table.add_row("aiosmtplib", "MISSING")
+    cfg = config.sanitized()
+    table.add_row("DB_URL", cfg.get("DB_URL"))
+    table.add_row("SMTP_HOST", cfg.get("SMTP_HOST"))
+    console.print(table)
+
+@cli.command()
+@click.option("--port", default=8000)
+def demo(port):
+    """Run demo API with metrics and guide"""
+    app_code = "from fastapi import FastAPI\nfrom core.api.routes import router\napp=FastAPI()\napp.include_router(router)\n"
+    path = ".v5_demo_app.py"
+    with open(path, "w") as f:
+        f.write(app_code)
+    console.print("[yellow]Starting demo server[/yellow]")
+    subprocess.run([sys.executable, "-m", "uvicorn", ".v5_demo_app:app", "--port", str(port)], check=False)
 
 @cli.command()
 @click.option("--name", prompt="Campaign Name", help="Name of the campaign")
