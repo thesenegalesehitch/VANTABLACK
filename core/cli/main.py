@@ -150,17 +150,30 @@ def edge_run(name, path, host, port):
 
 @cli.command("phishlets-list")
 def phishlets_list():
-    files = []
+    rows = []
     try:
+        import yaml
         for fn in os.listdir("phishlets"):
-            if fn.endswith(".yaml"):
-                files.append(fn[:-5])
+            if not fn.endswith(".yaml"):
+                continue
+            path = os.path.join("phishlets", fn)
+            with open(path, "r") as f:
+                data = yaml.safe_load(f)
+            name = data.get("name", fn[:-5])
+            targets = []
+            for m in data.get("proxy_hosts", []):
+                t = m.get("target")
+                if t:
+                    targets.append(t)
+            rows.append((fn[:-5], name, ", ".join(targets)))
     except Exception:
         pass
     table = Table(title="Phishlets disponibles")
+    table.add_column("Fichier")
     table.add_column("Nom")
-    for n in sorted(files):
-        table.add_row(n)
+    table.add_column("Cibles")
+    for f, n, t in sorted(rows):
+        table.add_row(f, n, t)
     console.print(table)
 
 @cli.command()
