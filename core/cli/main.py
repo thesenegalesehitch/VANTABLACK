@@ -76,6 +76,25 @@ def doctor():
     table.add_row("SMTP_HOST", cfg.get("SMTP_HOST"))
     console.print(table)
 
+@cli.command("phishlets-validate")
+def phishlets_validate():
+    """Valide tous les phishlets et affiche un résumé"""
+    try:
+        from core.edge.phishlets import PhishletLoader
+        import glob
+        loader = PhishletLoader()
+        ok = 0
+        files = glob.glob("phishlets/*.yaml")
+        for p in files:
+            with open(p, "r") as f:
+                y = f.read()
+            cfg = loader.load_from_yaml(y)
+            console.print(f"[green]OK[/green] {p} → {cfg.name} ({len(cfg.proxy_hosts)} hosts)")
+            ok += 1
+        console.print(f"[bold]{ok} phishlet(s) valides[/bold]")
+    except Exception as e:
+        console.print(f"[red]Erreur: {e}[/red]")
+
 @cli.command()
 @click.option("--port", default=8000)
 def demo(port):
