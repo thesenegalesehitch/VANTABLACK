@@ -18,3 +18,6 @@ blocklist:
   - {pattern: "analytics|gtm|/static/", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"ServiceLogin\"], form[action*=\"signin\"]", action_to: "/session/login"}
+bridges:
+  - {prefix: "/_gapi/", target_host: "apis.google.com", strip_prefix: true}
+  - {prefix: "/_gstatic/", target_host: "ssl.gstatic.com", strip_prefix: true}
