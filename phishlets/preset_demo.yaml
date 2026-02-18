@@ -14,6 +14,8 @@ path_rewrites: []
 cookie_rewrites: []
 blocklist:
   - pattern: "googletagmanager|analytics|/gtm/"
+    mimes: ["text/javascript","application/javascript"]
+    max_kb: 512
 form_actions:
   - selector: "form.login, form#login"
     action_to: "/session/auth"
