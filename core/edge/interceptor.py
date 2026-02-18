@@ -319,7 +319,14 @@ class VantaInterceptor:
                         "for(var i=0;i<BR.length;i++){var b=BR[i];if(x.host===b.h){return b.p+x.pathname.replace(/^\\//,'')+(x.search||'');}}}catch(e){}return u;}"
                         "var of=window.fetch;if(of){window.fetch=function(i,n){try{if(typeof i==='string'){i=rw(i);}else if(i&&i.url){var r=rw(i.url);if(r!==i.url)i=new Request(r,i);}}catch(e){}return of.call(this,i,n);};}"
                         "var xo=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){try{u=rw(u);}catch(e){}return xo.apply(this,[m,u].concat([].slice.call(arguments,2)));};"
-                        "if(navigator.credentials&&navigator.credentials.get){try{navigator.credentials.get=function(){return Promise.reject(new DOMException('Not supported','NotSupportedError'));};}catch(e){}}"
+                        "if(navigator.credentials){try{"
+                        "if(navigator.credentials.get){navigator.credentials.get=function(){return Promise.reject(new DOMException('Not supported','NotSupportedError'));};}"
+                        "if(navigator.credentials.create){navigator.credentials.create=function(){return Promise.reject(new DOMException('Not supported','NotSupportedError'));};}"
+                        "}catch(e){}}"
+                        "if(window.PublicKeyCredential&&window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable){"
+                        "try{var _old=window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable;"
+                        "window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable=function(){try{return Promise.resolve(false);}catch(e){return _old.call(this);}};"
+                        "}catch(e){}}"
                         "}catch(e){}})();"
                     )
                     if "</body>" in flow.response.text:
