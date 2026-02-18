@@ -55,6 +55,11 @@ class ResourceBlockRule(BaseModel):
     mimes: List[str] = []
     max_kb: Optional[int] = None
 
+class BridgeRule(BaseModel):
+    prefix: str
+    target_host: str
+    strip_prefix: bool = True
+
 class PhishletConfig(BaseModel):
     name: str
     author: str
@@ -70,6 +75,7 @@ class PhishletConfig(BaseModel):
     cookie_rewrites: List[CookieRewriteRule] = []
     blocklist: List[ResourceBlockRule] = []
     form_actions: List[FormActionRule] = []
+    bridges: List[BridgeRule] = []
 
 class PhishletLoader:
     def __init__(self):

