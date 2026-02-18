@@ -329,6 +329,58 @@ def phishlets_list():
         table.add_row(f, n, t)
     console.print(table)
 
+@cli.command("safe-mode")
+@click.option("--port", default=8888, type=int)
+def safe_mode(port):
+    try:
+        import importlib.util
+        import runpy
+        runpy.run_path("safe_mode.py", run_name="__main__")
+    except Exception as e:
+        console.print(f"[red]Safe mode failed: {e}[/red]")
+
+@cli.command("phishlets-audit")
+@click.option("--allow", default="localhost,example.com", help="Suffixes de domaines autorisés (CSV)")
+def phishlets_audit(allow):
+    try:
+        import yaml, glob, os
+        allow_sfx = [s.strip() for s in allow.split(",") if s.strip()]
+        files = glob.glob("phishlets/*.yaml")
+        rows = []
+        bad = 0
+        for p in files:
+            try:
+                with open(p, "r") as f:
+                    data = yaml.safe_load(f)
+                hosts = [m.get("target","") for m in data.get("proxy_hosts", [])]
+                bridges = [b.get("target_host","") for b in data.get("bridges", [])]
+                offenders = []
+                for h in hosts + bridges:
+                    if not h:
+                        continue
+                    if not any(h==s or h.endswith("."+s) for s in allow_sfx):
+                        offenders.append(h)
+                rows.append((os.path.basename(p), data.get("name","?"), len(offenders), offenders[:5]))
+                if offenders:
+                    bad += 1
+            except Exception:
+                rows.append((os.path.basename(p), "N/A", -1, ["parse_error"]))
+                bad += 1
+        table = Table(title="Audit des phishlets")
+        table.add_column("Fichier")
+        table.add_column("Nom")
+        table.add_column("Hôtes non autorisés")
+        table.add_column("Exemples")
+        for f, n, k, ex in rows:
+            table.add_row(f, n, str(k), ", ".join(ex))
+        console.print(table)
+        if bad:
+            console.print(f"[yellow]{bad} phishlet(s) avec hôtes hors liste autorisée[/yellow]")
+        else:
+            console.print("[green]Tous les phishlets respectent la liste autorisée[/green]")
+    except Exception as e:
+        console.print(f"[red]Audit échoué: {e}[/red]")
+
 @cli.command()
 @click.option("--open-server", is_flag=True, help="Start demo server after run")
 def lunar(open_server):
