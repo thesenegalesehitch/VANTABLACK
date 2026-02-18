@@ -81,10 +81,22 @@ class PhishletLoader:
             data = yaml.safe_load(yaml_content)
             # New schema fast-path
             if isinstance(data, dict) and "name" in data and "proxy_hosts" in data:
-                return PhishletConfig(**data)
+                cfg = PhishletConfig(**data)
+                try:
+                    from core.common.metrics import PHISHLET_LOAD
+                    PHISHLET_LOAD.inc()
+                except Exception:
+                    pass
+                return cfg
             # Legacy (evilginx-like) schema conversion
             conv = self._convert_legacy_schema(data)
-            return PhishletConfig(**conv)
+            cfg = PhishletConfig(**conv)
+            try:
+                from core.common.metrics import PHISHLET_LOAD
+                PHISHLET_LOAD.inc()
+            except Exception:
+                pass
+            return cfg
         except Exception as e:
             self.logger.error(f"Failed to load phishlet: {str(e)}")
             raise
