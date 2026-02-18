@@ -17,6 +17,10 @@ DEFAULTS = {
     "EDGE_ENABLED": "false",
     "EDGE_HOST": "0.0.0.0",
     "EDGE_PORT": "8080",
+    "RATE_LIMIT_PER_MINUTE": "120",
+    "ALLOW_IPS": "",
+    "DENY_IPS": "",
+    "UPSTREAM_HTTP": ""
 }
 
 SENSITIVE_KEYS = {"SMTP_PASS", "DB_URL"}
@@ -35,3 +39,14 @@ def sanitized() -> Dict[str, Any]:
             cfg[k] = "***"
     return cfg
 
+def get_int(key: str, default: int) -> int:
+    try:
+        return int(get(key))
+    except Exception:
+        return default
+
+def get_list(key: str) -> list[str]:
+    raw = get(key)
+    if not raw:
+        return []
+    return [x.strip() for x in raw.split(",") if x.strip()]

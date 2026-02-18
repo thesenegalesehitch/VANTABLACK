@@ -14,6 +14,8 @@ CAMPAIGN_STATUS = Gauge('vanta_campaign_active', 'Active Campaigns')
 PHISHLET_LOAD = Gauge('vanta_phishlet_loaded', 'Loaded Phishlets')
 MUTATION_OPS = Counter('vanta_mutation_total', 'Total Mutations Performed')
 DETECTION_EVENTS = Counter('vanta_detection_events', 'Detected Blocking Events')
+RATE_LIMITED = Counter('vanta_rate_limited_total', 'Requests rate-limited', ['ip'])
+BLOCKED_IP = Counter('vanta_blocked_ip_total', 'Requests blocked by ACL', ['ip'])
 
 class MetricsManager:
     @staticmethod

