@@ -106,6 +106,24 @@ def edge_demo(phishlet, host, port):
         console.print(f"[red]Edge demo unavailable: {e}[/red]")
         console.print("[blue]Install optional dependency: mitmproxy[/blue]")
 
+@cli.command("edge-preset")
+@click.option("--host", default="0.0.0.0")
+@click.option("--port", default=8443, type=int)
+def edge_preset(host, port):
+    """Run Edge Proxy with preset demo mapping"""
+    try:
+        from core.edge.proxy import EdgeProxy, EdgeConfig
+        import asyncio
+        cfg = EdgeConfig(listen_host=host, listen_port=port)
+        proxy = EdgeProxy(cfg)
+        console.print(f"[yellow]Starting Edge preset on {host}:{port}[/yellow]")
+        with open("phishlets/preset_demo.yaml", "r") as f:
+            ph_yaml = f.read()
+        asyncio.run(proxy.start(ph_yaml))
+    except Exception as e:
+        console.print(f"[red]Edge preset unavailable: {e}[/red]")
+        console.print("[blue]Install optional dependency: mitmproxy[/blue]")
+
 @cli.command()
 @click.option("--open-server", is_flag=True, help="Start demo server after run")
 def lunar(open_server):
