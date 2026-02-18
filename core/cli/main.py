@@ -169,6 +169,7 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
             ph_yaml = f.read()
         # Appliquer profil
         p = (profile or "default").lower()
+        _profile_http2 = None
         if p == "stealth":
             try:
                 data = yaml.safe_load(ph_yaml)
@@ -224,7 +225,7 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
                 data["headers"] = hdrs
                 ph_yaml = yaml.safe_dump(data, sort_keys=False)
                 # HTTP/2 off et limite plus basse
-                cfg.http2 = False
+                _profile_http2 = False
                 if rate is None:
                     os.environ["RATE_LIMIT_PER_MINUTE"] = "40"
             except Exception as e:
@@ -237,7 +238,7 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
         if deny_ips is not None:
             os.environ["DENY_IPS"] = deny_ips
         cfg = EdgeConfig(listen_host=host, listen_port=port)
-        cfg.http2 = bool(http2)
+        cfg.http2 = bool(http2) if _profile_http2 is None else bool(_profile_http2)
         cfg.connection_strategy = conn_strategy
         if upstream:
             cfg.upstream_http = upstream
