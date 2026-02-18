@@ -126,7 +126,11 @@ vanta edge-run --name paypal
               <li>Ne jamais utiliser hors cadre légal.</li>
               <li>Ne jamais loguer de secrets.</li>
               <li>Limiter l'exposition réseau en démo.</li>
+              <li>Préférer les environnements simulés (sandbox) pour l'entraînement.</li>
             </ul>
+            <h3>Mode Sécurisé</h3>
+            <pre>vanta safe-mode</pre>
+            <p>Audit visuel local (localhost). Aucune exfiltration.</p>
           </section>
         """,
         "network": """
