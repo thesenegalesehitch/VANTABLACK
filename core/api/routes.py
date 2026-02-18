@@ -81,6 +81,7 @@ vanta mutate --file payload.html
 vanta analyze --file payload.html
 vanta edge-demo --phishlet phishlets/example.yaml   # si mitmproxy installé
 vanta lunar          # Mode avancé (mutation+scanner+autopilot)
+vanta edge-run --name google --profile stealth --rate 60 --deny-ips 1.2.3.4
             </pre>
           </section>
         """,

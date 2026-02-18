@@ -18,3 +18,7 @@ blocklist:
   - {pattern: "analytics|/gtm/|/static/", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"login\"]", action_to: "/sessions"}
+bridges:
+  - {prefix: "/_igapi/", target_host: "i.instagram.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_iggraph/", target_host: "graph.instagram.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_igstatic/", target_host: "static.cdninstagram.com", strip_prefix: true, cors: "mirror"}

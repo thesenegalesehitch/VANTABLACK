@@ -18,3 +18,7 @@ blocklist:
   - {pattern: "analytics|/tr/|/connect/xd_arbiter", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"login\"]", action_to: "/login/device"}
+bridges:
+  - {prefix: "/_fbapi/", target_host: "graph.facebook.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_fbcn/", target_host: "connect.facebook.net", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_fbstatic/", target_host: "static.xx.fbcdn.net", strip_prefix: true, cors: "mirror"}

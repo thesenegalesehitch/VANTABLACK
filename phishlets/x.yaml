@@ -12,8 +12,7 @@ auth_tokens:
   - {type: "cookie", name: "guest_id"}
   - {type: "cookie", name: "personalization_id"}
 credentials: []
-injections:
-  - {trigger_path: "/i/flow/login", position: "body_end", content: "document.addEventListener('DOMContentLoaded',function(){try{var f=document.querySelector('input[name=\\\"text\\\"],input[name=\\\"username\\\"]');if(f&&!f.value){f.value='@ynw_221';}}catch(e){}});"}
+injections: []
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
 path_rewrites:

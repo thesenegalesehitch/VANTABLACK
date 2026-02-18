@@ -18,3 +18,7 @@ blocklist:
   - {pattern: "analytics|/li/px", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"checkpoint\"], form[action*=\"login\"]", action_to: "/uas/sessions"}
+bridges:
+  - {prefix: "/_liapi/", target_host: "api.linkedin.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_listatic/", target_host: "static.licdn.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_limedia/", target_host: "media.licdn.com", strip_prefix: true, cors: "mirror"}
