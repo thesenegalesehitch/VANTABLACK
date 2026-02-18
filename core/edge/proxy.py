@@ -79,10 +79,15 @@ class EdgeProxy:
             listen_port=self.config.listen_port,
             ssl_insecure=True,
             http2=self.config.http2,
-            connection_strategy=self.config.connection_strategy,
         )
         if mode_val:
             opts.update(mode=mode_val)
+        # Optional: connection_strategy (not available on all mitmproxy versions)
+        try:
+            if hasattr(opts, "set"):
+                opts.set("connection_strategy", self.config.connection_strategy)
+        except Exception:
+            pass
         
         self._master = DumpMaster(opts)
         
