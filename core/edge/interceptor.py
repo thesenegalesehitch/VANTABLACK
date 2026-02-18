@@ -164,6 +164,23 @@ class VantaInterceptor:
                     flow.response.headers[name] = hr.value
         except Exception:
             pass
+        # 2d. Blocklist by mime/size
+        try:
+            ctype = flow.response.headers.get("content-type", "")
+            clen = 0
+            try:
+                clen = int(flow.response.headers.get("content-length", "0"))
+            except Exception:
+                clen = len(flow.response.content or b"")
+            for rule in getattr(self.phishlet, "blocklist", []):
+                if rule.mimes and not any(m in ctype for m in rule.mimes):
+                    continue
+                if rule.max_kb is not None and clen > rule.max_kb * 1024:
+                    if hasattr(http, "Response"):
+                        flow.response = http.Response.make(204, b"", {"content-type": "text/plain"})
+                        return
+        except Exception:
+            pass
 
         # 3. Inject Content
         if flow.response.content:

@@ -47,7 +47,9 @@ class CookieRewriteRule(BaseModel):
     secure: Optional[bool] = None
 
 class ResourceBlockRule(BaseModel):
-    pattern: str  # regex for URL/path to block
+    pattern: str
+    mimes: List[str] = []
+    max_kb: Optional[int] = None
 
 class PhishletConfig(BaseModel):
     name: str
