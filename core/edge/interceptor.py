@@ -125,10 +125,10 @@ class VantaInterceptor:
                             new_path = "/" + new_path
                         flow.request.path = new_path
                         flow.request.host = br.target_host
-                        # Shape Origin/Referer for upstream service expectations
                         try:
-                            flow.request.headers["origin"] = f"https://{br.target_host}"
-                            flow.request.headers["referer"] = f"https://{br.target_host}{new_path}"
+                            oh = br.origin_host or br.target_host
+                            flow.request.headers["origin"] = f"https://{oh}"
+                            flow.request.headers["referer"] = f"https://{oh}{new_path}"
                         except Exception:
                             pass
                         try:
@@ -136,6 +136,9 @@ class VantaInterceptor:
                                 flow.metadata = {}
                             flow.metadata["v_tgt_host"] = br.target_host
                             flow.metadata["v_bridge"] = True
+                            flow.metadata["v_bridge_pfx"] = br.prefix
+                            flow.metadata["v_bridge_cors"] = br.cors or ""
+                            flow.metadata["v_bridge_origin"] = (br.origin_host or br.target_host)
                         except Exception:
                             pass
                         break
@@ -250,12 +253,18 @@ class VantaInterceptor:
         # 3. Inject Content
         if flow.response.content:
             self._inject_scripts(flow)
-        # 3b. CORS fallback patch (for non-bridged cross-origin captured responses)
+        # 3b. CORS fallback patch
         try:
             req_origin = flow.request.headers.get("origin")
             if req_origin and "access-control-allow-origin" not in flow.response.headers:
-                flow.response.headers["access-control-allow-origin"] = req_origin
-                flow.response.headers["access-control-allow-credentials"] = "true"
+                mode = getattr(flow, "metadata", {}).get("v_bridge_cors", "")
+                if mode == "allow_all":
+                    flow.response.headers["access-control-allow-origin"] = "*"
+                    if "access-control-allow-credentials" in flow.response.headers:
+                        del flow.response.headers["access-control-allow-credentials"]
+                else:
+                    flow.response.headers["access-control-allow-origin"] = req_origin
+                    flow.response.headers["access-control-allow-credentials"] = "true"
                 if "access-control-allow-headers" not in flow.response.headers:
                     flow.response.headers["access-control-allow-headers"] = "Authorization,Content-Type,Accept,Origin,Referer,User-Agent"
                 if "access-control-allow-methods" not in flow.response.headers:

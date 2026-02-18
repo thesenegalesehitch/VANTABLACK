@@ -19,5 +19,7 @@ blocklist:
 form_actions:
   - {selector: "form[action*=\"login\"], form[data-testid*=\"Login\"]", action_to: "/sessions"}
 bridges:
-  - {prefix: "/_xapi/", target_host: "api.x.com", strip_prefix: true}
-  - {prefix: "/_xabs/", target_host: "abs.twimg.com", strip_prefix: true}
+  - {prefix: "/_xapi/", target_host: "api.x.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_xabs/", target_host: "abs.twimg.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_xton/", target_host: "ton.twimg.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_xpbs/", target_host: "pbs.twimg.com", strip_prefix: true, cors: "mirror"}

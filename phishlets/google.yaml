@@ -19,5 +19,5 @@ blocklist:
 form_actions:
   - {selector: "form[action*=\"ServiceLogin\"], form[action*=\"signin\"]", action_to: "/session/login"}
 bridges:
-  - {prefix: "/_gapi/", target_host: "apis.google.com", strip_prefix: true}
-  - {prefix: "/_gstatic/", target_host: "ssl.gstatic.com", strip_prefix: true}
+  - {prefix: "/_gapi/", target_host: "apis.google.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_gstatic/", target_host: "ssl.gstatic.com", strip_prefix: true, cors: "mirror"}

