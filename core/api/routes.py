@@ -111,6 +111,18 @@ vanta lunar          # Mode avancé (mutation+scanner+autopilot)
               <li>Limiter l'exposition réseau en démo.</li>
             </ul>
           </section>
+        """,
+        "network": """
+          <section>
+            <h2>Réseau</h2>
+            <ul>
+              <li>Limiteur: RATE_LIMIT_PER_MINUTE (def: 120)</li>
+              <li>ACL: ALLOW_IPS, DENY_IPS (CSV d'IP)</li>
+              <li>Proxy amont: UPSTREAM_HTTP (ex: http://user:pass@host:3128)</li>
+              <li>HTTP/2 & stratégie connexion configurables dans EdgeConfig</li>
+            </ul>
+            <p>Edge demo: <code>python -m core.cli.main edge-demo --port 8443</code></p>
+          </section>
         """
     }
 
@@ -121,6 +133,7 @@ vanta lunar          # Mode avancé (mutation+scanner+autopilot)
         <a href="/v5/guide?page=delivery">Delivery</a>
         <a href="/v5/guide?page=edge">Edge</a>
         <a href="/v5/guide?page=mutation">Mutation</a>
+        <a href="/v5/guide?page=network">Réseau</a>
         <a href="/v5/guide?page=ethics">Éthique</a>
       </nav>
     """
