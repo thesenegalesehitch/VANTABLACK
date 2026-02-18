@@ -57,32 +57,92 @@ async def preview_mutation(payload: Dict[str, str]):
     raise HTTPException(status_code=400, detail="Invalid payload")
 
 @router.get("/guide")
-async def guide():
-    html = """
+async def guide(page: str = "home"):
+    pages = {
+        "home": """
+          <section>
+            <h2>Démarrage Express</h2>
+            <ol>
+              <li>python3 -m venv .venv && source .venv/bin/activate</li>
+              <li>python -m pip install -r requirements-v5.txt</li>
+              <li>python -m core.cli.main demo</li>
+              <li>Voir <a href="/v5/metrics">/v5/metrics</a> et <a href="/v5/guide?page=cli">CLI</a></li>
+            </ol>
+          </section>
+        """,
+        "cli": """
+          <section>
+            <h2>CLI</h2>
+            <pre>
+vanta init           # Crée .env
+vanta doctor         # Diagnostics
+vanta demo           # Lance API demo
+vanta mutate --file payload.html
+vanta analyze --file payload.html
+vanta edge-demo --phishlet phishlets/example.yaml   # si mitmproxy installé
+vanta lunar          # Mode avancé (mutation+scanner+autopilot)
+            </pre>
+          </section>
+        """,
+        "delivery": """
+          <section>
+            <h2>Delivery</h2>
+            <p>SMTP asynchrone via aiosmtplib. Fallbacks pour le rendu MJML/texte.</p>
+          </section>
+        """,
+        "edge": """
+          <section>
+            <h2>Edge</h2>
+            <p>Proxy MitM optionnel basé sur mitmproxy. Démo activable via CLI si dépendance présente.</p>
+          </section>
+        """,
+        "mutation": """
+          <section>
+            <h2>Mutation & Autopilot</h2>
+            <p>Moteur polymorphe (HTML/JS) + Scanner statique + cycle AutoPilot.</p>
+          </section>
+        """,
+        "ethics": """
+          <section>
+            <h2>Éthique & Sécurité</h2>
+            <ul>
+              <li>Ne jamais utiliser hors cadre légal.</li>
+              <li>Ne jamais loguer de secrets.</li>
+              <li>Limiter l'exposition réseau en démo.</li>
+            </ul>
+          </section>
+        """
+    }
+
+    nav = """
+      <nav>
+        <a href="/v5/guide?page=home">Accueil</a>
+        <a href="/v5/guide?page=cli">CLI</a>
+        <a href="/v5/guide?page=delivery">Delivery</a>
+        <a href="/v5/guide?page=edge">Edge</a>
+        <a href="/v5/guide?page=mutation">Mutation</a>
+        <a href="/v5/guide?page=ethics">Éthique</a>
+      </nav>
+    """
+    content = pages.get(page, pages["home"])
+    html = f"""
     <html>
-      <head><title>Vantablack v5 Guide</title></head>
+      <head>
+        <title>Vantablack v5 Guide</title>
+        <style>
+          body {{ font-family: system-ui, -apple-system, Segoe UI, Roboto; margin: 0; padding: 0; }}
+          header {{ background: #0b0b0b; color: #fff; padding: 16px; }}
+          nav a {{ margin-right: 12px; color: #0b0b0b; text-decoration: none; font-weight: 600; }}
+          nav {{ background: #f5f5f7; padding: 8px 16px; border-bottom: 1px solid #e5e5e7; }}
+          main {{ padding: 24px; }}
+          pre {{ background: #0f0f14; color: #e6e6e6; padding: 16px; border-radius: 8px; overflow-x: auto; }}
+          a {{ color: #0070f3; }}
+        </style>
+      </head>
       <body>
-        <h1>Vantablack Core v5</h1>
-        <h2>Getting Started</h2>
-        <ol>
-          <li>pip install -r requirements-v5.txt</li>
-          <li>vanta demo</li>
-          <li>Open /v5/guide and /v5/metrics</li>
-        </ol>
-        <h2>CLI</h2>
-        <ul>
-          <li>vanta init</li>
-          <li>vanta doctor</li>
-          <li>vanta mutate --file file.html</li>
-          <li>vanta analyze --file file.html</li>
-        </ul>
-        <h2>APIs</h2>
-        <ul>
-          <li>/v5/health</li>
-          <li>/v5/metrics</li>
-          <li>/v5/config</li>
-          <li>/v5/mutation/preview</li>
-        </ul>
+        <header><h1>Vantablack Core v5 - Guide</h1></header>
+        {nav}
+        <main>{content}</main>
       </body>
     </html>
     """

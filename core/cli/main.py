@@ -19,6 +19,9 @@ from core.common import config
 import subprocess
 import sys
 import os
+import textwrap
+from core.orchestrator.autopilot import Autopilot
+from core.common.metrics import MUTATION_OPS, DETECTION_EVENTS
 
 console = Console()
 
@@ -83,6 +86,47 @@ def demo(port):
         f.write(app_code)
     console.print("[yellow]Starting demo server[/yellow]")
     subprocess.run([sys.executable, "-m", "uvicorn", ".v5_demo_app:app", "--port", str(port)], check=False)
+
+@cli.command("edge-demo")
+@click.option("--phishlet", default="phishlets/example.yaml")
+@click.option("--host", default="0.0.0.0")
+@click.option("--port", default=8443, type=int)
+def edge_demo(phishlet, host, port):
+    """Run Edge Proxy demo if mitmproxy is available"""
+    try:
+        from core.edge.proxy import EdgeProxy, EdgeConfig
+        import asyncio
+        cfg = EdgeConfig(listen_host=host, listen_port=port)
+        proxy = EdgeProxy(cfg)
+        console.print(f"[yellow]Starting Edge demo on {host}:{port}[/yellow]")
+        with open(phishlet, "r") as f:
+            ph_yaml = f.read()
+        asyncio.run(proxy.start(ph_yaml))
+    except Exception as e:
+        console.print(f"[red]Edge demo unavailable: {e}[/red]")
+        console.print("[blue]Install optional dependency: mitmproxy[/blue]")
+
+@cli.command()
+@click.option("--open-server", is_flag=True, help="Start demo server after run")
+def lunar(open_server):
+    """Lunar Mode: mutation + scanner + autopilot cycle with metrics"""
+    console.print("[magenta]Launching Lunar Mode[/magenta]")
+    # Sample HTML to mutate and scan
+    html = "<html><body class='login-form'><script>eval('bad');</script></body></html>"
+    engine = MutationEngine()
+    mutated = engine.mutate_html(html)
+    scanner = DetectionScanner()
+    res = scanner.scan_content(mutated)
+    MUTATION_OPS.inc()
+    if res["status"] == "RISKY":
+        DETECTION_EVENTS.inc()
+    console.print("[bold]Scan Result:[/bold] " + str(res))
+    # Autopilot event
+    ap = Autopilot()
+    asyncio.run(ap.process_event({"type": "detection_alert", "source": "LunarTest", "campaign_id": "lunar-001"}))
+    if open_server:
+        console.print("[yellow]Opening demo server[/yellow]")
+        demo.callback(8000)  # type: ignore
 
 @cli.command()
 @click.option("--name", prompt="Campaign Name", help="Name of the campaign")

