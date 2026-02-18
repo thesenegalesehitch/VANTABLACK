@@ -57,6 +57,8 @@ def test_interceptor_host_rewrite():
     
     # Mock Flow
     flow = MagicMock(spec=http.HTTPFlow if http else object)
+    # Ensure nested request object exists for spec'd mocks
+    flow.request = MagicMock()
     flow.request.pretty_host = "login.phish-domain.com"
     flow.request.method = "GET"
     
