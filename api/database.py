@@ -35,5 +35,5 @@ def get_db():
 
 def init_db():
     # Import all models here so they are registered with Base
-    # from . import models  # We will create models later
+    from . import models
     Base.metadata.create_all(bind=engine)

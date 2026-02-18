@@ -412,7 +412,7 @@ class JavaScriptObfuscator:
 })();
 """
     
-    def generate_network_check(self) -> allowed_domains: List[str] = None) -> str:
+    def generate_network_check(self, allowed_domains: List[str] = None) -> str:
         """Generate network connectivity check"""
         if allowed_domains is None:
             allowed_domains = ['google.com', 'facebook.com', 'microsoft.com']

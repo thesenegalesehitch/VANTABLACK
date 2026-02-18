@@ -5,6 +5,21 @@ import subprocess
 import time
 import signal
 import platform
+import logging
+from api.config import settings
+
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, settings.logging.level.upper(), logging.INFO),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename=settings.logging.file,
+    filemode='a'
+)
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
 def print_banner():
     print("""
