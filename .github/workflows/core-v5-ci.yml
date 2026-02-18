@@ -1,0 +1,49 @@
+name: Vantablack Core v5 CI
+
+on:
+  push:
+    branches:
+      - v5-hyperdrive-core
+  pull_request:
+    branches:
+      - v5-hyperdrive-core
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.14-dev"] # Target Python version
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements-v5.txt ]; then pip install -r requirements-v5.txt; fi
+
+    - name: Lint with Ruff
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        ruff check . --select=E9,F63,F7,F82 --target-version=py314
+        # exit-zero treats all errors as warnings.
+        ruff check . --exit-zero --target-version=py314
+
+    - name: Type check with Mypy
+      run: |
+        mypy core/ --ignore-missing-imports
+
+    - name: Security check with Bandit
+      run: |
+        bandit -r core/ -ll
+
+    - name: Run Tests
+      run: |
+        pytest core/tests/

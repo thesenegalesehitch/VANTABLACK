@@ -1,0 +1,48 @@
+# Vantablack Core v5 Dependencies
+# Python 3.14 Compatible
+# Strict version pinning for stability and reproducibility
+
+# --- Core Framework ---
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.6.0
+pydantic-settings>=2.1.0
+
+# --- Database & Persistence ---
+sqlalchemy>=2.0.25
+alembic>=1.13.1
+asyncpg>=0.29.0  # PostgreSQL async driver
+redis>=5.0.1     # Async Redis client
+
+# --- Edge Proxy (Replacing Evilginx) ---
+mitmproxy>=10.2.2
+cryptography>=42.0.2
+pyopenssl>=24.0.0
+
+# --- Mailer / Delivery (Replacing Gophish) ---
+aiosmtplib>=3.0.1
+jinja2>=3.1.3
+mjml-python>=1.3.1  # For responsive email templates
+dnspython>=2.6.0    # For SPF/DKIM/DMARC checks
+
+# --- Data Science & Behavioral Intelligence ---
+numpy>=1.26.4
+pandas>=2.2.0
+scikit-learn>=1.4.0
+joblib>=1.3.2
+
+# --- Orchestration & Utilities ---
+pyyaml>=6.0.1
+click>=8.1.7        # For CLI
+httpx>=0.26.0       # Async HTTP client
+python-multipart>=0.0.7
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# --- Testing & Quality ---
+pytest>=8.0.0
+pytest-asyncio>=0.23.5
+ruff>=0.2.1
+black>=24.1.1
+mypy>=1.8.0
+bandit>=1.7.7
