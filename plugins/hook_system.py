@@ -153,7 +153,16 @@ class HookSystem:
             # Monitoring hooks
             "monitor.metric": "Called when metric is collected",
             "monitor.alert": "Called when alert is triggered",
-            "monitor.health_check": "Called during health check"
+            "monitor.health_check": "Called during health check",
+
+            # Red Team Operations
+            "http.request.intercept": "Intercept and modify HTTP requests",
+            "http.response.intercept": "Intercept and modify HTTP responses",
+            "session.captured": "Called when a valid session is captured",
+            "creds.captured": "Called when credentials are captured",
+            "evasion.trigger": "Called when evasion mechanisms are triggered",
+            "bot.detected": "Called when a bot/scanner is detected",
+            "loot.saved": "Called when loot is saved to disk"
         }
     
     def register_hook(self, hook_name: str, plugin_instance: Any, 
