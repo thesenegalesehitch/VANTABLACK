@@ -29,4 +29,8 @@ form_actions:
 bridges:
   - {prefix: "/_fbapi/", target_host: "graph.facebook.com", strip_prefix: true, cors: "mirror"}
   - {prefix: "/_fbcn/", target_host: "connect.facebook.net", strip_prefix: true, cors: "mirror"}
-  - {prefix: "/_fbstatic/", target_host: "static.xx.fbcdn.net", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_fbstatic/", target_host: "static.xx.fbcdn.net", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

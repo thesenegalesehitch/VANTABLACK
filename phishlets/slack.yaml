@@ -43,3 +43,7 @@ form_actions:
   - {selector: "form[action*=\"signin\"], form[action*=\"login\"]", action_to: "/api/signin"}
 bridges:
   - {prefix: "/_app/", target_host: "app.slack.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

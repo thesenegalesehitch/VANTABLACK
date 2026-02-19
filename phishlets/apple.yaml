@@ -46,3 +46,7 @@ form_actions:
 bridges:
   - {prefix: "/_cdn/", target_host: "appleid.cdn-apple.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_www/", target_host: "www.apple.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

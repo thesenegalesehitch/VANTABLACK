@@ -50,3 +50,7 @@ bridges:
   - {prefix: "/_roauth/", target_host: "oauth.reddit.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_rgql/", target_host: "gql.reddit.com", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_rstatic/", target_host: "www.redditstatic.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]

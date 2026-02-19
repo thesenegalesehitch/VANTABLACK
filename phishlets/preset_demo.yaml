@@ -19,3 +19,7 @@ blocklist:
 form_actions:
   - selector: "form.login, form#login"
     action_to: "/session/auth"
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+  headers: ["*"]
