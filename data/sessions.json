@@ -1,0 +1,1045 @@
+{
+  "b609a958-f2b9-425d-b0db-eca9ee834316": {
+    "session_id": "b609a958-f2b9-425d-b0db-eca9ee834316",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152347167567376",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:51:11.161099",
+    "last_activity": "2026-02-19T17:51:11.161104"
+  },
+  "02de484f-1f10-435e-8dd2-fbd28edf79c8": {
+    "session_id": "02de484f-1f10-435e-8dd2-fbd28edf79c8",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:11.962079",
+    "last_activity": "2026-02-19T17:51:11.962083"
+  },
+  "66dc1aa3-eb90-47fc-b521-0796d7417c86": {
+    "session_id": "66dc1aa3-eb90-47fc-b521-0796d7417c86",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "P",
+        "captured_at": "2026-02-19T17:51:12.076850",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:12.075524",
+    "last_activity": "2026-02-19T17:51:12.075528"
+  },
+  "cc300821-cc75-4326-aa53-308adc1220fb": {
+    "session_id": "cc300821-cc75-4326-aa53-308adc1220fb",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pa",
+        "captured_at": "2026-02-19T17:51:12.188870",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:12.187597",
+    "last_activity": "2026-02-19T17:51:12.187602"
+  },
+  "4048322c-79fd-49ac-9d9c-1d89c834a1cc": {
+    "session_id": "4048322c-79fd-49ac-9d9c-1d89c834a1cc",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pas",
+        "captured_at": "2026-02-19T17:51:12.300039",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:12.298562",
+    "last_activity": "2026-02-19T17:51:12.298570"
+  },
+  "627b0ace-09f4-4789-8c29-bcdcf8b187d6": {
+    "session_id": "627b0ace-09f4-4789-8c29-bcdcf8b187d6",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass",
+        "captured_at": "2026-02-19T17:51:12.413433",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:12.411763",
+    "last_activity": "2026-02-19T17:51:12.411768"
+  },
+  "a9fa7e67-976f-4e5a-8a70-dafd7a7d89f5": {
+    "session_id": "a9fa7e67-976f-4e5a-8a70-dafd7a7d89f5",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass123!",
+        "captured_at": "2026-02-19T17:51:12.522992",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:12.521140",
+    "last_activity": "2026-02-19T17:51:12.521145"
+  },
+  "c6999caa-3e04-4e9e-984c-cce4dfe215cd": {
+    "session_id": "c6999caa-3e04-4e9e-984c-cce4dfe215cd",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152347301841889",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:51:12.633663",
+    "last_activity": "2026-02-19T17:51:12.633668"
+  },
+  "9bb0b2c0-8ee0-4f14-a42f-e0eb27ebc6fe": {
+    "session_id": "9bb0b2c0-8ee0-4f14-a42f-e0eb27ebc6fe",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152350838621680",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:51:47.951657",
+    "last_activity": "2026-02-19T17:51:47.951662"
+  },
+  "f943e369-047a-4a21-9417-384c262ffbbb": {
+    "session_id": "f943e369-047a-4a21-9417-384c262ffbbb",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152351348615002",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:51:53.087750",
+    "last_activity": "2026-02-19T17:51:53.087755"
+  },
+  "329ddf00-b455-4da8-98fa-dd7cb14f6d0a": {
+    "session_id": "329ddf00-b455-4da8-98fa-dd7cb14f6d0a",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:54.078521",
+    "last_activity": "2026-02-19T17:51:54.078527"
+  },
+  "6525ecd9-a536-4f17-912b-48b58cc4f956": {
+    "session_id": "6525ecd9-a536-4f17-912b-48b58cc4f956",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "P",
+        "captured_at": "2026-02-19T17:51:54.200143",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:54.197843",
+    "last_activity": "2026-02-19T17:51:54.197849"
+  },
+  "e2af923b-6c34-4fb9-a654-44ce16c1919b": {
+    "session_id": "e2af923b-6c34-4fb9-a654-44ce16c1919b",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pa",
+        "captured_at": "2026-02-19T17:51:54.319583",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:54.315939",
+    "last_activity": "2026-02-19T17:51:54.315944"
+  },
+  "c3fef2d0-051d-497c-a7d7-7e74a606c442": {
+    "session_id": "c3fef2d0-051d-497c-a7d7-7e74a606c442",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pas",
+        "captured_at": "2026-02-19T17:51:54.439220",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:54.436539",
+    "last_activity": "2026-02-19T17:51:54.436545"
+  },
+  "b0340460-b8aa-462a-b629-97908b86f1db": {
+    "session_id": "b0340460-b8aa-462a-b629-97908b86f1db",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass",
+        "captured_at": "2026-02-19T17:51:54.558231",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:54.555420",
+    "last_activity": "2026-02-19T17:51:54.555426"
+  },
+  "7e093215-4499-4acc-beb5-982a7c800c51": {
+    "session_id": "7e093215-4499-4acc-beb5-982a7c800c51",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass123!",
+        "captured_at": "2026-02-19T17:51:54.688420",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:51:54.682561",
+    "last_activity": "2026-02-19T17:51:54.682566"
+  },
+  "ad26f274-d52c-4071-988c-188d3df3547c": {
+    "session_id": "ad26f274-d52c-4071-988c-188d3df3547c",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152351519738618",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:51:54.812456",
+    "last_activity": "2026-02-19T17:51:54.812462"
+  },
+  "5324a3c5-e96c-4ed8-b384-47c6f34f600a": {
+    "session_id": "5324a3c5-e96c-4ed8-b384-47c6f34f600a",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152357817204686",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:52:57.701932",
+    "last_activity": "2026-02-19T17:52:57.701936"
+  },
+  "5f582f39-9883-4e2e-997d-5a998a5b6c7a": {
+    "session_id": "5f582f39-9883-4e2e-997d-5a998a5b6c7a",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:52:58.485129",
+    "last_activity": "2026-02-19T17:52:58.485134"
+  },
+  "dd91dd67-3718-4e08-b4d1-4cd2d6a71955": {
+    "session_id": "dd91dd67-3718-4e08-b4d1-4cd2d6a71955",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "P",
+        "captured_at": "2026-02-19T17:52:58.616715",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:52:58.614166",
+    "last_activity": "2026-02-19T17:52:58.614177"
+  },
+  "746e57a9-1250-4bbc-844b-466d30bc1041": {
+    "session_id": "746e57a9-1250-4bbc-844b-466d30bc1041",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pa",
+        "captured_at": "2026-02-19T17:52:58.743102",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:52:58.738452",
+    "last_activity": "2026-02-19T17:52:58.738456"
+  },
+  "24471b9d-34c2-49af-ad09-b97ac8265e4d": {
+    "session_id": "24471b9d-34c2-49af-ad09-b97ac8265e4d",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pas",
+        "captured_at": "2026-02-19T17:52:58.861645",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:52:58.857824",
+    "last_activity": "2026-02-19T17:52:58.857829"
+  },
+  "7c03c79f-b796-4786-a81f-ee69aa9d2eb5": {
+    "session_id": "7c03c79f-b796-4786-a81f-ee69aa9d2eb5",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass",
+        "captured_at": "2026-02-19T17:52:58.979511",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:52:58.977118",
+    "last_activity": "2026-02-19T17:52:58.977122"
+  },
+  "ecda5239-eac2-4b10-93e4-233ac6d03c2a": {
+    "session_id": "ecda5239-eac2-4b10-93e4-233ac6d03c2a",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass123!",
+        "captured_at": "2026-02-19T17:52:59.098768",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:52:59.096286",
+    "last_activity": "2026-02-19T17:52:59.096290"
+  },
+  "b6255d4f-5d4c-49a7-8dec-7d036dc62bc2": {
+    "session_id": "b6255d4f-5d4c-49a7-8dec-7d036dc62bc2",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152357960053112",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:52:59.211855",
+    "last_activity": "2026-02-19T17:52:59.211860"
+  },
+  "b5814527-4321-4816-b49f-cd67bb5582ef": {
+    "session_id": "b5814527-4321-4816-b49f-cd67bb5582ef",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152399784074462",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:59:57.336764",
+    "last_activity": "2026-02-19T17:59:57.336769"
+  },
+  "8d2c603b-1fe5-4934-bd6c-5429473460b0": {
+    "session_id": "8d2c603b-1fe5-4934-bd6c-5429473460b0",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:59:58.245750",
+    "last_activity": "2026-02-19T17:59:58.245755"
+  },
+  "7b3acf28-19f5-46f5-b3d4-5a0ad5668dfb": {
+    "session_id": "7b3acf28-19f5-46f5-b3d4-5a0ad5668dfb",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "P",
+        "captured_at": "2026-02-19T17:59:58.367104",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:59:58.364850",
+    "last_activity": "2026-02-19T17:59:58.364854"
+  },
+  "d78ba922-9274-410e-b425-b141379c0dec": {
+    "session_id": "d78ba922-9274-410e-b425-b141379c0dec",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pa",
+        "captured_at": "2026-02-19T17:59:58.485069",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:59:58.482636",
+    "last_activity": "2026-02-19T17:59:58.482640"
+  },
+  "414363a1-29c8-4243-8326-fe0299c5027e": {
+    "session_id": "414363a1-29c8-4243-8326-fe0299c5027e",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pas",
+        "captured_at": "2026-02-19T17:59:58.601811",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:59:58.599433",
+    "last_activity": "2026-02-19T17:59:58.599437"
+  },
+  "a1d37e32-771c-4968-b9f4-68793e2394c0": {
+    "session_id": "a1d37e32-771c-4968-b9f4-68793e2394c0",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass",
+        "captured_at": "2026-02-19T17:59:58.719021",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:59:58.716619",
+    "last_activity": "2026-02-19T17:59:58.716623"
+  },
+  "5fda3e41-1b93-4ee4-83b6-334ccb9ead53": {
+    "session_id": "5fda3e41-1b93-4ee4-83b6-334ccb9ead53",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass123!",
+        "captured_at": "2026-02-19T17:59:58.834650",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T17:59:58.831276",
+    "last_activity": "2026-02-19T17:59:58.831284"
+  },
+  "f34f9728-3d74-4e68-8ee5-8ae9a394b7b6": {
+    "session_id": "f34f9728-3d74-4e68-8ee5-8ae9a394b7b6",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152399936467891",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T17:59:58.983571",
+    "last_activity": "2026-02-19T17:59:58.983576"
+  },
+  "b2528277-635b-44d3-bec4-9ba87e789997": {
+    "session_id": "b2528277-635b-44d3-bec4-9ba87e789997",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152433367625511",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T18:05:33.115253",
+    "last_activity": "2026-02-19T18:05:33.115258"
+  },
+  "bef167e9-135b-4395-82f8-9c673688e2e7": {
+    "session_id": "bef167e9-135b-4395-82f8-9c673688e2e7",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152435130859921",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T18:05:50.866052",
+    "last_activity": "2026-02-19T18:05:50.866056"
+  },
+  "fdc88940-1b16-49a1-8674-a23a73e17283": {
+    "session_id": "fdc88940-1b16-49a1-8674-a23a73e17283",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:05:51.734108",
+    "last_activity": "2026-02-19T18:05:51.734112"
+  },
+  "4098a647-debf-4645-80ac-c5873555d9af": {
+    "session_id": "4098a647-debf-4645-80ac-c5873555d9af",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "P",
+        "captured_at": "2026-02-19T18:05:51.866530",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:05:51.863186",
+    "last_activity": "2026-02-19T18:05:51.863191"
+  },
+  "d9b867a4-9ca8-483d-b4e8-60dcf04457a5": {
+    "session_id": "d9b867a4-9ca8-483d-b4e8-60dcf04457a5",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pa",
+        "captured_at": "2026-02-19T18:05:51.988546",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:05:51.985304",
+    "last_activity": "2026-02-19T18:05:51.985326"
+  },
+  "a63e8c5e-905c-4f8a-a9ce-c5b28a37ee3f": {
+    "session_id": "a63e8c5e-905c-4f8a-a9ce-c5b28a37ee3f",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pas",
+        "captured_at": "2026-02-19T18:05:52.109530",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:05:52.105894",
+    "last_activity": "2026-02-19T18:05:52.105899"
+  },
+  "47df02dc-2d4c-486e-8d33-b0f6cc616b7a": {
+    "session_id": "47df02dc-2d4c-486e-8d33-b0f6cc616b7a",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass",
+        "captured_at": "2026-02-19T18:05:52.227600",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:05:52.223926",
+    "last_activity": "2026-02-19T18:05:52.223930"
+  },
+  "f6a4cb12-e23e-4cd5-9360-16db68ab50a1": {
+    "session_id": "f6a4cb12-e23e-4cd5-9360-16db68ab50a1",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass123!",
+        "captured_at": "2026-02-19T18:05:52.352763",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:05:52.349963",
+    "last_activity": "2026-02-19T18:05:52.349968"
+  },
+  "73f5b9c6-3112-4f74-aec8-58b4fdc6e26b": {
+    "session_id": "73f5b9c6-3112-4f74-aec8-58b4fdc6e26b",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152435287938614",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T18:05:52.469992",
+    "last_activity": "2026-02-19T18:05:52.470002"
+  },
+  "332fd78e-5013-45dc-bdd1-851f4f50f9b9": {
+    "session_id": "332fd78e-5013-45dc-bdd1-851f4f50f9b9",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152443253218555",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T18:07:12.082540",
+    "last_activity": "2026-02-19T18:07:12.082545"
+  },
+  "37ea695c-cae5-4d18-ac46-80cf0b2ed847": {
+    "session_id": "37ea695c-cae5-4d18-ac46-80cf0b2ed847",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:07:13.046981",
+    "last_activity": "2026-02-19T18:07:13.046985"
+  },
+  "dbfbfea4-b66e-41d1-93d7-358d0d3d135c": {
+    "session_id": "dbfbfea4-b66e-41d1-93d7-358d0d3d135c",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "P",
+        "captured_at": "2026-02-19T18:07:13.167981",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:07:13.164840",
+    "last_activity": "2026-02-19T18:07:13.164845"
+  },
+  "0335ceb3-a812-46a1-ba2c-636cd538358d": {
+    "session_id": "0335ceb3-a812-46a1-ba2c-636cd538358d",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pa",
+        "captured_at": "2026-02-19T18:07:13.287908",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:07:13.283730",
+    "last_activity": "2026-02-19T18:07:13.283736"
+  },
+  "75256272-a531-40f7-9707-5b74ade05b52": {
+    "session_id": "75256272-a531-40f7-9707-5b74ade05b52",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pas",
+        "captured_at": "2026-02-19T18:07:13.410982",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:07:13.406494",
+    "last_activity": "2026-02-19T18:07:13.406500"
+  },
+  "84adb7c4-09cf-49a5-8ec7-bef366e43adb": {
+    "session_id": "84adb7c4-09cf-49a5-8ec7-bef366e43adb",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass",
+        "captured_at": "2026-02-19T18:07:13.535213",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:07:13.530535",
+    "last_activity": "2026-02-19T18:07:13.530542"
+  },
+  "f5b0ef36-0a57-465b-8ff6-85a97e75cd0d": {
+    "session_id": "f5b0ef36-0a57-465b-8ff6-85a97e75cd0d",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "Pass123!",
+        "captured_at": "2026-02-19T18:07:13.658061",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:07:13.654651",
+    "last_activity": "2026-02-19T18:07:13.654656"
+  },
+  "796b0074-f8c5-4600-ab46-517dfe6373dc": {
+    "session_id": "796b0074-f8c5-4600-ab46-517dfe6373dc",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152443417771054",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T18:07:13.774542",
+    "last_activity": "2026-02-19T18:07:13.774548"
+  },
+  "3732b568-ce05-4d72-9da7-8cdd7d654bf6": {
+    "session_id": "3732b568-ce05-4d72-9da7-8cdd7d654bf6",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "unknown",
+        "password": "P",
+        "captured_at": "2026-02-19T18:08:25.965324",
+        "url": "https://localhost:8443/__vanta_track"
+      },
+      {
+        "username": "unknown",
+        "password": "Pa",
+        "captured_at": "2026-02-19T18:08:26.078998",
+        "url": "https://localhost:8443/__vanta_track"
+      },
+      {
+        "username": "unknown",
+        "password": "Pas",
+        "captured_at": "2026-02-19T18:08:26.195429",
+        "url": "https://localhost:8443/__vanta_track"
+      },
+      {
+        "username": "unknown",
+        "password": "Pass",
+        "captured_at": "2026-02-19T18:08:26.316998",
+        "url": "https://localhost:8443/__vanta_track"
+      },
+      {
+        "username": "unknown",
+        "password": "Pass123!",
+        "captured_at": "2026-02-19T18:08:26.441252",
+        "url": "https://localhost:8443/__vanta_track"
+      }
+    ],
+    "tokens": {
+      "guest_id": "v1%3A177152450696215738",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T18:08:25.008956",
+    "last_activity": "2026-02-19T18:08:25.008960"
+  },
+  "4a19006e-6d2a-47af-af24-ce827560e346": {
+    "session_id": "4a19006e-6d2a-47af-af24-ce827560e346",
+    "campaign_id": "manual",
+    "phishlet_name": "microsoft",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:13:15.681840",
+    "last_activity": "2026-02-19T18:13:15.681845"
+  },
+  "e69212cb-d2f9-4a35-b849-ce7cc46a5674": {
+    "session_id": "e69212cb-d2f9-4a35-b849-ce7cc46a5674",
+    "campaign_id": "manual",
+    "phishlet_name": "github",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "_gh_sess": "rL7uComTuxi2V4H3YORVCR0WrJWbi7qtGohMupmxPJYoSPXkOGL%2FKvwlTPO%2F4dfAtRS%2F8uMzWbT0FKanKGJklFJELUUKmIMpej7ecGXEu7%2BcIY%2F3YPwLiYB%2BxUJcHNinpqx%2Bwmpq6jINqMGKbgMBOwdLpJo0NFiHIsaU3Eqzu5k2oLB323eZtC5aHLhcegOxJW5LcD8yjWJnbGutP3O1ibMfMtWdOCXmVwjTz64Z4I6lcc4ln3sijPI5WNTrGnhE6kFhqz0%2FKZOxKXtVrkOZew%3D%3D--G5pmlenViOLez6la--X%2BqnW4PlvldhKbSA6SKDAQ%3D%3D",
+      "logged_in": "no"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T18:13:55.028285",
+    "last_activity": "2026-02-19T18:13:55.028290"
+  },
+  "55c4ead0-22a9-468c-b3af-03d9e7683b67": {
+    "session_id": "55c4ead0-22a9-468c-b3af-03d9e7683b67",
+    "campaign_id": "manual",
+    "phishlet_name": "microsoft",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:14:48.229311",
+    "last_activity": "2026-02-19T18:14:48.229316"
+  },
+  "ebe4ad80-05be-42bc-bacc-e3ef2d0851a0": {
+    "session_id": "ebe4ad80-05be-42bc-bacc-e3ef2d0851a0",
+    "campaign_id": "manual",
+    "phishlet_name": "microsoft",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "python-requests/2.32.5",
+    "credentials": [
+      {
+        "username": "victim@example.com",
+        "password": "unknown",
+        "captured_at": "2026-02-19T18:15:41.990410",
+        "url": "https://login.microsoftonline.com/common/login"
+      },
+      {
+        "username": "victim@example.com",
+        "password": "P@ssw0rd123!",
+        "captured_at": "2026-02-19T18:15:42.123792",
+        "url": "https://login.microsoftonline.com/common/login"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:15:41.542516",
+    "last_activity": "2026-02-19T18:15:41.542521"
+  },
+  "fd3a3a73-2aea-4edc-bd54-a71d24e23e17": {
+    "session_id": "fd3a3a73-2aea-4edc-bd54-a71d24e23e17",
+    "campaign_id": "manual",
+    "phishlet_name": "microsoft",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+    "credentials": [
+      {
+        "username": "victim@example.com",
+        "password": "unknown",
+        "captured_at": "2026-02-19T18:21:39.038650",
+        "url": "https://login.microsoftonline.com/common/login"
+      },
+      {
+        "username": "victim@example.com",
+        "password": "P@ssw0rd123!",
+        "captured_at": "2026-02-19T18:21:39.165589",
+        "url": "https://login.microsoftonline.com/common/login"
+      }
+    ],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T18:21:38.307971",
+    "last_activity": "2026-02-19T18:21:38.307976"
+  }
+}
