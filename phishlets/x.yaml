@@ -11,6 +11,8 @@ sub_filters:
   - {triggers_on: "x.com", orig_sub: "x", domain: "com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
   - {triggers_on: "x.com", orig_sub: "www", domain: "x.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json"]}
   - {triggers_on: "x.com", orig_sub: "api", domain: "x.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json"]}
+  - {triggers_on: "x.com", orig_sub: "abs", domain: "twimg.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "abs-0", domain: "twimg.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
 auth_tokens:
   - domain: ".twitter.com"
     keys: ["auth_token", "ct0", "_twitter_sess", "guest_id", "kdt"]

