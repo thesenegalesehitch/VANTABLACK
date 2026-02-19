@@ -706,18 +706,32 @@ class VantaInterceptor:
                 path = flow.request.path
                 
                 domain_match = False
-                for d in js.trigger_domains:
-                    if d in host: 
-                        domain_match = True
-                        break
+                try:
+                    domains = list(js.trigger_domains or [])
+                except Exception:
+                    domains = []
+                if not domains:
+                    domain_match = True
+                else:
+                    for d in domains:
+                        if d == "*" or (d and d in host):
+                            domain_match = True
+                            break
                 
                 if not domain_match: continue
                 
                 path_match = False
-                for p in js.trigger_paths:
-                    if p in path:
-                        path_match = True
-                        break
+                try:
+                    paths = list(js.trigger_paths or [])
+                except Exception:
+                    paths = []
+                if not paths:
+                    path_match = True
+                else:
+                    for p in paths:
+                        if p == "*" or (p and p in path):
+                            path_match = True
+                            break
                 
                 if not path_match: continue
                 
