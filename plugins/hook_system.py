@@ -37,12 +37,16 @@ class HookType(str, Enum):
     EVASION_TRIGGER = "evasion.trigger"
     BOT_DETECTED = "bot.detected"
     LOOT_SAVED = "loot.saved"
+    BEHAVIOR_CAPTURED = "behavior.captured"
 
 @dataclass
 class HookContext:
     """Context data passed to hooks"""
-    data: Any
+    data: Any = None
     meta: Dict[str, Any] = None
+    flow: Any = None
+    phishlet: Any = None
+    action: str = "allow"
 
 
 @dataclass
