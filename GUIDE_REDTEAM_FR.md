@@ -309,6 +309,14 @@ Ouvrez `phishlets/microsoft.yaml`. Vous verrez :
 **Cause** : Le terminal ne trouve pas le script car il n'est pas dans le "PATH".
 **Solution** : Ajoutez `./` devant le nom du fichier pour dire "dans ce dossier". Tapez `./vanta.sh` au lieu de `vanta.sh`.
 
+### Erreur : `[Errno 48] address already in use`
+**Cause** : Une autre campagne Vantablack tourne déjà en arrière-plan.
+**Solution** : Tuez les anciens processus avec cette commande :
+```bash
+lsof -ti:8443 | xargs kill -9
+```
+Puis relancez votre attaque.
+
 ### Problème : "Command not found: ngrok"
 **Solution** : Ngrok n'est pas installé. Refaites l'étape d'installation ou vérifiez que ngrok est dans votre PATH.
 
