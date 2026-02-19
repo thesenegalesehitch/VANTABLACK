@@ -45,6 +45,15 @@
 
 ## 1. 🌍 INTRODUCTION & CONCEPTS CLÉS
 
+### ⚠️ Règle d'Or : La Syntaxe
+Pour lancer une commande, vous devez **toujours** commencer par `./vanta.sh` suivi d'une **action** (comme `edge-run` ou `loot`).
+
+| ✅ Correct | ❌ Incorrect | Pourquoi c'est faux ? |
+| :--- | :--- | :--- |
+| `./vanta.sh edge-run --tunnel ngrok` | `--tunnel ngrok` | Il manque le programme (`./vanta.sh`) et l'action (`edge-run`). |
+| `./vanta.sh doctor` | `vanta.sh doctor` | Il manque le `./` au début. |
+| `./vanta.sh loot` | `./vanta.sh --id 5` | Il manque l'action (`loot`) avant les options. |
+
 ### C'est quoi Vantablack ?
 Vantablack est une plateforme "Man-in-the-Middle" (MitM). Contrairement aux vieux sites de phishing qui sont de simples copies statiques, Vantablack agit comme un **proxy transparent**.
 1.  La victime se connecte sur Vantablack.
@@ -139,12 +148,21 @@ Pour les vraies missions Red Team.
 
 ## 5. ⚔️ CHAPITRE 4 : LANCER UNE ATTAQUE
 
-La commande principale est `edge-run`. Elle démarre le proxy.
+La commande principale est `edge-run`. C'est elle qui démarre le proxy et active les tunnels.
 
 ### Syntaxe Complète
+La structure est toujours : `./vanta.sh [ACTION] [OPTIONS]`
+
 ```bash
-./vanta.sh edge-run [OPTIONS]
+# Exemple : Lancer une attaque Microsoft via Ngrok
+./vanta.sh edge-run --name microsoft --tunnel ngrok
 ```
+*   `./vanta.sh` : Le script lanceur.
+*   `edge-run` : L'action à effectuer (lancer le proxy).
+*   `--name microsoft` : Le phishlet à utiliser.
+*   `--tunnel ngrok` : L'option pour ouvrir l'accès WAN.
+
+### Options Indispensables
 
 ### Options Indispensables
 *   `--name <nom>` : Le nom du phishlet (ex: `microsoft`).
@@ -272,6 +290,14 @@ Ouvrez `phishlets/microsoft.yaml`. Vous verrez :
 ---
 
 ## 9. ❓ CHAPITRE 8 : DÉPANNAGE & FAQ
+
+### Erreur : `zsh: command not found: --tunnel`
+**Cause** : Vous avez tapé `--tunnel` comme une commande.
+**Solution** : `--tunnel` est une **option** de `edge-run`. Vous devez taper : `./vanta.sh edge-run --tunnel ngrok ...`
+
+### Erreur : `zsh: command not found: vanta.sh`
+**Cause** : Le terminal ne trouve pas le script car il n'est pas dans le "PATH".
+**Solution** : Ajoutez `./` devant le nom du fichier pour dire "dans ce dossier". Tapez `./vanta.sh` au lieu de `vanta.sh`.
 
 ### Problème : "Command not found: ngrok"
 **Solution** : Ngrok n'est pas installé. Refaites l'étape d'installation ou vérifiez que ngrok est dans votre PATH.
