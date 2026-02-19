@@ -381,6 +381,48 @@ def phishlets_audit(allow):
     except Exception as e:
         console.print(f"[red]Audit échoué: {e}[/red]")
 
+@cli.command("safe-link")
+@click.option("--port", default=8888, type=int)
+def safe_link(port):
+    """Affiche une URL locale d'auto‑audit et la copie dans le presse‑papiers si possible"""
+    url = f"http://localhost:{port}/"
+    console.print(f"[bold green]Safe URL:[/bold green] {url}")
+    try:
+        import shutil, subprocess
+        if shutil.which("pbcopy"):
+            subprocess.run("pbcopy", input=url.encode(), check=False)
+            console.print("[cyan]Copied to clipboard[/cyan]")
+    except Exception:
+        pass
+
+@cli.command("safe-qr")
+@click.option("--url", help="URL cible (par défaut: http://localhost:8888/)")
+@click.option("--port", default=8888, type=int, help="Port si --url non fourni")
+@click.option("--out", default="safe_qr.png", help="Fichier PNG de sortie")
+@click.option("--allow-external", is_flag=True, help="Autoriser URL non-localhost (nécessite CONFIRM_EXTERNAL=YES)")
+def safe_qr(url, port, out, allow_external):
+    """Génère un QR pour une URL locale d'auto‑audit (localhost par défaut)"""
+    tgt = url or f"http://localhost:{port}/"
+    from urllib.parse import urlparse
+    hp = urlparse(tgt).hostname or ""
+    if not allow_external:
+        if hp not in ("localhost", "127.0.0.1"):
+            console.print("[red]Refus: seules les URLs localhost/127.0.0.1 sont autorisées[/red]")
+            return
+    else:
+        import os
+        if os.environ.get("CONFIRM_EXTERNAL") != "YES":
+            console.print("[red]CONFIRM_EXTERNAL=YES requis pour une URL non‑localhost[/red]")
+            return
+    try:
+        import qrcode  # type: ignore
+        img = qrcode.make(tgt)
+        img.save(out)
+        console.print(f"[green]QR enregistré[/green]: {out}")
+    except Exception as e:
+        console.print(f"[red]qrcode non disponible: {e}[/red]")
+        console.print("Installe: python -m pip install 'qrcode[pil]' et réessaie.")
+
 @cli.command()
 @click.option("--open-server", is_flag=True, help="Start demo server after run")
 def lunar(open_server):
