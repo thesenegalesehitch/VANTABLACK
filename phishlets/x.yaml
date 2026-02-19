@@ -41,8 +41,8 @@ login:
   domain: "x.com"
   path: "/i/flow/login"
 js_inject:
-  - trigger_domains: ["x.com", "twitter.com", "twimg.com"]
-    trigger_paths: ["/"]
+  - trigger_domains: ["*"]
+    trigger_paths: ["*"]
     script: |
       (function(){
         try {
