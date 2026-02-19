@@ -15,7 +15,7 @@ import logging
 from typing import Dict, List, Any, Optional, Callable, Union
 from datetime import datetime
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, auto
 import inspect
 import traceback
 
@@ -27,6 +27,22 @@ class HookPriority(Enum):
     NORMAL = 50
     HIGH = 75
     HIGHEST = 100
+
+class HookType(str, Enum):
+    """Standard Hook Types for Red Team Operations"""
+    HTTP_REQUEST_INTERCEPT = "http.request.intercept"
+    HTTP_RESPONSE_INTERCEPT = "http.response.intercept"
+    SESSION_CAPTURED = "session.captured"
+    CREDS_CAPTURED = "creds.captured"
+    EVASION_TRIGGER = "evasion.trigger"
+    BOT_DETECTED = "bot.detected"
+    LOOT_SAVED = "loot.saved"
+
+@dataclass
+class HookContext:
+    """Context data passed to hooks"""
+    data: Any
+    meta: Dict[str, Any] = None
 
 
 @dataclass
@@ -550,7 +566,7 @@ def hook(hook_name: str, priority: HookPriority = HookPriority.NORMAL):
 
 
 # Hook context manager for batch operations
-class HookContext:
+class HookExecutionScope:
     """Context manager for hook execution"""
     
     def __init__(self, hook_system: HookSystem, hook_name: str):
@@ -605,3 +621,16 @@ class HookFilters:
         def filter_func(plugin_instance):
             return getattr(plugin_instance, attribute_name, None) == attribute_value
         return filter_func
+
+
+# Global Hook System Instance
+_global_hook_system = HookSystem()
+
+async def trigger_hook(hook_name: str, context: HookContext):
+    """
+    Trigger a global hook with context
+    """
+    return await _global_hook_system.execute_hook(hook_name, context)
+
+def get_global_hook_system() -> HookSystem:
+    return _global_hook_system
