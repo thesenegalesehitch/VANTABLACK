@@ -33,6 +33,7 @@ class MutationEngine:
         - Rename classes and IDs
         - Inject dummy comments/tags
         - Shuffle attributes
+        - Inject Junk Code (Polymorphism)
         """
         soup = BeautifulSoup(html_content, 'html.parser')
         
@@ -55,32 +56,56 @@ class MutationEngine:
         # 3. Inject Noise (Invisible elements)
         body = soup.find('body')
         if body:
-            noise = soup.new_tag('div', style="display:none")
-            noise.string = self.generate_random_name(32)
-            body.insert(0, noise)
+            # Inject at top
+            noise_top = soup.new_tag('div', style="display:none; visibility:hidden; opacity:0;")
+            noise_top.string = self.generate_random_name(64)
+            body.insert(0, noise_top)
+            
+            # Inject random junk scripts
+            junk_script = soup.new_tag('script')
+            junk_script.string = f"var {self.generate_random_name()} = '{self.generate_random_name(128)}';"
+            body.append(junk_script)
+
+        # 4. Inject Random Data Attributes (Evasion)
+        for tag in soup.find_all():
+            if random.random() < 0.3:  # 30% chance per tag
+                attr_name = f"data-{self.generate_random_name(4).lower()}"
+                tag[attr_name] = self.generate_random_name(8)
             
         return str(soup)
 
     def mutate_js(self, js_content: str) -> str:
         """
-        Simple JS obfuscation (variable renaming, string splitting).
-        For V5, we simulate AST transformation with regex/string ops for now.
-        Real AST requires `esprima` or `slimit` which are heavy deps.
+        Advanced JS obfuscation:
+        - String splitting
+        - Variable renaming (Simulated)
+        - Dead code injection
+        - Control flow flattening (Simulated)
         """
         # 1. Split Strings
         def split_string(match):
             s = match.group(1)
             if len(s) > 4:
-                mid = len(s) // 2
-                return f"'{s[:mid]}' + '{s[mid:]}'"
+                chunks = [s[i:i+4] for i in range(0, len(s), 4)]
+                return " + ".join([f"'{chunk}'" for chunk in chunks])
             return f"'{s}'"
             
         obfuscated = re.sub(r"'([^']*)'", split_string, js_content)
         
         # 2. Remove comments
         obfuscated = re.sub(r"//.*", "", obfuscated)
+        obfuscated = re.sub(r"/\*[\s\S]*?\*/", "", obfuscated)
         
-        # 3. Minify/Beautify to change structure
+        # 3. Inject Dead Code
+        dead_code = f"""
+        (function(){{
+            var _0x{self.generate_random_name(4)} = ['{self.generate_random_name(5)}', '{self.generate_random_name(5)}'];
+            var _0y{self.generate_random_name(4)} = function(_0z) {{ return _0z; }};
+        }})();
+        """
+        obfuscated = dead_code + obfuscated
+        
+        # 4. Minify/Beautify to change structure
         opts = jsbeautifier.default_options()
         opts.indent_size = 2
         return jsbeautifier.beautify(obfuscated, opts)
