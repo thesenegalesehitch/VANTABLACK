@@ -156,7 +156,8 @@ class TunnelManager:
              return await self._get_public_ip()
              
         # Commande simplifiée
-        cmd = ["ngrok", "http", str(self.port)]
+        # Force 127.0.0.1 to avoid IPv6 issues on macOS
+        cmd = ["ngrok", "http", f"127.0.0.1:{self.port}"]
         self.process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
         # Attente que l'API locale ngrok soit dispo
