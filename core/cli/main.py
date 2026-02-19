@@ -564,7 +564,7 @@ def analyze(target, platform, out):
         phishlet_path = f"phishlets/{platform.lower()}.yaml"
         # Try aliases
         aliases = {
-            "twitter": "x.yaml", "x": "x.yaml",
+            "x": "x.yaml", "twitter": "x.yaml",
             "microsoft": "o365.yaml", "office365": "o365.yaml",
             "google": "google.yaml", "gmail": "google.yaml"
         }
@@ -574,7 +574,7 @@ def analyze(target, platform, out):
         if os.path.exists(phishlet_path):
             console.print(f"\n[bold yellow]Suggested Next Steps:[/bold yellow]")
             console.print(f"1. [bold]Weaponization[/bold]: Configure phishlet\n   [green]vanta edge-run --path {phishlet_path}[/green]")
-            console.print(f"2. [bold]Distribution[/bold]: Generate QR Code\n   [green]vanta safe-qr --url http://localhost:8443 --logo core/assets/logos/{platform.lower()}.png[/green]")
+            console.print(f"2. [bold]Distribution[/bold]: Generate QR Code\n   [green]vanta safe-qr --url http://<YOUR_IP>:8443 --logo core/assets/logos/{platform.lower()}.png[/green]")
             
     except Exception as e:
         console.print(f"[bold red]Error: {e}[/bold red]")
