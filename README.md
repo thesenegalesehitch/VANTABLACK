@@ -30,18 +30,28 @@ source .venv/bin/activate
 python -m pip install -r requirements-v5.txt
 ```
 
-3) Launch the demo API:
+3) **Red Team Operations (Full Scenario):**
 
+Follow the 6-Phase Attack Plan detailed in `plan.md`.
+
+**Phase 1: Reconnaissance**
 ```bash
-python -m core.cli.main demo
+vanta analyze --target @ceo_target --platform linkedin
 ```
 
-4) Explore the built‑in guide:
+**Phase 2 & 4: Weaponization & Capture**
+```bash
+vanta edge-run --path phishlets/linkedin.yaml --port 8443
+```
 
-```text
-GET http://localhost:8000/v5/guide?page=home
-GET http://localhost:8000/v5/guide?page=phishlets
-GET http://localhost:8000/v5/metrics
+**Phase 3: Distribution**
+```bash
+vanta safe-qr --url http://localhost:8443 --logo core/assets/logos/linkedin.png
+```
+
+**Phase 5: Access (Loot)**
+```bash
+vanta loot
 ```
 
 ## Ethical Use & Safety
@@ -76,6 +86,9 @@ The audit prints a summary of hosts that fall outside of the provided suffix all
 ```bash
 vanta init                 # Initialize .env interactively
 vanta doctor               # Environment diagnostics
+vanta analyze              # OSINT Reconnaissance (Phase 1)
+vanta safe-qr              # QR Code Generator (Phase 3)
+vanta loot                 # Session/Credential Dump (Phase 5)
 vanta demo                 # Launch demo API with metrics
 vanta phishlets-list       # List available phishlets
 vanta phishlets-validate   # Validate all phishlets

