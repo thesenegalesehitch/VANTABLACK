@@ -297,10 +297,20 @@ def edge_run(name, path, host, port, upstream, rate, allow_ips, deny_ips, http2,
         if upstream:
             cfg.upstream_http = upstream
         proxy = EdgeProxy(cfg)
+        
+        # WAN / Remote Access Info
+        try:
+            import urllib.request
+            public_ip = urllib.request.urlopen('https://api.ipify.org', timeout=3).read().decode('utf8')
+            console.print(f"[bold cyan]WAN Access:[/bold cyan] http://{public_ip}:{port}")
+            console.print(f"[dim](Ensure port {port} is forwarded on your router/firewall)[/dim]")
+        except:
+            console.print("[dim]Could not detect public IP. Check connectivity.[/dim]")
+
         console.print(f"[yellow]Starting Edge with {path}[/yellow]")
-        asyncio.run(proxy.start(ph_yaml))
+        asyncio.run(proxy.start(phish_yaml))
     except Exception as e:
-        console.print(f"[red]Edge run failed: {e}[/red]")
+        console.print(f"[red]Erreur: {e}[/red]")
         console.print("[blue]Install optional dependency: mitmproxy[/blue]")
 
 @cli.command("phishlets-list")
