@@ -1041,5 +1041,564 @@
     "is_authenticated": false,
     "created_at": "2026-02-19T18:21:38.307971",
     "last_activity": "2026-02-19T18:21:38.307976"
+  },
+  "a97557d0-c045-4868-b2fa-da899279091e": {
+    "session_id": "a97557d0-c045-4868-b2fa-da899279091e",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152802872000039",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:07:08.177514",
+    "last_activity": "2026-02-19T19:07:08.177521"
+  },
+  "6e9c8552-8c45-4318-9314-29aeb7a3cc66": {
+    "session_id": "6e9c8552-8c45-4318-9314-29aeb7a3cc66",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152837070430703",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:11:42.091339",
+    "last_activity": "2026-02-19T19:11:42.091346"
+  },
+  "3f6257a0-8ddc-4d80-bbcf-09cbc0bc8c7e": {
+    "session_id": "3f6257a0-8ddc-4d80-bbcf-09cbc0bc8c7e",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152847966355236",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:14:15.656796",
+    "last_activity": "2026-02-19T19:14:15.656802"
+  },
+  "f59df4da-b941-4724-b14e-b4653548ac07": {
+    "session_id": "f59df4da-b941-4724-b14e-b4653548ac07",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T19:14:26.881834",
+    "last_activity": "2026-02-19T19:14:26.881840"
+  },
+  "a0cebe3f-61c8-4b00-9bde-b76b27b017f3": {
+    "session_id": "a0cebe3f-61c8-4b00-9bde-b76b27b017f3",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152887422427006",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:20:30.151126",
+    "last_activity": "2026-02-19T19:20:30.151134"
+  },
+  "1acfa339-aea5-4c3e-8cdd-a70f1ede91ea": {
+    "session_id": "1acfa339-aea5-4c3e-8cdd-a70f1ede91ea",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152905899033479",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:24:16.985085",
+    "last_activity": "2026-02-19T19:24:16.985094"
+  },
+  "11ea3016-82b8-44fe-9e0b-9c797c17c076": {
+    "session_id": "11ea3016-82b8-44fe-9e0b-9c797c17c076",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152911653441212",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:25:16.301557",
+    "last_activity": "2026-02-19T19:25:16.301567"
+  },
+  "53c43093-9ab7-420e-ba7d-94a82eff98d1": {
+    "session_id": "53c43093-9ab7-420e-ba7d-94a82eff98d1",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152924942697548",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:27:27.590203",
+    "last_activity": "2026-02-19T19:27:27.590211"
+  },
+  "a798258f-3319-467d-b618-4b291cc4b0b8": {
+    "session_id": "a798258f-3319-467d-b618-4b291cc4b0b8",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152941614390941",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:29:57.668299",
+    "last_activity": "2026-02-19T19:29:57.668307"
+  },
+  "627370cc-e2f4-4e5b-8ebe-fb76039ca1ad": {
+    "session_id": "627370cc-e2f4-4e5b-8ebe-fb76039ca1ad",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152959517225864",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:33:13.085986",
+    "last_activity": "2026-02-19T19:33:13.085994"
+  },
+  "8fe5a555-b005-4c6c-bc31-7e20da05a4f8": {
+    "session_id": "8fe5a555-b005-4c6c-bc31-7e20da05a4f8",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152960783938486",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:33:21.273184",
+    "last_activity": "2026-02-19T19:33:21.273190"
+  },
+  "86de98ef-cbc5-42f0-b01d-e89f7603d8c8": {
+    "session_id": "86de98ef-cbc5-42f0-b01d-e89f7603d8c8",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152982148169239",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:37:01.169484",
+    "last_activity": "2026-02-19T19:37:01.169491"
+  },
+  "17d23ebe-5163-411e-ae4c-1fa62b71ee16": {
+    "session_id": "17d23ebe-5163-411e-ae4c-1fa62b71ee16",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177152984421565032",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:37:22.493840",
+    "last_activity": "2026-02-19T19:37:22.493847"
+  },
+  "394acc93-79b5-47af-b392-c9c94f12292b": {
+    "session_id": "394acc93-79b5-47af-b392-c9c94f12292b",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153031110289909",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:45:09.085171",
+    "last_activity": "2026-02-19T19:45:09.085182"
+  },
+  "a8c681f6-0b36-4fe4-b4b1-cab0ad59f2f7": {
+    "session_id": "a8c681f6-0b36-4fe4-b4b1-cab0ad59f2f7",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153034517074703",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:45:18.416014",
+    "last_activity": "2026-02-19T19:45:18.416019"
+  },
+  "fb684076-16a2-452c-a0b1-e91ea534c59b": {
+    "session_id": "fb684076-16a2-452c-a0b1-e91ea534c59b",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153074913964932",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:52:24.805226",
+    "last_activity": "2026-02-19T19:52:24.805233"
+  },
+  "549301fe-9758-417d-80b0-cb8d4a7d98cc": {
+    "session_id": "549301fe-9758-417d-80b0-cb8d4a7d98cc",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153077057022881",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T19:52:50.332611",
+    "last_activity": "2026-02-19T19:52:50.332617"
+  },
+  "c24e89a0-e198-4fa9-ad1c-0f461eadbec0": {
+    "session_id": "c24e89a0-e198-4fa9-ad1c-0f461eadbec0",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T19:52:56.995153",
+    "last_activity": "2026-02-19T19:52:56.995159"
+  },
+  "1af8527e-8000-45eb-b583-032a2ac1b63c": {
+    "session_id": "1af8527e-8000-45eb-b583-032a2ac1b63c",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153297441794663",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:29:33.033438",
+    "last_activity": "2026-02-19T20:29:33.033443"
+  },
+  "5c3ded21-2c3b-4eb7-b537-c35dcc76c037": {
+    "session_id": "5c3ded21-2c3b-4eb7-b537-c35dcc76c037",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153311307814733",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:31:52.815625",
+    "last_activity": "2026-02-19T20:31:52.815636"
+  },
+  "6a3d6f93-5d0e-4940-b97c-90211d8f8f5f": {
+    "session_id": "6a3d6f93-5d0e-4940-b97c-90211d8f8f5f",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153316569503384",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:32:45.401120",
+    "last_activity": "2026-02-19T20:32:45.401128"
+  },
+  "e16cc996-b6c0-4b11-8a01-cf03972353ca": {
+    "session_id": "e16cc996-b6c0-4b11-8a01-cf03972353ca",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153327026381280",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:34:29.902771",
+    "last_activity": "2026-02-19T20:34:29.902780"
+  },
+  "4d78c0ec-dfda-44ef-abd5-9c2094edbf79": {
+    "session_id": "4d78c0ec-dfda-44ef-abd5-9c2094edbf79",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153331150727024",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:35:11.180279",
+    "last_activity": "2026-02-19T20:35:11.180318"
+  },
+  "8ceb021f-bb13-481a-8c0e-8180eebbdf2c": {
+    "session_id": "8ceb021f-bb13-481a-8c0e-8180eebbdf2c",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T20:35:37.803390",
+    "last_activity": "2026-02-19T20:35:37.803394"
+  },
+  "9ec1bed1-5191-48c3-bc01-c754e79a01ab": {
+    "session_id": "9ec1bed1-5191-48c3-bc01-c754e79a01ab",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153427129721674"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:51:10.848668",
+    "last_activity": "2026-02-19T20:51:10.848673"
+  },
+  "e632260e-c43a-4974-934a-5ffec48c0400": {
+    "session_id": "e632260e-c43a-4974-934a-5ffec48c0400",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153428567635897",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:51:25.308477",
+    "last_activity": "2026-02-19T20:51:25.308481"
+  },
+  "92436dfb-6471-48dd-ab7b-0ec1b488b78a": {
+    "session_id": "92436dfb-6471-48dd-ab7b-0ec1b488b78a",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153447282864990"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:54:32.352586",
+    "last_activity": "2026-02-19T20:54:32.352593"
+  },
+  "710d3653-43c4-4161-acc7-283505cb9680": {
+    "session_id": "710d3653-43c4-4161-acc7-283505cb9680",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153455098785854",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T20:55:33.601088",
+    "last_activity": "2026-02-19T20:55:33.601093"
+  },
+  "30523955-e85b-45c9-97c2-496f5fa850ea": {
+    "session_id": "30523955-e85b-45c9-97c2-496f5fa850ea",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153512672886109"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T21:05:26.271874",
+    "last_activity": "2026-02-19T21:05:26.271879"
+  },
+  "ab7d1936-1aeb-4a96-bdd9-89394550f2b6": {
+    "session_id": "ab7d1936-1aeb-4a96-bdd9-89394550f2b6",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153537602589925"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T21:09:35.467845",
+    "last_activity": "2026-02-19T21:09:35.467851"
+  },
+  "992f095c-f472-41a2-9085-4c5f8220799c": {
+    "session_id": "992f095c-f472-41a2-9085-4c5f8220799c",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153537644556223",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T21:09:36.122882",
+    "last_activity": "2026-02-19T21:09:36.122886"
+  },
+  "885d33b1-207e-42ec-bb86-54ad69ca1531": {
+    "session_id": "885d33b1-207e-42ec-bb86-54ad69ca1531",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153544376352367",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T21:10:43.443784",
+    "last_activity": "2026-02-19T21:10:43.443789"
+  },
+  "e8557a60-fedf-4807-8491-5c2999f29a0a": {
+    "session_id": "e8557a60-fedf-4807-8491-5c2999f29a0a",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-19T21:10:57.837700",
+    "last_activity": "2026-02-19T21:10:57.837705"
+  },
+  "1f95aaa2-49c2-44ae-8d19-8f23944947bf": {
+    "session_id": "1f95aaa2-49c2-44ae-8d19-8f23944947bf",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177153546873227926"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T21:11:08.410429",
+    "last_activity": "2026-02-19T21:11:08.410442"
+  },
+  "07e77b35-bb51-4369-b0ae-e6d8d31f125b": {
+    "session_id": "07e77b35-bb51-4369-b0ae-e6d8d31f125b",
+    "campaign_id": "manual",
+    "phishlet_name": "github",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "_gh_sess": "rKbepmCpeepiEgpbcUd2aFawsPknSNWFlYtBSnvQWOX%2FMJ3ytZzG40EPzBADYveRAB9MRoznaNghlF0P0P1tT0i5sssSXksBYodXWxE8dmMlmCpPTmDEOQg4HY1Z1hNhNsgnzEQqFnZ3LmFmluj4nujggz8aNHFTgavMtSMmq29U6PS6QW47x2zjji8jVc5c0LxrTeUafMSNhqDW4Kq%2FgbyI6wsL0Z7JgY8XMdaTNgbY3eNHLNTPO9iLYlBJQpn%2FLI7G8Fw0P1MTwaY2GjDeJQ%3D%3D--HQHSCoIl91RW4GV3--yHUiMiJ3%2BT%2BEzWs57Ew2ew%3D%3D",
+      "logged_in": "no"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T21:12:03.644838",
+    "last_activity": "2026-02-19T21:12:03.644846"
+  },
+  "4dbd551b-d95a-4a3f-a1d5-2a7b737d03cb": {
+    "session_id": "4dbd551b-d95a-4a3f-a1d5-2a7b737d03cb",
+    "campaign_id": "manual",
+    "phishlet_name": "github",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "_gh_sess": "9khCtdzZdSlCcp5DILuhYI%2B68BaK4JHH3aH7ncIbHcxZboKcqne%2FUAJYM%2FDw4%2F7ssFva4SaNfupC3y0CJvn%2F%2BzRKMURinqJSPtoc67a%2F3XtoKi8WFYMjCcwhlFTuF7WXXOd59VAhF3OVNTGhuacdAC%2FdgBp85GWS6DSjIy%2FqH7PiWdHgnDiYEIZSAubgSjzDccfTE9pCoHM5Ukk1IJKwa523OVUFzxOKUTQXS36umQZDYYJ%2F5r%2FqHiTQ1Ch%2B9nTNA7YfaOmXicb0E5ZeJOOTIg%3D%3D--ul86MZpN8bhymSlW--zjOiAWo7zOkBQk5K63Hwsw%3D%3D",
+      "logged_in": "no"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-19T21:12:11.472629",
+    "last_activity": "2026-02-19T21:12:11.472634"
   }
 }
