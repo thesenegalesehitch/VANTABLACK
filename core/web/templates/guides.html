@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-accent mb-2">
+            <i class="fas fa-book mr-2"></i>
+            Guides d'Installation Multi-OS
+        </h1>
+        <p class="text-gray-400">Instructions complètes pour macOS, Linux et Windows</p>
+    </div>
+
+    <!-- OS Selection Tabs -->
+    <div class="bg-darkgray rounded-lg p-1 border border-gray-700">
+        <div class="flex space-x-1">
+            <button onclick="showOSGuide('macos')" class="os-tab os-tab-active" id="tab-macos">
+                <i class="fab fa-apple mr-2"></i>macOS
+            </button>
+            <button onclick="showOSGuide('linux')" class="os-tab" id="tab-linux">
+                <i class="fab fa-linux mr-2"></i>Linux
+            </button>
+            <button onclick="showOSGuide('windows')" class="os-tab" id="tab-windows">
+                <i class="fab fa-windows mr-2"></i>Windows
+            </button>
+        </div>
+    </div>
+
+    <!-- macOS Guide -->
+    <div id="guide-macos" class="os-guide">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Prerequisites -->
+            <div class="guide-section">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                    Prérequis macOS
+                </h2>
+                
+                <div class="space-y-3">
+                    <div class="prerequisite-item">
+                        <div class="flex items-center">
+                            <span class="prerequisite-check">✓</span>
+                            <span>Homebrew installé</span>
+                        </div>
+                        <div class="code-block">
+                            <code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code>
+                            <button class="copy-btn" data-copy="/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="prerequisite-item">
+                        <div class="flex items-center">
+                            <span class="prerequisite-check">✓</span>
+                            <span>Python 3.11+ via Homebrew</span>
+                        </div>
+                        <div class="code-block">
+                            <code>brew install python@3.11</code>
+                            <button class="copy-btn" data-copy="brew install python@3.11">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="prerequisite-item">
+                        <div class="flex items-center">
+                            <span class="prerequisite-check">✓</span>
+                            <span>Vérification PEP 668</span>
+                        </div>
+                        <div class="code-block">
+                            <code>python3.11 -m pip config list | grep break-system-packages</code>
+                            <button class="copy-btn" data-copy="python3.11 -m pip config list | grep break-system-packages">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Installation Steps -->
+            <div class="guide-section">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-download text-blue-400 mr-2"></i>
+                    Installation macOS
+                </h2>
+                
+                <div class="space-y-4">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3 class="font-semibold">Cloner le repository</h3>
+                            <div class="code-block">
+                                <code>git clone https://github.com/vantablack/core.git</code>
+                                <button class="copy-btn" data-copy="git clone https://github.com/vantablack/core.git">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3 class="font-semibold">Créer l'environnement virtuel</h3>
+                            <div class="code-block">
+                                <code>python3.11 -m venv venv</code>
+                                <button class="copy-btn" data-copy="python3.11 -m venv venv">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3 class="font-semibold">Activer et installer les dépendances</h3>
+                            <div class="code-block">
+                                <code>source venv/bin/activate && pip install -r requirements.txt</code>
+                                <button class="copy-btn" data-copy="source venv/bin/activate && pip install -r requirements.txt">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3 class="font-semibold">Lancer l'application</h3>
+                            <div class="code-block">
+                                <code>python -m core.cli.main</code>
+                                <button class="copy-btn" data-copy="python -m core.cli.main">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification -->
+        <div class="guide-section mt-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-check-double text-green-400 mr-2"></i>
+                Vérification Installation
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="verification-item">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-code text-blue-400 mr-2"></i>
+                        <span class="font-semibold">Version Python</span>
+                    </div>
+                    <div class="code-block-sm">
+                        <code>python --version</code>
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1">Doit afficher Python 3.11+</div>
+                </div>
+
+                <div class="verification-item">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-box text-purple-400 mr-2"></i>
+                        <span class="font-semibold">Dépendances</span>
+                    </div>
+                    <div class="code-block-sm">
+                        <code>pip list</code>
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1">Vérifier toutes les dépendances</div>
+                </div>
+
+                <div class="verification-item">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-plug text-green-400 mr-2"></i>
+                        <span class="font-semibold">Test API</span>
+                    </div>
+                    <div class="code-block-sm">
+                        <code>curl http://localhost:5000/v5/health</code>
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1">Doit retourner status 200</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="guide-section mt-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-wrench text-yellow-400 mr-2"></i>
+                Dépannage macOS
+            </h2>
+            
+            <div class="space-y-3">
+                <details class="troubleshooting-item">
+                    <summary class="cursor-pointer font-semibold">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Erreur PEP 668 - --break-system-packages
+                    </summary>
+                    <div class="mt-2 pl-6">
+                        <p class="text-sm text-gray-400 mb-2">Solution:</p>
+                        <div class="code-block">
+                            <code>python3.11 -m pip config set global.break-system-packages false</code>
+                            <button class="copy-btn" data-copy="python3.11 -m pip config set global.break-system-packages false">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="troubleshooting-item">
+                    <summary class="cursor-pointer font-semibold">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Python version incorrecte
+                    </summary>
+                    <div class="mt-2 pl-6">
+                        <p class="text-sm text-gray-400 mb-2">Vérifier le path:</p>
+                        <div class="code-block">
+                            <code>which python3.11</code>
+                            <button class="copy-btn" data-copy="which python3.11">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="troubleshooting-item">
+                    <summary class="cursor-pointer font-semibold">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Problèmes de permissions
+                    </summary>
+                    <div class="mt-2 pl-6">
+                        <p class="text-sm text-gray-400 mb-2">Réparer les permissions:</p>
+                        <div class="code-block">
+                            <code>sudo chown -R $(whoami) /usr/local/*</code>
+                            <button class="copy-btn" data-copy="sudo chown -R $(whoami) /usr/local/*">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linux Guide (initially hidden) -->
+    <div id="guide-linux" class="os-guide" style="display: none;">
+        <!-- Linux guide content would go here -->
+        <div class="text-center py-12">
+            <i class="fab fa-linux text-6xl text-gray-600 mb-4"></i>
+            <h2 class="text-2xl font-bold mb-4">Guide Linux</h2>
+            <p class="text-gray-400">Instructions détaillées pour les distributions Linux</p>
+        </div>
+    </div>
+
+    <!-- Windows Guide (initially hidden) -->
+    <div id="guide-windows" class="os-guide" style="display: none;">
+        <!-- Windows guide content would go here -->
+        <div class="text-center py-12">
+            <i class="fab fa-windows text-6xl text-gray-600 mb-4"></i>
+            <h2 class="text-2xl font-bold mb-4">Guide Windows</h2>
+            <p class="text-gray-400">Instructions détaillées pour Windows</p>
+        </div>
+    </div>
+
+    <!-- Quick Setup -->
+    <div class="guide-section">
+        <h2 class="text-xl font-semibold mb-4">
+            <i class="fas fa-bolt text-yellow-400 mr-2"></i>
+            Installation Rapide
+        </h2>
+        
+        <div class="bg-black rounded-lg p-4 border border-gray-700">
+            <div class="flex items-center justify-between mb-3">
+                <span class="font-mono text-sm text-gray-300">Script d'installation automatique</span>
+                <button class="copy-btn" data-copy="curl -fsSL https://raw.githubusercontent.com/vantablack/core/main/bootstrap.py | python3.11">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+            
+            <div class="code-block">
+                <code>curl -fsSL https://raw.githubusercontent.com/vantablack/core/main/bootstrap.py | python3.11</code>
+            </div>
+            
+            <div class="mt-3 text-sm text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                Ce script détecte automatiquement votre OS et configure l'environnement complet.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// OS Guide Navigation
+function showOSGuide(os) {
+    // Hide all guides
+    document.querySelectorAll('.os-guide').forEach(guide => {
+        guide.style.display = 'none';
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.os-tab').forEach(tab => {
+        tab.classList.remove('os-tab-active');
+    });
+    
+    // Show selected guide and activate tab
+    document.getElementById(`guide-${os}`).style.display = 'block';
+    document.getElementById(`tab-${os}`).classList.add('os-tab-active');
+    
+    // Save preference
+    localStorage.setItem('lastOSGuide', os);
+}
+
+// Copy to clipboard functionality
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('copy-btn')) {
+        const text = e.target.getAttribute('data-copy');
+        copyToClipboard(text);
+    }
+});
+
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast('Copié dans le presse-papiers!', 'success');
+    } catch (err) {
+        console.error('Failed to copy:', err);
+        showToast('Échec de la copie', 'error');
+    }
+}
+
+// Initialize with saved preference or default to macos
+document.addEventListener('DOMContentLoaded', () => {
+    const lastOS = localStorage.getItem('lastOSGuide') || 'macos';
+    showOSGuide(lastOS);
+});
+</script>
+
+<style>
+.os-tab {
+    @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+    @apply text-gray-300 hover:text-white hover:bg-gray-700;
+}
+
+.os-tab-active {
+    @apply bg-accent text-black;
+}
+
+.guide-section {
+    @apply bg-darkgray rounded-lg p-6 border border-gray-700;
+}
+
+.prerequisite-item {
+    @apply p-3 bg-gray-800 rounded-lg mb-3;
+}
+
+.prerequisite-check {
+    @apply bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-3;
+}
+
+.step-item {
+    @apply flex items-start space-x-3 p-3 bg-gray-800 rounded-lg;
+}
+
+.step-number {
+    @apply bg-accent text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0;
+}
+
+.step-content {
+    @apply flex-1;
+}
+
+.code-block {
+    @apply bg-black rounded p-3 mt-2 relative;
+    @apply border border-gray-700 font-mono text-sm;
+}
+
+.code-block-sm {
+    @apply bg-black rounded p-2;
+    @apply border border-gray-700 font-mono text-xs;
+}
+
+.code-block code {
+    @apply text-green-300;
+}
+
+.copy-btn {
+    @apply absolute top-2 right-2 px-2 py-1 rounded text-xs;
+    @apply bg-gray-700 text-gray-300 hover:bg-gray-600;
+}
+
+.troubleshooting-item {
+    @apply p-3 bg-gray-800 rounded-lg border border-gray-700;
+}
+
+.verification-item {
+    @apply p-3 bg-gray-800 rounded-lg border border-gray-700;
+}
+</style>
+{% endblock %}

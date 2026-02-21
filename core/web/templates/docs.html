@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-accent mb-2">
+            <i class="fas fa-file-alt mr-2"></i>
+            Documentation
+        </h1>
+        <p class="text-gray-400">Référence d'usage rapide</p>
+    </div>
+
+    <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4"><i class="fas fa-terminal mr-2"></i>Commandes CLI clés</h2>
+        <ul class="list-disc pl-6 space-y-2 text-gray-300">
+            <li>vanta menu — Menu interactif avancé</li>
+            <li>vanta verify-link — Vérifier accessibilité lien (local/distant)</li>
+            <li>vanta fuse-qr-link — Générer QR + validation URL</li>
+            <li>vanta verify-qr — Décoder et valider un QR</li>
+            <li>vanta demo — Lancer serveur UI + API (démo)</li>
+        </ul>
+    </div>
+
+    <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4"><i class="fas fa-plug mr-2"></i>Points d'accès API</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-3 bg-gray-800 rounded-lg border border-gray-700">
+                <div class="font-mono text-sm">GET /v5/health</div>
+                <div class="text-xs text-gray-400">Vérification de santé</div>
+            </div>
+            <div class="p-3 bg-gray-800 rounded-lg border border-gray-700">
+                <div class="font-mono text-sm">GET /v5/metrics</div>
+                <div class="text-xs text-gray-400">Métriques Prometheus</div>
+            </div>
+            <div class="p-3 bg-gray-800 rounded-lg border border-gray-700">
+                <div class="font-mono text-sm">GET /v5/config</div>
+                <div class="text-xs text-gray-400">Configuration (sanitisée)</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

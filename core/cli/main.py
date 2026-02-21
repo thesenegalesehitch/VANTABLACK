@@ -25,6 +25,11 @@ import json
 import textwrap
 from core.orchestrator.autopilot import Autopilot
 from core.common.metrics import MUTATION_OPS, DETECTION_EVENTS
+from core.qr_link_system import qr_link_system, QRConfig, QRCorrectionLevel
+import requests
+import time
+import socket
+import platform
 
 console = Console()
 
@@ -32,6 +37,464 @@ console = Console()
 def cli():
     """Vantablack Core v5 - Red Team Operations Suite"""
     logging.basicConfig(level=logging.INFO)
+
+def _verify_link(url, timeout=5.0):
+    """Wrapper pour la nouvelle validation robuste"""
+    is_valid, result, details = qr_link_system.validate_url(url, timeout)
+    return is_valid, f"{result.value}: {details.get('error', 'No details')}"
+
+def _open_web(url):
+    try:
+        sysname = platform.system()
+        if sysname == "Darwin":
+            subprocess.run(["open", url], check=False)
+        elif sysname == "Windows":
+            subprocess.run(["powershell","-command",f"Start-Process '{url}'"], check=False)
+        else:
+            subprocess.run(["xdg-open", url], check=False)
+        return True
+    except Exception:
+        return False
+
+@cli.command("verify-link")
+@click.option("--url", help="URL à vérifier")
+@click.option("--port", default=8888, type=int, help="Port local si URL non fourni")
+def verify_link(url, port):
+    """Vérifie la disponibilité d’un lien local et/ou distant"""
+    targets = []
+    if url:
+        targets.append(url)
+    else:
+        targets.append(f"http://localhost:{port}/health")
+        targets.append(f"http://127.0.0.1:{port}/health")
+    env_url = os.environ.get("VANTA_PUBLIC_URL")
+    if env_url:
+        targets.append(env_url)
+    table = Table(title="Vérification des liens")
+    table.add_column("URL")
+    table.add_column("OK")
+    table.add_column("Détail")
+    for u in targets:
+        ok, info = _verify_link(u)
+        table.add_row(u, "YES" if ok else "NO", str(info))
+    console.print(table)
+
+@cli.command("verify-qr")
+@click.option("--file", default="safe_qr.png", help="Fichier PNG du QR")
+def verify_qr(file):
+    """Décodage robuste de QR code avec validation multi-OS et gestion d'erreurs"""
+    success, decoded_data = qr_link_system.decode_qr(file)
+    
+    if success:
+        if not decoded_data:
+            console.print("[yellow]Aucune donnée QR détectée[/yellow]")
+            return
+        
+        table = Table(title="QR Décodé - Système Robustifié")
+        table.add_column("Type")
+        table.add_column("Valeur")
+        
+        for i, data in enumerate(decoded_data, 1):
+            table.add_row(f"QR {i}", data)
+        
+        console.print(table)
+        
+        # Validation automatique des URLs décodées
+        url_count = 0
+        for data in decoded_data:
+            if data.startswith(('http://', 'https://')):
+                url_count += 1
+                console.print(f"\n🔗 Validation automatique: {data}")
+                is_valid, result, details = qr_link_system.validate_url(data, timeout=3)
+                status = "✅" if is_valid else "❌"
+                console.print(f"   {status} {result.value}")
+        
+        if url_count > 0:
+            console.print(f"\n📊 Métriques: {qr_link_system.get_metrics()}")
+    else:
+        # Gestion d'erreur avec guide d'installation
+        error_msg = decoded_data[0] if decoded_data else "Erreur inconnue"
+        console.print(f"[red]❌ {error_msg}[/red]")
+        
+        # Guide d'installation spécifique
+        install_guide = qr_link_system.get_installation_guide()
+        console.print(f"[yellow]📦 Installation requise:[/yellow] {install_guide}")
+
+
+@cli.command("fuse-qr-link")
+@click.option("--url", required=True, help="URL cible à fusionner")
+@click.option("--qr-file", default="fused_qr.png", help="Fichier QR de sortie")
+@click.option("--validate/--no-validate", default=True, help="Valider le lien avant fusion")
+@click.option("--open-browser", is_flag=True, help="Ouvrir le lien après génération")
+@click.option("--logo", help="Logo à incruster dans le QR")
+def fuse_qr_link(url, qr_file, validate, open_browser, logo):
+    """
+    🎯 FUSION INTELLIGENTE QR + LIEN
+    
+    Génère un QR code pour une URL avec validation automatique,
+    optimisation et ouverture du lien si demandé.
+    """
+    console.print(f"[bold magenta]🎯 Fusion QR/Lien: {url}[/bold magenta]")
+    
+    # Validation robuste du lien
+    if validate:
+        console.print("🔍 Validation du lien...")
+        is_valid, result, details = qr_link_system.validate_url(url)
+        
+        if not is_valid:
+            if result.value == "localhost_only":
+                console.print("[yellow]⚠️  Service local non démarré - Génération quand même[/yellow]")
+            else:
+                console.print(f"[red]❌ Lien invalide: {result.value}[/red]")
+                console.print(f"   Détails: {details}")
+                if not click.confirm("❓ Continuer malgré l'erreur?"):
+                    return
+    
+    # Génération du QR avec configuration optimisée
+    config = QRConfig(
+        error_correction=QRCorrectionLevel.HIGH,
+        fill_color="#000000",  # Noir professionnel
+        back_color="#FFFFFF",  # Blanc pur
+        logo_path=logo
+    )
+    
+    result = qr_link_system.generate_qr_with_link_validation(
+        url=url,
+        output_path=qr_file,
+        validate=False,  # Already validated above
+        config=config
+    )
+    
+    if result["qr_generated"]:
+        console.print(f"[green]✅ QR généré: {qr_file}[/green]")
+        
+        # Ouverture automatique du lien si demandé
+        if open_browser:
+            console.print("🌐 Ouverture du lien dans le navigateur...")
+            _open_web(url)
+        
+        # Affichage des informations de fusion
+        console.print("\n📋 Résumé de la fusion:")
+        console.print(f"   🔗 URL: {url}")
+        console.print(f"   📷 QR: {qr_file}")
+        console.print(f"   📏 Taille: {os.path.getsize(qr_file)} bytes")
+        
+        # Test de décodage immédiat pour validation
+        console.print("\n🔍 Test de décodage du QR généré...")
+        success, decoded = qr_link_system.decode_qr(qr_file)
+        if success and decoded:
+            console.print(f"   ✅ Décodage réussi: {decoded[0]}")
+        else:
+            console.print("   ⚠️  Décodage échoué - Vérifier les dépendances")
+    
+    else:
+        console.print(f"[red]❌ Erreur lors de la fusion: {result.get('error', 'Unknown')}[/red]")
+        
+        # Guide d'installation si nécessaire
+        if any(x in str(result.get('error', '')).lower() for x in ['dépendance', 'install', 'missing']):
+            console.print(f"[yellow]📦 {qr_link_system.get_installation_guide()}[/yellow]")
+
+@cli.command("menu")
+def menu():
+    """
+    🎯 MENU INTERACTIF AVANCÉ - Vantablack Core
+    
+    Interface unifiée pour toutes les opérations QR/liens avec validation robuste,
+    métriques de performance et gestion d'erreurs professionnelle.
+    """
+    
+    # En-tête avec informations système
+    console.print("")
+    console.print("[bold magenta]🎯 VANTABLACK - MENU PRINCIPAL[/bold magenta]")
+    console.print("[dim]Système QR/Liens Robustifié v2.0 | Multi-OS | Métriques Temps Réel[/dim]")
+    
+    while True:
+        console.print("\n" + "="*60)
+        console.print("[bold]📋 MENU PRINCIPAL[/bold]")
+        console.print("="*60)
+        
+        # Section Génération
+        console.print("[bold blue]🚀 GÉNÉRATION[/bold blue]")
+        console.print("1) Générer lien local (copie presse-papiers)")
+        console.print("2) Générer QR code (options avancées)")
+        console.print("3) Fusion intelligente QR + lien (recommandé)")
+        
+        # Section Validation
+        console.print("[bold green]🔍 VALIDATION[/bold green]")
+        console.print("4) Vérifier lien (local + distant + SSL)")
+        console.print("5) Vérifier QR code (décodage + validation)")
+        console.print("6) Diagnostic complet environnement")
+        
+        # Section Utilitaire
+        console.print("[bold yellow]⚙️  UTILITAIRES[/bold yellow]")
+        console.print("7) Ouvrir interface web")
+        console.print("8) Voir métriques de performance")
+        console.print("9) Guide d'installation multi-OS")
+        console.print("10) Mode diagnostic avancé")
+        
+        # Section Système
+        console.print("[bold red]🔧 SYSTÈME[/bold red]")
+        console.print("11) Vérifier compatibilité OS")
+        console.print("12) Test réseau et connectivité")
+        console.print("0) Quitter")
+        
+        console.print("\n[dim]💡 Utilisez 'fuse-qr-link' pour la fusion intelligente recommandée[/dim]")
+        
+        choice = input("\n🎯 Sélection (0-12): ").strip()
+        
+        if choice == "0":
+            console.print("[green]👋 Au revoir![/green]")
+            break
+            
+        elif choice == "1":
+            # Génération lien local améliorée
+            port = input("🔢 Port local (défaut 8888): ").strip() or "8888"
+            url = f"http://localhost:{port}/"
+            
+            # Validation du service local
+            console.print(f"🔍 Validation de {url}...")
+            is_valid, result, details = qr_link_system.validate_url(url, timeout=2)
+            
+            if is_valid:
+                console.print(f"[green]✅ Service local actif: {url}[/green]")
+            else:
+                console.print(f"[yellow]⚠️  Service local non démarré: {result.value}[/yellow]")
+            
+            console.print(f"[bold]🔗 Lien généré:[/bold] {url}")
+            
+            # Copie presse-papiers multi-OS
+            try:
+                import shutil
+                if platform.system() == "Darwin" and shutil.which("pbcopy"):
+                    subprocess.run("pbcopy", input=url.encode(), check=False)
+                    console.print("[cyan]📋 Copié dans le presse‑papiers (macOS)[/cyan]")
+                elif platform.system() == "Linux" and shutil.which("xclip"):
+                    subprocess.run(["xclip", "-selection", "clipboard"], input=url.encode(), check=False)
+                    console.print("[cyan]📋 Copié dans le presse‑papiers (Linux)[/cyan]")
+                elif platform.system() == "Windows":
+                    import pyperclip
+                    pyperclip.copy(url)
+                    console.print("[cyan]📋 Copié dans le presse‑papiers (Windows)[/cyan]")
+                else:
+                    console.print("[yellow]ℹ️  Presse-papiers non disponible - Copiez manuellement[/yellow]")
+            except Exception as e:
+                console.print(f"[yellow]⚠️  Presse-papiers indisponible: {e}[/yellow]")
+        
+        elif choice == "2":
+            # Génération QR avec options avancées
+            console.print("[bold]🎨 GÉNÉRATION QR AVANCÉE[/bold]")
+            
+            url = input("🔗 URL cible (vide pour localhost:8888): ").strip()
+            if not url:
+                port = input("🔢 Port local (défaut 8888): ").strip() or "8888"
+                url = f"http://localhost:{port}/"
+            
+            out = input("💾 Fichier sortie (safe_qr.png): ").strip() or "safe_qr.png"
+            logo = input("🖼️  Logo PNG optionnel: ").strip() or None
+            
+            # Options avancées
+            console.print("\n[bold]🎯 OPTIONS AVANCÉES[/bold]")
+            error_corr = input("📊 Niveau correction [L/M/Q/H] (défaut H): ").strip().upper() or "H"
+            color = input("🎨 Couleur QR (défaut black): ").strip() or "black"
+            bg_color = input("🏳️  Couleur fond (défaut white): ").strip() or "white"
+            
+            # Appel avec toutes les options
+            safe_qr(
+                url=url if url != "None" else None,
+                port=8888,
+                out=out,
+                logo=logo if logo != "None" else None,
+                validate=True,
+                error_correction=error_corr if error_corr in ['L', 'M', 'Q', 'H'] else 'H',
+                color=color,
+                bg_color=bg_color
+            )
+        
+        elif choice == "3":
+            # Fusion intelligente QR + lien (recommandée)
+            console.print("[bold]🎯 FUSION INTELLIGENTE QR/LIEN[/bold]")
+            
+            url = input("🔗 URL cible (obligatoire): ").strip()
+            if not url:
+                console.print("[red]❌ URL obligatoire pour la fusion[/red]")
+                continue
+            
+            qr_file = input("💾 Fichier QR (fused_qr.png): ").strip() or "fused_qr.png"
+            logo = input("🖼️  Logo optionnel: ").strip() or None
+            
+            # Validation automatique
+            validate = input("🔍 Valider le lien? [O/n]: ").strip().lower() != 'n'
+            open_browser = input("🌐 Ouvrir dans le navigateur? [o/N]: ").strip().lower() == 'o'
+            
+            # Appel de la fusion intelligente
+            fuse_qr_link(
+                url=url,
+                qr_file=qr_file,
+                validate=validate,
+                open_browser=open_browser,
+                logo=logo if logo != "None" else None
+            )
+        
+        elif choice == "4":
+            # Validation de lien robuste
+            console.print("[bold]🔗 VALIDATION DE LIEN ROBUSTE[/bold]")
+            
+            url = input("🔗 URL à valider (vide pour options): ").strip()
+            if not url:
+                # Options de validation
+                console.print("\n[bold]🎯 OPTIONS DE VALIDATION[/bold]")
+                print("1) Service local (localhost:8888)")
+                print("2) Service distant (VANTA_PUBLIC_URL)")
+                print("3) URL personnalisée")
+                
+                opt = input("🔢 Choix (1-3): ").strip()
+                
+                if opt == "1":
+                    port = input("🔢 Port local: ").strip() or "8888"
+                    url = f"http://localhost:{port}/health"
+                elif opt == "2":
+                    url = os.environ.get("VANTA_PUBLIC_URL")
+                    if not url:
+                        console.print("[red]❌ VANTA_PUBLIC_URL non configuré[/red]")
+                        continue
+                elif opt == "3":
+                    url = input("🔗 URL personnalisée: ").strip()
+                else:
+                    console.print("[yellow]⚠️  Option invalide[/yellow]")
+                    continue
+            
+            if url:
+                verify_link(url=url, port=8888)
+        
+        elif choice == "5":
+            # Vérification QR améliorée
+            file = input("📷 Fichier QR à vérifier (safe_qr.png): ").strip() or "safe_qr.png"
+            verify_qr(file=file)
+        
+        elif choice == "6":
+            # Diagnostic complet
+            doctor()
+        
+        elif choice == "7":
+            # Ouverture interface web
+            port = input("🌐 Port de l'interface web (défaut 8080): ").strip() or "8080"
+            url = f"http://localhost:{port}/ui"
+            console.print(f"[green]🌐 Ouverture de {url}[/green]")
+            _open_web(url)
+        
+        elif choice == "8":
+            # Métriques de performance
+            metrics = qr_link_system.get_metrics()
+            console.print("[bold]📊 MÉTRIQUES DE PERFORMANCE[/bold]")
+            console.print(f"   Total validations: {metrics['total_checks']}")
+            console.print(f"   Succès: {metrics['successful_checks']}")
+            console.print(f"   Échecs: {metrics['failed_checks']}")
+            console.print(f"   Erreurs SSL: {metrics['ssl_errors']}")
+            console.print(f"   Erreurs réseau: {metrics['network_errors']}")
+            console.print(f"   Temps réponse moyen: {metrics['average_response_time']:.2f}s")
+        
+        elif choice == "9":
+            # Guide d'installation multi-OS
+            console.print("[bold]📦 GUIDE D'INSTALLATION MULTI-OS[/bold]")
+            guide = qr_link_system.get_installation_guide()
+            console.print(f"   {guide}")
+            
+            # Détails supplémentaires par OS
+            sysname = platform.system()
+            if sysname == "Darwin":
+                console.print("   💡 macOS: 'brew update && brew upgrade' recommandé")
+            elif sysname == "Linux":
+                console.print("   💡 Linux: 'sudo apt update && sudo apt upgrade' recommandé")
+            elif sysname == "Windows":
+                console.print("   💡 Windows: Vérifier Python dans PATH")
+        
+        elif choice == "10":
+            # Mode diagnostic avancé
+            console.print("[bold]🔧 DIAGNOSTIC AVANCÉ[/bold]")
+            
+            table = Table(title="Diagnostic Système Complet")
+            table.add_column("Test")
+            table.add_column("Résultat")
+            table.add_column("Détails")
+            
+            # Test DNS
+            try:
+                s = socket.socket()
+                s.settimeout(3.0)
+                s.connect(("1.1.1.1", 53))
+                table.add_row("DNS", "✅ OK", "Connectivité Internet")
+            except Exception as e:
+                table.add_row("DNS", "❌ FAIL", f"{e}")
+            finally:
+                try:
+                    s.close()
+                except Exception:
+                    pass
+            
+            # Test services locaux
+            services = ["http://localhost:8080/health", "http://localhost:8888/", "http://127.0.0.1:8080"]
+            for service in services:
+                is_valid, result, details = qr_link_system.validate_url(service, timeout=2)
+                status = "✅" if is_valid else "❌"
+                table.add_row(f"Service {service}", status, result.value)
+            
+            console.print(table)
+        
+        elif choice == "11":
+            # Compatibilité OS
+            sysname = platform.system()
+            console.print(f"[bold]💻 COMPATIBILITÉ OS: {sysname}[/bold]")
+            
+            if sysname == "Darwin":
+                console.print("   ✅ macOS compatible")
+                console.print("   📋 Python 3.11+, Homebrew, venv .venv")
+                console.print("   🔧 Commandes: brew install zbar, pip install qrcode[pil]")
+            elif sysname == "Linux":
+                console.print("   ✅ Linux compatible")
+                console.print("   📋 python3.11, python3.11-venv, libzbar0")
+                console.print("   🔧 Commandes: sudo apt install libzbar0")
+            elif sysname == "Windows":
+                console.print("   ✅ Windows compatible")
+                console.print("   📋 Python officiel, PowerShell")
+                console.print("   🔧 Commandes: pip install pyzbar qrcode[pil]")
+            else:
+                console.print("   ⚠️  Système non standard - Compatibilité limitée")
+        
+        elif choice == "12":
+            # Test réseau complet
+            console.print("[bold]🌐 TEST RÉSEAU COMPLET[/bold]")
+            
+            targets = [
+                ("Google", "https://www.google.com"),
+                ("Cloudflare DNS", "https://1.1.1.1"),
+                ("Localhost", "http://localhost:8080"),
+                ("Vanta Public", os.environ.get("VANTA_PUBLIC_URL", "https://httpbin.org/status/200"))
+            ]
+            
+            table = Table(title="Test de Connectivité")
+            table.add_column("Cible")
+            table.add_column("Statut")
+            table.add_column("Temps")
+            table.add_column("SSL")
+            
+            for name, url in targets:
+                if url:
+                    start_time = time.time()
+                    is_valid, result, details = qr_link_system.validate_url(url, timeout=5)
+                    response_time = time.time() - start_time
+                    
+                    status = "✅" if is_valid else "❌"
+                    ssl_ok = "✅" if details.get("ssl_valid", False) else "❌"
+                    
+                    table.add_row(name, status, f"{response_time:.2f}s", ssl_ok)
+            
+            console.print(table)
+        
+        else:
+            console.print("[yellow]⚠️  Choix invalide - Sélectionnez 0-12[/yellow]")
+            
+        # Pause avant de revenir au menu
+        input("\n↵ Presser Entrée pour continuer...")
 
 @cli.command()
 def init():
@@ -102,12 +565,37 @@ def phishlets_validate():
 @click.option("--port", default=8000)
 def demo(port):
     """Run demo API with metrics and guide"""
-    app_code = "from fastapi import FastAPI\nfrom core.api.routes import router\napp=FastAPI()\napp.include_router(router)\n"
+    app_code = (
+        "from fastapi import FastAPI\n"
+        "from core.api.routes import router\n"
+        "from core.web.server import create_app\n"
+        "app = create_app()\n"
+        "app.include_router(router)\n"
+    )
     path = ".v5_demo_app.py"
     with open(path, "w") as f:
         f.write(app_code)
     console.print("[yellow]Starting demo server[/yellow]")
     subprocess.run([sys.executable, "-m", "uvicorn", ".v5_demo_app:app", "--port", str(port)], check=False)
+
+
+@cli.command("test")
+def run_tests():
+    """Exécute la suite de tests de base (API + UI)"""
+    console.print("[yellow]Exécution des tests (pytest requis)...[/yellow]")
+    try:
+        import pytest  # noqa: F401
+    except Exception:
+        console.print("[red]pytest introuvable[/red]")
+        console.print("Installez les dépendances puis relancez:")
+        console.print("  python -m pip install -r requirements.txt")
+        console.print("  python -m pytest -q")
+        return
+    try:
+        import subprocess as sp
+        sp.run([sys.executable, "-m", "pytest", "-q"], check=False)
+    except Exception as e:
+        console.print(f"[red]Erreur lors des tests:[/red] {e}")
 
 @cli.command("edge-demo")
 @click.option("--phishlet", default="phishlets/example.yaml")
@@ -423,40 +911,62 @@ def safe_link(port):
 @click.option("--port", default=8888, type=int, help="Port si --url non fourni")
 @click.option("--out", default="safe_qr.png", help="Fichier PNG de sortie")
 @click.option("--logo", help="Chemin vers un logo à incruster (PNG)")
-def safe_qr(url, port, out, logo):
-    """Génère un QR code (High Error Correction) pour une URL cible"""
+@click.option("--validate/--no-validate", default=True, help="Valider le lien avant génération")
+@click.option("--error-correction", type=click.Choice(['L', 'M', 'Q', 'H']), default='H', 
+              help="Niveau correction erreur: L(7%), M(15%), Q(25%), H(30%)")
+@click.option("--color", default="black", help="Couleur du QR (nom ou hex: #FF0000)")
+@click.option("--bg-color", default="white", help="Couleur de fond")
+def safe_qr(url, port, out, logo, validate, error_correction, color, bg_color):
+    """Génération robuste de QR code avec validation, customisation avancée et métriques"""
     tgt = url or f"http://localhost:{port}/"
-    console.print(f"[cyan]Génération du QR code pour: {tgt}[/cyan]")
-    try:
-        import qrcode
-        from PIL import Image
+    console.print(f"[cyan]🔗 Génération QR robuste pour: {tgt}[/cyan]")
+    
+    # Mapping niveau correction
+    correction_map = {
+        'L': QRCorrectionLevel.LOW,
+        'M': QRCorrectionLevel.MEDIUM, 
+        'Q': QRCorrectionLevel.QUALITY,
+        'H': QRCorrectionLevel.HIGH
+    }
+    
+    # Configuration avancée
+    config = QRConfig(
+        error_correction=correction_map[error_correction],
+        fill_color=color,
+        back_color=bg_color,
+        logo_path=logo
+    )
+    
+    # Génération avec validation
+    result = qr_link_system.generate_qr_with_link_validation(
+        url=tgt,
+        output_path=out,
+        validate=validate,
+        config=config
+    )
+    
+    if result["qr_generated"]:
+        console.print(f"[green]✅ QR généré avec succès: {out}[/green]")
         
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_H,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(tgt)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
-        
-        if logo and os.path.exists(logo):
-            icon = Image.open(logo)
-            img_w, img_h = img.size
-            factor = 4
-            size_w = int(img_w / factor)
-            size_h = int(img_h / factor)
-            icon = icon.resize((size_w, size_h), Image.LANCZOS)
-            w = int((img_w - size_w) / 2)
-            h = int((img_h - size_h) / 2)
-            img.paste(icon, (w, h), icon if icon.mode == 'RGBA' else None)
+        # Affichage des détails de validation
+        if validate:
+            status = "✅" if result["link_valid"] else "⚠️"
+            console.print(f"   {status} Lien validé: {result['validation_result']}")
             
-        img.save(out)
-        console.print(f"[green]QR enregistré[/green]: {out}")
-    except Exception as e:
-        console.print(f"[red]Erreur QR: {e}[/red]")
-        console.print("Installe: python -m pip install 'qrcode[pil]' et réessaie.")
+            if not result["link_valid"] and result["validation_result"] == "localhost_only":
+                console.print("   [yellow]ℹ️  Service local non démarré - QR généré quand même[/yellow]")
+        
+        # Métriques de performance
+        metrics = result["metrics"]
+        console.print(f"   📊 Métriques: {metrics['successful_checks']}/{metrics['total_checks']} succès")
+        
+    else:
+        console.print(f"[red]❌ Erreur génération QR: {result.get('error', 'Unknown error')}[/red]")
+        
+        # Guide d'installation si dépendances manquantes
+        if "Dépendances manquantes" in str(result.get('error', '')):
+            install_guide = qr_link_system.get_installation_guide()
+            console.print(f"[yellow]📦 Installation requise:[/yellow] {install_guide}")
 
 @cli.command()
 @click.option("--open-server", is_flag=True, help="Start demo server after run")

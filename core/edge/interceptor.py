@@ -54,6 +54,43 @@ class VantaInterceptor:
             flow.response = http.Response.make(403, b"Blocked by Plugin", {})
             return
 
+        # Serve Static Assets (Phantasm Engine, etc.)
+        if flow.request.path.startswith("/core/assets/"):
+            try:
+                # Remove query parameters if any
+                req_path = flow.request.path.split('?')[0]
+                # Construct absolute path: assume running from project root
+                # Sanitize path to prevent traversal
+                normalized_path = os.path.normpath(req_path.lstrip('/'))
+                # Ensure we don't traverse up
+                if ".." in normalized_path or not normalized_path.startswith("core/assets"):
+                     flow.response = http.Response.make(403, b"Forbidden", {})
+                     return
+
+                abs_path = os.path.abspath(normalized_path)
+                
+                if os.path.exists(abs_path) and os.path.isfile(abs_path):
+                    import mimetypes
+                    ctype, _ = mimetypes.guess_type(abs_path)
+                    with open(abs_path, "rb") as f:
+                        content = f.read()
+                    if hasattr(http, "Response"):
+                        flow.response = http.Response.make(
+                            200, 
+                            content, 
+                            {"Content-Type": ctype or "application/octet-stream"}
+                        )
+                    return
+                else:
+                    if hasattr(http, "Response"):
+                        flow.response = http.Response.make(404, b"Not Found", {})
+                    return
+            except Exception as e:
+                self.logger.error(f"Static asset error: {e}")
+                if hasattr(http, "Response"):
+                    flow.response = http.Response.make(500, b"Internal Error", {})
+                return
+
         # Session Identification
         session_id = None
         if "vanta_sid" in flow.request.cookies:

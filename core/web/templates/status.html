@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-accent mb-2">
+            <i class="fas fa-chart-bar mr-2"></i>
+            Statut Système
+        </h1>
+        <p class="text-gray-400">Monitoring en temps réel et métriques de performance</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold">Santé Globale</h3>
+                    <p class="text-2xl font-bold text-green-400" id="global-health">--%</p>
+                </div>
+                <div class="w-3 h-3 rounded-full bg-green-500" id="health-indicator"></div>
+            </div>
+            <div class="mt-3">
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="health-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold">Uptime</h3>
+                    <p class="text-2xl font-bold" id="uptime-display">00:00:00</p>
+                </div>
+                <div class="text-blue-400">
+                    <i class="fas fa-clock text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold">Mémoire</h3>
+                    <p class="text-2xl font-bold" id="memory-usage">--/--</p>
+                </div>
+                <div class="text-purple-400">
+                    <i class="fas fa-memory text-2xl"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div class="bg-purple-500 h-2 rounded-full" style="width: 0%" id="memory-bar"></div>
+                </div>
+                <div class="text-xs text-gray-400 mt-1" id="memory-percent">--%</div>
+            </div>
+        </div>
+
+        <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold">CPU</h3>
+                    <p class="text-2xl font-bold" id="cpu-load">--%</p>
+                </div>
+                <div class="text-yellow-400">
+                    <i class="fas fa-microchip text-2xl"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 0%" id="cpu-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-darkgray rounded-lg p-6 border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">
+            <i class="fas fa-server mr-2"></i>Services
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="services-grid">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+
+    <div class="flex justify-center space-x-4">
+        <button id="refresh-btn" class="btn btn-primary">
+            <i class="fas fa-sync-alt mr-2"></i>Actualiser
+        </button>
+        <button id="diagnostic-btn" class="btn btn-secondary">
+            <i class="fas fa-stethoscope mr-2"></i>Diagnostics
+        </button>
+    </div>
+</div>
+
+<script>
+(function () {
+    const state = { start: Date.now(), metrics: {} };
+
+    function fmtBytes(bytes) {
+        if (!bytes) return '0 B';
+        const sizes = ['B','KB','MB','GB','TB'];
+        const i = Math.floor(Math.log(bytes)/Math.log(1024));
+        return (bytes/Math.pow(1024,i)).toFixed(1)+' '+sizes[i];
+    }
+
+    function setHealth(healthy) {
+        const pct = healthy ? 100 : 50;
+        document.getElementById('global-health').textContent = pct + '%';
+        document.getElementById('health-bar').style.width = pct + '%';
+        document.getElementById('health-indicator').className =
+            'w-3 h-3 rounded-full ' + (healthy ? 'bg-green-500' : 'bg-yellow-500');
+    }
+
+    function tickUptime() {
+        const s = Math.floor((Date.now() - state.start)/1000);
+        const h = String(Math.floor(s/3600)).padStart(2,'0');
+        const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+        const sec = String(s%60).padStart(2,'0');
+        document.getElementById('uptime-display').textContent = `${h}:${m}:${sec}`;
+    }
+
+    function parseProm(metricsText) {
+        const out = {};
+        metricsText.split('\\n').forEach(line => {
+            if (!line || line[0]==='#') return;
+            const parts = line.split(' ');
+            if (parts.length>=2) out[parts[0]] = parseFloat(parts[1]);
+        });
+        return out;
+    }
+
+    function updateBasics() {
+        const used = state.metrics.vantablack_memory_used_bytes || 0;
+        const total = state.metrics.vantablack_memory_total_bytes || 1;
+        const pct = Math.min(100, (used/total)*100);
+        document.getElementById('memory-usage').textContent = `${fmtBytes(used)}/${fmtBytes(total)}`;
+        document.getElementById('memory-bar').style.width = pct.toFixed(1)+'%';
+        document.getElementById('memory-percent').textContent = pct.toFixed(1)+'%';
+
+        const cpu = state.metrics.vantablack_cpu_load || 0;
+        document.getElementById('cpu-load').textContent = cpu.toFixed(1)+'%';
+        document.getElementById('cpu-bar').style.width = Math.min(100, cpu)+'%';
+    }
+
+    function updateServices() {
+        const grid = document.getElementById('services-grid');
+        const items = [
+            { key: 'api', label: 'API Core' },
+            { key: 'db', label: 'Base de données' },
+            { key: 'metrics', label: 'Service Métriques' },
+            { key: 'web', label: 'Interface Web' },
+        ];
+        grid.innerHTML = items.map(s => {
+            const ok = (state.metrics[`vantablack_${s.key}_status`] || 1) === 1;
+            const cls = ok ? 'text-green-400' : 'text-red-400';
+            const dot = ok ? 'bg-green-500' : 'bg-red-500';
+            return `
+                <div class="p-3 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full ${dot} mr-3"></span>
+                        <span>${s.label}</span>
+                    </div>
+                    <span class="${cls}">${ok ? 'Operational' : 'Down'}</span>
+                </div>`;
+        }).join('');
+    }
+
+    async function refresh() {
+        try {
+            const h = await fetch('/v5/health');
+            setHealth(h.ok);
+        } catch { setHealth(false); }
+
+        try {
+            const r = await fetch('/v5/metrics');
+            if (r.ok) {
+                const txt = await r.text();
+                state.metrics = parseProm(txt);
+                updateBasics();
+                updateServices();
+            }
+        } catch {}
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', refresh);
+    document.getElementById('diagnostic-btn').addEventListener('click', () => {
+        alert('Diagnostics de base: ping /v5/health, lecture /v5/metrics, vérif UI.');
+    });
+
+    setInterval(tickUptime, 1000);
+    refresh();
+})();
+</script>
+{% endblock %}
+

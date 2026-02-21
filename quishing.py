@@ -12,7 +12,7 @@ RED = '\033[91m'
 GREEN = '\033[92m'
 RESET = '\033[0m'
 
-def generate_quishing_payload(url, output_file="attack.png", logo_path=None):
+def generate_quishing_payload(url, output_file="attack.png", logo_path=None, fg="black", bg="white", box_size=10, border=4, label=None):
     """
     Generate a malicious QR Code (Quishing)
     """
@@ -21,13 +21,13 @@ def generate_quishing_payload(url, output_file="attack.png", logo_path=None):
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=10,
-        border=4,
+        box_size=box_size,
+        border=border,
     )
     qr.add_data(url)
     qr.make(fit=True)
 
-    img = qr.make_image(fill_color="black", back_color="white").convert('RGBA')
+    img = qr.make_image(fill_color=fg, back_color=bg).convert('RGBA')
     
     # Add logo if provided
     if logo_path and os.path.exists(logo_path):
@@ -79,7 +79,7 @@ def generate_quishing_payload(url, output_file="attack.png", logo_path=None):
     except:
         font = None
         
-    text = t("scan_verify")
+    text = label or t("scan_verify")
     
     # Calculate text position
     try:
@@ -100,9 +100,14 @@ if __name__ == "__main__":
     parser.add_argument("--out", default="payload_qr.png", help="Output filename")
     parser.add_argument("--logo", help="Path to logo image to embed")
     parser.add_argument("--lang", default="en", help="Language (en/fr)")
+    parser.add_argument("--fg", default="black")
+    parser.add_argument("--bg", default="white")
+    parser.add_argument("--box-size", type=int, default=10)
+    parser.add_argument("--border", type=int, default=4)
+    parser.add_argument("--label", help="Custom label text below QR")
     
     args = parser.parse_args()
     
     i18n.set_language(args.lang)
     
-    generate_quishing_payload(args.url, args.out, args.logo)
+    generate_quishing_payload(args.url, args.out, args.logo, args.fg, args.bg, args.box_size, args.border, args.label)

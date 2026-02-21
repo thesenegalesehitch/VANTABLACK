@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+message_file="$1"
+message="$(head -n 1 "$message_file")"
+pattern='^(feat|fix|chore|docs|style|refactor|perf|test)(\(.+\))?!?: .+'
+if ! [[ "$message" =~ $pattern ]]; then
+  echo "Commit message must follow Conventional Commits: type(scope): subject" >&2
+  echo "Example: feat(core): add /health endpoint" >&2
+  exit 1
+fi
+exit 0

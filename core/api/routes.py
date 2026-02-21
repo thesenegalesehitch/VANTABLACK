@@ -64,7 +64,7 @@ async def guide(page: str = "home"):
             <h2>Démarrage Express</h2>
             <ol>
               <li>python3 -m venv .venv && source .venv/bin/activate</li>
-              <li>python -m pip install -r requirements-v5.txt</li>
+              <li>python -m pip install -r requirements.txt</li>
               <li>python -m core.cli.main demo</li>
               <li>Voir <a href="/v5/metrics">/v5/metrics</a> et <a href="/v5/guide?page=cli">CLI</a></li>
             </ol>

