@@ -1,0 +1,11 @@
+{
+  "target": "@pseudo_cible",
+  "platform": "twitter",
+  "profile_found": true,
+  "estimated_value": "High",
+  "security_score": 56,
+  "recommended_phishlet": "twitter.yaml",
+  "suggested_lure": "Password Reset",
+  "simulated_email": "pseudo_cible@twitter.com",
+  "scraped_at": "2026-02-21 12:25:29"
+}

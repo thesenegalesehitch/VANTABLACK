@@ -61,8 +61,13 @@ bin/gophish
 campaigns/
 
 # Captures
+captures.json
 captures_*.json
 captures_*.csv
+
+# Generated Assets
+attack_qr_*.png
+qr_codes/
 
 # Backups
 *.bak

