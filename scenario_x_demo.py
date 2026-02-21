@@ -163,7 +163,7 @@ def phase_4_capture_simulation():
     console.print("[dim]Access verified via API: https://api.twitter.com/1.1/account/verify_credentials.json[/dim]")
 
 def main():
-    console.print("[bold red]⚠ VANTABLACK RED TEAM OPERATION: SCENARIO X ⚠[/bold red]\n")
+    console.print("[bold red]⚠ VANTABLACK BY THE SENEGALESEHITCH: SCENARIO X ⚠[/bold red]\n")
     
     phase_1_recon()
     phase_2_weaponization()

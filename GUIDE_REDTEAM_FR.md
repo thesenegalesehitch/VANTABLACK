@@ -1,4 +1,4 @@
-# 📕 MANUEL DES OPÉRATIONS OFFENSIVES - VANTABLACK RED TEAM
+# 📕 MANUEL DES OPÉRATIONS OFFENSIVES - VANTABLACK BY THE SENEGALESEHITCH
 **Version :** 5.0 (Hyperdrive)
 **Niveau :** Débutant à Expert
 **Langue :** Français

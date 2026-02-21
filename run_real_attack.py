@@ -194,7 +194,7 @@ def check_updates():
 def main_menu():
     while True:
         clear_screen()
-        console.print(Panel.fit("VANTABLACK RED TEAM", style="bold purple", subtitle="v2.1 - Live Operation"))
+        console.print(Panel.fit("VANTABLACK BY THE SENEGALESEHITCH", style="bold purple", subtitle="v2.1 - Live Operation"))
         console.print(t("menu_options"))
         console.print(t("option_attack"))
         console.print(t("option_settings"))

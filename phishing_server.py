@@ -226,8 +226,6 @@ if __name__ == "__main__":
     if GEO_BLOCK:
         print(t("geo_active"))
 
-    uvicorn.run(app, host="0.0.0.0", port=args.port)
-    
     print(t("starting_server", target=TARGET_PLATFORM))
     if STEALTH_MODE:
         print(t("stealth_mode_active"))
