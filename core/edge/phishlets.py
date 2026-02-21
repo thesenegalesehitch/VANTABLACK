@@ -140,6 +140,7 @@ class PhishletLoader:
                         phish_sub=host.get("subdomain"),
                         orig_sub=host.get("subdomain"),
                         domain=host.get("target", "").split(".", 1)[1] if "." in host.get("target", "") else "com",
+                        target=host.get("target"),
                         session=True,
                         is_landing=True
                     ))

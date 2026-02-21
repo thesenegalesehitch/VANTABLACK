@@ -1600,5 +1600,1076 @@
     "is_authenticated": true,
     "created_at": "2026-02-19T21:12:11.472629",
     "last_activity": "2026-02-19T21:12:11.472634"
+  },
+  "a933d746-60b6-4a02-b1f0-4bc3da3268a4": {
+    "session_id": "a933d746-60b6-4a02-b1f0-4bc3da3268a4",
+    "campaign_id": "manual",
+    "phishlet_name": "microsoft",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:18:58.161273",
+    "last_activity": "2026-02-20T14:18:58.161283"
+  },
+  "8549cb0c-6ecf-4b43-80c4-61b375508882": {
+    "session_id": "8549cb0c-6ecf-4b43-80c4-61b375508882",
+    "campaign_id": "manual",
+    "phishlet_name": "x",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "guest_id": "v1%3A177159720956923145",
+      "ct0": ""
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:20:09.264741",
+    "last_activity": "2026-02-20T14:20:09.264747"
+  },
+  "8315ee69-3432-4106-a06a-4179ec6efa73": {
+    "session_id": "8315ee69-3432-4106-a06a-4179ec6efa73",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:iJQWZwYvuarldzxbYSa8WaWxGaTwVQ:YnFAtSARvZ2KgTYX"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:28:20.039265",
+    "last_activity": "2026-02-20T14:28:20.039274"
+  },
+  "468b7f73-d3b1-4d74-96e7-268239c3ee75": {
+    "session_id": "468b7f73-d3b1-4d74-96e7-268239c3ee75",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:9vBAcDxjyS4LkkknpiMwyG5PT-RJXA:-95QzpiIKu8JxO7a"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:28:32.632142",
+    "last_activity": "2026-02-20T14:28:32.632150"
+  },
+  "bb81c9b6-7395-41ef-b4f3-b770a7ed638b": {
+    "session_id": "bb81c9b6-7395-41ef-b4f3-b770a7ed638b",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:NcxqGy9CnBvmKcQ3VrD5A8W0_0lCbA:hVgqYbBs-_kjnqCi"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:32:43.763533",
+    "last_activity": "2026-02-20T14:32:43.763550"
+  },
+  "0e378303-beb7-48b7-8547-d50daa855938": {
+    "session_id": "0e378303-beb7-48b7-8547-d50daa855938",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:ENAylCk-t7iQ_Vs1Qz3AHV6ZgsSiHw:ar8AR1yUYXV76MnN"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:32:50.352737",
+    "last_activity": "2026-02-20T14:32:50.352745"
+  },
+  "c45f8c47-a279-4de8-acbc-fb0b2e3a58eb": {
+    "session_id": "c45f8c47-a279-4de8-acbc-fb0b2e3a58eb",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:_z6-EM5aGdutuvzr3u0_fHuVehTVWQ:IyfTY2FKgGOrDTYg"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:32:51.538948",
+    "last_activity": "2026-02-20T14:32:51.538954"
+  },
+  "057cdedb-9c65-4a40-8388-5b2cc1957bf6": {
+    "session_id": "057cdedb-9c65-4a40-8388-5b2cc1957bf6",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:phMZt9_6t0mz3e1pkB0cHDb-87InPg:dh5SnkJYnpEDRmBq"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:35:06.973603",
+    "last_activity": "2026-02-20T14:35:06.973618"
+  },
+  "0e42e637-27d8-4bdd-b5b7-9611ce896c50": {
+    "session_id": "0e42e637-27d8-4bdd-b5b7-9611ce896c50",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:ZywCEltyrGueHw7RBYqTY510-J_TqA:y6tDQ32vS7ptqogG"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:37:32.043965",
+    "last_activity": "2026-02-20T14:37:32.043972"
+  },
+  "977ad929-17f8-42b1-8f42-807f43b4e77e": {
+    "session_id": "977ad929-17f8-42b1-8f42-807f43b4e77e",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:bLKqheiwAXFR9WN0i97uxUYs4qGIMA:WFsraXNr4ZpKzxc4"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:37:32.590666",
+    "last_activity": "2026-02-20T14:37:32.590679"
+  },
+  "67c42aea-0427-4f7e-a169-dcc1610e1bc4": {
+    "session_id": "67c42aea-0427-4f7e-a169-dcc1610e1bc4",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:t79f81Pe86BTLlkEkJPqm2tunm-VsA:ziva2a8klzHYE8DN"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:37:32.823442",
+    "last_activity": "2026-02-20T14:37:32.823448"
+  },
+  "f51b9b03-fdb1-4613-98d7-ee01936e71aa": {
+    "session_id": "f51b9b03-fdb1-4613-98d7-ee01936e71aa",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:--Z0jep4MlXTMDbscHwlbKUWVQHwCA:UzAHz6MGAl2Siv38"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:37:33.062372",
+    "last_activity": "2026-02-20T14:37:33.062378"
+  },
+  "6007b9a8-9015-4965-90ac-cc6291df4ac6": {
+    "session_id": "6007b9a8-9015-4965-90ac-cc6291df4ac6",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:39:12.310973",
+    "last_activity": "2026-02-20T14:39:12.310982"
+  },
+  "00994538-9df2-4844-b288-1ba7fa1a6877": {
+    "session_id": "00994538-9df2-4844-b288-1ba7fa1a6877",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:39:40.494271",
+    "last_activity": "2026-02-20T14:39:40.494283"
+  },
+  "751406ff-5685-4d4a-aafd-b52570497bff": {
+    "session_id": "751406ff-5685-4d4a-aafd-b52570497bff",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:40:49.381960",
+    "last_activity": "2026-02-20T14:40:49.381969"
+  },
+  "e72e92e0-0de1-4fd4-9027-e1ba85198d1e": {
+    "session_id": "e72e92e0-0de1-4fd4-9027-e1ba85198d1e",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:42:48.339852",
+    "last_activity": "2026-02-20T14:42:48.339862"
+  },
+  "e0103589-dd79-46f1-aa74-8e678b4d8820": {
+    "session_id": "e0103589-dd79-46f1-aa74-8e678b4d8820",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:44:34.815185",
+    "last_activity": "2026-02-20T14:44:34.815194"
+  },
+  "08cf2433-51c8-4d2c-91d7-beb33f71248b": {
+    "session_id": "08cf2433-51c8-4d2c-91d7-beb33f71248b",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:50:07.897493",
+    "last_activity": "2026-02-20T14:50:07.897506"
+  },
+  "b23f93c3-36b1-48af-a38f-a2e86db8f6f9": {
+    "session_id": "b23f93c3-36b1-48af-a38f-a2e86db8f6f9",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:wsjkHGBDgPfrduaZo53jg4yXgyVTsw:bqca1QvepZ4pNRuy"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:51:16.909682",
+    "last_activity": "2026-02-20T14:51:16.909695"
+  },
+  "d4c3a48c-d0c6-4ff5-9d54-fb77794e1984": {
+    "session_id": "d4c3a48c-d0c6-4ff5-9d54-fb77794e1984",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:RKLNNWjKwgQFsaKrABHw8qAp_gjNVw:A0yDWUSQDwy6glFp"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:51:17.587774",
+    "last_activity": "2026-02-20T14:51:17.587780"
+  },
+  "5a9e9240-af1a-47c2-92db-819672ad4beb": {
+    "session_id": "5a9e9240-af1a-47c2-92db-819672ad4beb",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:1l83obqSCx3XR7l60AWFsZmyYrWrAA:qo_87jgz-D96OvjW"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:51:17.870341",
+    "last_activity": "2026-02-20T14:51:17.870349"
+  },
+  "d16b7b14-bb4b-4c46-8e99-514de226aed0": {
+    "session_id": "d16b7b14-bb4b-4c46-8e99-514de226aed0",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:8UPUUJQ1VG3sQJXq1BZso1Lljntoeg:RS68KfoKZEJFuYJL"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:51:18.257585",
+    "last_activity": "2026-02-20T14:51:18.257591"
+  },
+  "70e35766-9c20-4aff-835d-0d8b91b8c0e6": {
+    "session_id": "70e35766-9c20-4aff-835d-0d8b91b8c0e6",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:D3Hng-PH1uh2hmVoZhkOLbHKKkQ6-A:f36fsL5VwBY8KSBN"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T14:51:28.630880",
+    "last_activity": "2026-02-20T14:51:28.630888"
+  },
+  "6bbf8c58-3404-4822-8ce6-01afb0a1a026": {
+    "session_id": "6bbf8c58-3404-4822-8ce6-01afb0a1a026",
+    "campaign_id": "manual",
+    "phishlet_name": "Discord-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:52:39.202642",
+    "last_activity": "2026-02-20T14:52:39.202651"
+  },
+  "d70efd7b-0a04-482c-9e4d-3901745e1a1c": {
+    "session_id": "d70efd7b-0a04-482c-9e4d-3901745e1a1c",
+    "campaign_id": "manual",
+    "phishlet_name": "Amazon-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:54:21.945266",
+    "last_activity": "2026-02-20T14:54:21.945390"
+  },
+  "dccdbfa1-ced5-412b-97fa-c39ffda1e441": {
+    "session_id": "dccdbfa1-ced5-412b-97fa-c39ffda1e441",
+    "campaign_id": "manual",
+    "phishlet_name": "Apple-ID",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T14:55:42.594876",
+    "last_activity": "2026-02-20T14:55:42.594891"
+  },
+  "f91611d0-e90f-42a7-ba43-cb7cfe9bfb70": {
+    "session_id": "f91611d0-e90f-42a7-ba43-cb7cfe9bfb70",
+    "campaign_id": "manual",
+    "phishlet_name": "LinkedIn-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:00:12.898913",
+    "last_activity": "2026-02-20T15:00:12.898923"
+  },
+  "ac484765-e8b0-4cc9-8165-83b8dedbb6c3": {
+    "session_id": "ac484765-e8b0-4cc9-8165-83b8dedbb6c3",
+    "campaign_id": "manual",
+    "phishlet_name": "LinkedIn-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:00:20.374525",
+    "last_activity": "2026-02-20T15:00:20.374533"
+  },
+  "c2d66b78-62af-460a-9d65-4dcfd0523f14": {
+    "session_id": "c2d66b78-62af-460a-9d65-4dcfd0523f14",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:xLeX8Qm80hSd_fyi2ibeSc6Q_fRBkQ:6iyh0Y8N1EYYji5C"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:22.297662",
+    "last_activity": "2026-02-20T15:01:22.297671"
+  },
+  "478892cd-6804-4d24-9d8e-4b877f9b4d88": {
+    "session_id": "478892cd-6804-4d24-9d8e-4b877f9b4d88",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:r_-nUm9G1VB-pXMVfFebDI68TlOUKA:wIoV-IsDMMjx_UXp"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:22.863841",
+    "last_activity": "2026-02-20T15:01:22.863847"
+  },
+  "eed9b32b-7bbf-4cf1-9d59-2a069fd6c84e": {
+    "session_id": "eed9b32b-7bbf-4cf1-9d59-2a069fd6c84e",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:S4mTQUO-xxcy9iBxTC_beRV_fwI5hw:FsTTSB38UkeREi3z"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:23.146226",
+    "last_activity": "2026-02-20T15:01:23.146236"
+  },
+  "3d58025a-2399-4ed9-881c-2e2401eb7d9b": {
+    "session_id": "3d58025a-2399-4ed9-881c-2e2401eb7d9b",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:gnSBhf9gkQAuUfvkRoMuyvn3zJM3Ug:gaCjMS_LRT_m_tKN"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:23.435720",
+    "last_activity": "2026-02-20T15:01:23.435726"
+  },
+  "a8f13079-a452-464d-8a39-7d16f5b2e49b": {
+    "session_id": "a8f13079-a452-464d-8a39-7d16f5b2e49b",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:OIPAVhC_7MDzx97_I_LZ4Lv1SLmA1Q:c6Pmhus8G52Z3id3"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:32.239289",
+    "last_activity": "2026-02-20T15:01:32.239312"
+  },
+  "813cce61-7729-4526-8a1b-ba9c5be79aeb": {
+    "session_id": "813cce61-7729-4526-8a1b-ba9c5be79aeb",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:9sDtsPe2vUknkVkfKdRmDILXZTGK_w:cP48IIWgmp-Rf9ra"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:32.637941",
+    "last_activity": "2026-02-20T15:01:32.637946"
+  },
+  "a63d3f91-99a3-4c8c-bd50-65d19235e34b": {
+    "session_id": "a63d3f91-99a3-4c8c-bd50-65d19235e34b",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:G_VtmFiZMpl9DOYsinUXdoUKWQfetQ:VhfScAwE2D2x69X8"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:32.886440",
+    "last_activity": "2026-02-20T15:01:32.886446"
+  },
+  "235d8efe-57db-4360-80a3-3525717d99ca": {
+    "session_id": "235d8efe-57db-4360-80a3-3525717d99ca",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:MBLihMiGv9Qn-8GR-ic1SeGloAOZHA:NfXgqFYFTaam0mib"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:33.163545",
+    "last_activity": "2026-02-20T15:01:33.163550"
+  },
+  "7d77b074-7877-42fd-8943-235f43b98879": {
+    "session_id": "7d77b074-7877-42fd-8943-235f43b98879",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:pGM5WidmEWeDoHsI39xvrtTwnVBHug:3M_h87bt-QqMxsNR"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:49.818861",
+    "last_activity": "2026-02-20T15:01:49.818867"
+  },
+  "b28c393b-c2c0-4ca5-b7c9-d0fedd018ed8": {
+    "session_id": "b28c393b-c2c0-4ca5-b7c9-d0fedd018ed8",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:9-aoXcVep2tNALlMQ5CfWNGobCxRPw:XK_4bwrM5cCpVw7d"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:50.228087",
+    "last_activity": "2026-02-20T15:01:50.228095"
+  },
+  "f7cc66ca-7db8-44de-a618-007bb27017f1": {
+    "session_id": "f7cc66ca-7db8-44de-a618-007bb27017f1",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:OxQqqKTBvijD6FOkNs_c0yHQUge8lw:aEfswiI6iePh3uzv"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:50.476444",
+    "last_activity": "2026-02-20T15:01:50.476450"
+  },
+  "f65d45d2-18d0-4b3c-a5ab-026cd2dbca8a": {
+    "session_id": "f65d45d2-18d0-4b3c-a5ab-026cd2dbca8a",
+    "campaign_id": "manual",
+    "phishlet_name": "google",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {
+      "__Host-GAPS": "1:jv1Sb0feOno4IrmyDZJCvtJSM6JRUw:q3l3P-JMH537kIA5"
+    },
+    "custom_data": {},
+    "is_authenticated": true,
+    "created_at": "2026-02-20T15:01:50.743702",
+    "last_activity": "2026-02-20T15:01:50.743709"
+  },
+  "102a5ac5-ddc0-4d61-bef6-c1e1e7ad1b4e": {
+    "session_id": "102a5ac5-ddc0-4d61-bef6-c1e1e7ad1b4e",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:02:47.752560",
+    "last_activity": "2026-02-20T15:02:47.752568"
+  },
+  "8788b653-a493-43af-8112-893cc4673d8f": {
+    "session_id": "8788b653-a493-43af-8112-893cc4673d8f",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:02:55.390109",
+    "last_activity": "2026-02-20T15:02:55.390115"
+  },
+  "5f3635df-2bd1-4f44-a21e-9254c11a2d02": {
+    "session_id": "5f3635df-2bd1-4f44-a21e-9254c11a2d02",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:03:03.521733",
+    "last_activity": "2026-02-20T15:03:03.521739"
+  },
+  "138d6457-b486-40f9-b094-5a1e51577b29": {
+    "session_id": "138d6457-b486-40f9-b094-5a1e51577b29",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:03:12.279767",
+    "last_activity": "2026-02-20T15:03:12.279773"
+  },
+  "a12cfe4c-9c37-45b2-adff-cb1c3170ed9a": {
+    "session_id": "a12cfe4c-9c37-45b2-adff-cb1c3170ed9a",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:03:20.777863",
+    "last_activity": "2026-02-20T15:03:20.777887"
+  },
+  "fa577db6-1259-4243-9792-f3bf5702b4c7": {
+    "session_id": "fa577db6-1259-4243-9792-f3bf5702b4c7",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:03:31.807883",
+    "last_activity": "2026-02-20T15:03:31.807889"
+  },
+  "dfde65c8-7313-4cf3-9b69-6348e2852eda": {
+    "session_id": "dfde65c8-7313-4cf3-9b69-6348e2852eda",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:03:40.635887",
+    "last_activity": "2026-02-20T15:03:40.635893"
+  },
+  "c68ef56d-f8c2-48d2-80e4-d0f7aab2667c": {
+    "session_id": "c68ef56d-f8c2-48d2-80e4-d0f7aab2667c",
+    "campaign_id": "manual",
+    "phishlet_name": "Facebook-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:03:54.333377",
+    "last_activity": "2026-02-20T15:03:54.333383"
+  },
+  "a466a6bd-417c-4d7d-8b98-21f662fcca75": {
+    "session_id": "a466a6bd-417c-4d7d-8b98-21f662fcca75",
+    "campaign_id": "manual",
+    "phishlet_name": "Apple-ID",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:04:19.656117",
+    "last_activity": "2026-02-20T15:04:19.656127"
+  },
+  "1e6f6f33-8eac-4d3c-9acd-c206fee38b55": {
+    "session_id": "1e6f6f33-8eac-4d3c-9acd-c206fee38b55",
+    "campaign_id": "manual",
+    "phishlet_name": "Apple-ID",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:04:26.544303",
+    "last_activity": "2026-02-20T15:04:26.544309"
+  },
+  "27c653cc-bbfd-46ca-8d5c-7e1c1d2a2a0a": {
+    "session_id": "27c653cc-bbfd-46ca-8d5c-7e1c1d2a2a0a",
+    "campaign_id": "manual",
+    "phishlet_name": "Apple-ID",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:04:38.696909",
+    "last_activity": "2026-02-20T15:04:38.696936"
+  },
+  "9f55cb74-4fc4-4f4d-8993-c10b355ad5fc": {
+    "session_id": "9f55cb74-4fc4-4f4d-8993-c10b355ad5fc",
+    "campaign_id": "manual",
+    "phishlet_name": "Apple-ID",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:04:47.240430",
+    "last_activity": "2026-02-20T15:04:47.240437"
+  },
+  "b62cc09d-a944-44c3-bbdd-cc88c2415de5": {
+    "session_id": "b62cc09d-a944-44c3-bbdd-cc88c2415de5",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:06:23.192810",
+    "last_activity": "2026-02-20T15:06:23.192820"
+  },
+  "b98d8521-94dc-4a66-ac06-0914cd249808": {
+    "session_id": "b98d8521-94dc-4a66-ac06-0914cd249808",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:06:30.522933",
+    "last_activity": "2026-02-20T15:06:30.522939"
+  },
+  "286ac679-f4f2-4c34-bb26-77ead7d32c53": {
+    "session_id": "286ac679-f4f2-4c34-bb26-77ead7d32c53",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:06:37.826697",
+    "last_activity": "2026-02-20T15:06:37.826703"
+  },
+  "140a2461-1c10-4813-9ee6-2453260cb509": {
+    "session_id": "140a2461-1c10-4813-9ee6-2453260cb509",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:06:45.375475",
+    "last_activity": "2026-02-20T15:06:45.375481"
+  },
+  "6d9cb81d-2dda-478b-a794-ca4371c1d58f": {
+    "session_id": "6d9cb81d-2dda-478b-a794-ca4371c1d58f",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:06:53.329471",
+    "last_activity": "2026-02-20T15:06:53.329475"
+  },
+  "47bd8e79-8960-40c9-9c4a-e2b104b0e8d0": {
+    "session_id": "47bd8e79-8960-40c9-9c4a-e2b104b0e8d0",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:07:04.617223",
+    "last_activity": "2026-02-20T15:07:04.617230"
+  },
+  "891bb3ff-7349-4d45-b2de-ecb71ecb5821": {
+    "session_id": "891bb3ff-7349-4d45-b2de-ecb71ecb5821",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:08:02.881318",
+    "last_activity": "2026-02-20T15:08:02.881327"
+  },
+  "1e0a5658-b944-4e9f-9989-e95dfc5a59ae": {
+    "session_id": "1e0a5658-b944-4e9f-9989-e95dfc5a59ae",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:08:09.982172",
+    "last_activity": "2026-02-20T15:08:09.982250"
+  },
+  "214e4619-bf53-4a9d-8acc-da40349c4d8f": {
+    "session_id": "214e4619-bf53-4a9d-8acc-da40349c4d8f",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:08:18.549916",
+    "last_activity": "2026-02-20T15:08:18.549922"
+  },
+  "4235e4b6-e0b1-4deb-a0da-8cc45636a91c": {
+    "session_id": "4235e4b6-e0b1-4deb-a0da-8cc45636a91c",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:08:29.092427",
+    "last_activity": "2026-02-20T15:08:29.092435"
+  },
+  "9ed37d86-1c33-4b25-a8b3-e656844ebc70": {
+    "session_id": "9ed37d86-1c33-4b25-a8b3-e656844ebc70",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:08:36.853436",
+    "last_activity": "2026-02-20T15:08:36.853441"
+  },
+  "d7d2b0fa-8b1f-497d-9623-c4f696ac4e93": {
+    "session_id": "d7d2b0fa-8b1f-497d-9623-c4f696ac4e93",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:09:49.324394",
+    "last_activity": "2026-02-20T15:09:49.324404"
+  },
+  "446986a5-9345-400f-a707-1c00a4c67065": {
+    "session_id": "446986a5-9345-400f-a707-1c00a4c67065",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:09:56.749221",
+    "last_activity": "2026-02-20T15:09:56.749230"
+  },
+  "1fd7120b-6534-4c43-913f-51c4341f386b": {
+    "session_id": "1fd7120b-6534-4c43-913f-51c4341f386b",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:10:06.100656",
+    "last_activity": "2026-02-20T15:10:06.100663"
+  },
+  "e4e7d2d6-6d04-40d1-b45f-d0d0cb608e15": {
+    "session_id": "e4e7d2d6-6d04-40d1-b45f-d0d0cb608e15",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:10:13.633817",
+    "last_activity": "2026-02-20T15:10:13.633828"
+  },
+  "97fadc4a-7ab4-4e1a-bcbb-8bb26d941477": {
+    "session_id": "97fadc4a-7ab4-4e1a-bcbb-8bb26d941477",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:11:17.927418",
+    "last_activity": "2026-02-20T15:11:17.927428"
+  },
+  "796488d2-f5b2-4b35-bb55-d41a1e394247": {
+    "session_id": "796488d2-f5b2-4b35-bb55-d41a1e394247",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:11:25.529503",
+    "last_activity": "2026-02-20T15:11:25.529509"
+  },
+  "081a2ecf-96cc-4c52-a6f0-7f65bafc26f4": {
+    "session_id": "081a2ecf-96cc-4c52-a6f0-7f65bafc26f4",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:11:32.507649",
+    "last_activity": "2026-02-20T15:11:32.507657"
+  },
+  "1f1d2c91-84aa-4f42-ae07-8035cff96e87": {
+    "session_id": "1f1d2c91-84aa-4f42-ae07-8035cff96e87",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:12:17.232630",
+    "last_activity": "2026-02-20T15:12:17.232644"
+  },
+  "64eac911-1baf-404a-83a9-a96bc9826ab7": {
+    "session_id": "64eac911-1baf-404a-83a9-a96bc9826ab7",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:12:25.908743",
+    "last_activity": "2026-02-20T15:12:25.908750"
+  },
+  "8d3dfa9d-8190-4f95-aa2f-41e7e0ab7772": {
+    "session_id": "8d3dfa9d-8190-4f95-aa2f-41e7e0ab7772",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:13:26.366841",
+    "last_activity": "2026-02-20T15:13:26.366851"
+  },
+  "84eec26f-f1bd-4a12-8e65-0c4e1aa47c68": {
+    "session_id": "84eec26f-f1bd-4a12-8e65-0c4e1aa47c68",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:13:33.974602",
+    "last_activity": "2026-02-20T15:13:33.974610"
+  },
+  "bb8fc145-9ee7-446c-95a2-6b7e99a1f8be": {
+    "session_id": "bb8fc145-9ee7-446c-95a2-6b7e99a1f8be",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:13:42.085608",
+    "last_activity": "2026-02-20T15:13:42.085617"
+  },
+  "ad768f75-a54c-490a-82e2-3afd2c3873b8": {
+    "session_id": "ad768f75-a54c-490a-82e2-3afd2c3873b8",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:14:34.614332",
+    "last_activity": "2026-02-20T15:14:34.614344"
+  },
+  "9a001c12-a725-4ba3-bead-9434dc073fe1": {
+    "session_id": "9a001c12-a725-4ba3-bead-9434dc073fe1",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:14:43.218432",
+    "last_activity": "2026-02-20T15:14:43.218438"
+  },
+  "20b8801d-6da2-47ed-b5db-e1d0b29171e4": {
+    "session_id": "20b8801d-6da2-47ed-b5db-e1d0b29171e4",
+    "campaign_id": "manual",
+    "phishlet_name": "Dropbox-Login",
+    "remote_ip": "127.0.0.1",
+    "user_agent": "curl/8.7.1",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-20T15:14:53.442206",
+    "last_activity": "2026-02-20T15:14:53.442212"
   }
 }

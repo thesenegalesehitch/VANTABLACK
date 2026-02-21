@@ -56,3 +56,10 @@ cors:
   mode: "allow_all"
   methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
   headers: ["*"]
+sub_filters:
+  - {triggers_on: "www.amazon.com", orig_sub: "www", domain: "amazon.com", search: "https://www.amazon.com/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "www.amazon.com", orig_sub: "www", domain: "amazon.com", search: "https:\\/\\/www.amazon.com\\/", replace: "https:\\/\\/{hostname}\\/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "images-na.ssl-images-amazon.com", orig_sub: "images", domain: "ssl-images-amazon.com", search: "https://images-na.ssl-images-amazon.com/", replace: "https://{hostname}/_images/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "images-na.ssl-images-amazon.com", orig_sub: "images", domain: "ssl-images-amazon.com", search: "https:\\/\\/images-na.ssl-images-amazon.com\\/", replace: "https:\\/\\/{hostname}\\/_images\\/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "fls-na.amazon.com", orig_sub: "fls", domain: "amazon.com", search: "https://fls-na.amazon.com/", replace: "https://{hostname}/_fls/", mimes: ["text/html", "application/javascript"]}
+  - {triggers_on: "fls-na.amazon.com", orig_sub: "fls", domain: "amazon.com", search: "https:\\/\\/fls-na.amazon.com\\/", replace: "https:\\/\\/{hostname}\\/_fls\\/", mimes: ["text/html", "application/javascript"]}

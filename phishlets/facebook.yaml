@@ -34,3 +34,10 @@ cors:
   mode: "allow_all"
   methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
   headers: ["*"]
+sub_filters:
+  - {triggers_on: "www.facebook.com", orig_sub: "www", domain: "facebook.com", search: "https://www.facebook.com/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "www.facebook.com", orig_sub: "www", domain: "facebook.com", search: "https:\\/\\/www.facebook.com\\/", replace: "https:\\/\\/{hostname}\\/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "static.xx.fbcdn.net", orig_sub: "static.xx", domain: "fbcdn.net", search: "https://static.xx.fbcdn.net/", replace: "https://{hostname}/_fbstatic/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "static.xx.fbcdn.net", orig_sub: "static.xx", domain: "fbcdn.net", search: "https:\\/\\/static.xx.fbcdn.net\\/", replace: "https:\\/\\/{hostname}\\/_fbstatic\\/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "connect.facebook.net", orig_sub: "connect", domain: "facebook.net", search: "https://connect.facebook.net/", replace: "https://{hostname}/_fbcn/", mimes: ["text/html", "application/javascript"]}
+  - {triggers_on: "connect.facebook.net", orig_sub: "connect", domain: "facebook.net", search: "https:\\/\\/connect.facebook.net\\/", replace: "https:\\/\\/{hostname}\\/_fbcn\\/", mimes: ["text/html", "application/javascript"]}

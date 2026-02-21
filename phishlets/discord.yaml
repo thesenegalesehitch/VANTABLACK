@@ -47,3 +47,10 @@ form_actions:
 bridges:
   - {prefix: "/_gateway/", target_host: "gateway.discord.gg", strip_prefix: true, cors: "allow_all"}
   - {prefix: "/_cdn/", target_host: "cdn.discordapp.com", strip_prefix: true, cors: "allow_all"}
+sub_filters:
+  - {triggers_on: "discord.com", orig_sub: "discord", domain: "discord.com", search: "https://discord.com/", replace: "https://{hostname}/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "discord.com", orig_sub: "discord", domain: "discord.com", search: "https:\\/\\/discord.com\\/", replace: "https:\\/\\/{hostname}\\/", mimes: ["text/html", "application/json", "application/javascript"]}
+  - {triggers_on: "cdn.discordapp.com", orig_sub: "cdn", domain: "discordapp.com", search: "https://cdn.discordapp.com/", replace: "https://{hostname}/_cdn/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "cdn.discordapp.com", orig_sub: "cdn", domain: "discordapp.com", search: "https:\\/\\/cdn.discordapp.com\\/", replace: "https:\\/\\/{hostname}\\/_cdn\\/", mimes: ["text/html", "application/javascript", "text/css"]}
+  - {triggers_on: "gateway.discord.gg", orig_sub: "gateway", domain: "discord.gg", search: "wss://gateway.discord.gg/", replace: "wss://{hostname}/_gateway/", mimes: ["text/html", "application/javascript"]}
+  - {triggers_on: "gateway.discord.gg", orig_sub: "gateway", domain: "discord.gg", search: "https://gateway.discord.gg/", replace: "https://{hostname}/_gateway/", mimes: ["text/html", "application/javascript"]}

