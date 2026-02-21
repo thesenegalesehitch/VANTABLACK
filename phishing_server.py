@@ -109,7 +109,7 @@ async def stealth_middleware(request: Request, call_next):
         return RedirectResponse("https://www.wikipedia.org")
 
     # Check IP Reputation (Datacenter/VPN)
-    if STEALTH_MODE and is_datacenter_ip(client_ip):
+    if GEO_BLOCK and is_datacenter_ip(client_ip):
         print(t("ip_blocked", ip=client_ip))
         return RedirectResponse("https://www.google.com")
         

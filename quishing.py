@@ -5,6 +5,8 @@ import argparse
 import os
 from PIL import Image, ImageDraw, ImageFont
 
+from core.utils.i18n import i18n, t
+
 # Colors
 RED = '\033[91m'
 GREEN = '\033[92m'
@@ -14,7 +16,7 @@ def generate_quishing_payload(url, output_file="attack.png", logo_path=None):
     """
     Generate a malicious QR Code (Quishing)
     """
-    print(f"{GREEN}[*] Generating Quishing Payload for: {url}{RESET}")
+    print(f"{GREEN}[*] {t('generating_qr_logo', path=url)}{RESET}")
     
     qr = qrcode.QRCode(
         version=1,
@@ -77,7 +79,7 @@ def generate_quishing_payload(url, output_file="attack.png", logo_path=None):
     except:
         font = None
         
-    text = "SCAN TO VERIFY IDENTITY"
+    text = t("scan_verify")
     
     # Calculate text position
     try:
@@ -97,7 +99,10 @@ if __name__ == "__main__":
     parser.add_argument("--url", required=True, help="Target Phishing URL")
     parser.add_argument("--out", default="payload_qr.png", help="Output filename")
     parser.add_argument("--logo", help="Path to logo image to embed")
+    parser.add_argument("--lang", default="en", help="Language (en/fr)")
     
     args = parser.parse_args()
+    
+    i18n.set_language(args.lang)
     
     generate_quishing_payload(args.url, args.out, args.logo)

