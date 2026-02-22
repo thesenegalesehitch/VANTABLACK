@@ -100,7 +100,17 @@ class RedisCacheManager:
     def delete(self, key: str) -> bool:
         """Supprimer une clé"""
         with self.get_client() as client:
-            return client.delete(key) > 0
+            return client.delete(key)
+            
+    def scan_keys(self, pattern: str) -> List[str]:
+        """Scanner les clés correspondant au pattern"""
+        keys = []
+        cursor = '0'
+        with self.get_client() as client:
+            while cursor != 0:
+                cursor, data = client.scan(cursor=cursor, match=pattern, count=100)
+                keys.extend(data)
+        return [k.decode('utf-8') if isinstance(k, bytes) else k for k in keys]
     
     def increment(self, key: str, amount: int = 1) -> int:
         """Incrémenter une valeur numérique"""

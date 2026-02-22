@@ -9,6 +9,8 @@ import shutil
 from datetime import datetime
 from core.qr_link_system import qr_link_system, QRConfig, QRCorrectionLevel
 from core.common import config
+from core.api.dashboard import router as dashboard_router
+from core.api.routes import router as api_router
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -28,6 +30,10 @@ def create_app() -> FastAPI:
     # Mount static files
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
+
+    # API Routers
+    app.include_router(dashboard_router, prefix="/v5")
+    app.include_router(api_router)
 
     # Tier 2 Authentication Middleware
     if config.get("TIER2_ENABLED").lower() == "true":
