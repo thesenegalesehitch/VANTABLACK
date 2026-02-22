@@ -8,18 +8,37 @@ Endpoints for:
 - Metrics Export (Prometheus)
 """
 
-from fastapi import APIRouter, HTTPException, Response, Request, Depends
+from fastapi import APIRouter, HTTPException, Response, Request, Depends, status
+from fastapi.responses import RedirectResponse
 from typing import Dict, List
 from core.common.metrics import MetricsManager
 from core.common.config import sanitized
 from core.cache.redis_manager import redis_cache
 from core.security.rate_limiter import rate_limiter
+from core.redirect.smart_redirector import smart_redirector
 
 router = APIRouter(prefix="/v5", tags=["Vantablack Core"])
 
 # Cache configuration
 CACHE_TTL = 300  # 5 minutes
 ASYNC_CACHE_TTL = 60  # 1 minute for async operations
+
+@router.get("/r/{campaign_id}")
+async def smart_redirect(campaign_id: str, request: Request):
+    """
+    Smart Redirection Endpoint (Tier 2 Logic)
+    Analyse le trafic entrant, filtre les bots, et redirige vers la landing page ou le decoy.
+    """
+    try:
+        result = await smart_redirector.process_request(request, campaign_id)
+        
+        if isinstance(result, RedirectResponse):
+            return result
+            
+        return result
+    except Exception as e:
+        # En cas d'erreur interne, fail-safe vers decoy pour ne pas exposer d'erreur
+        return RedirectResponse(url="https://www.google.com", status_code=status.HTTP_302_FOUND)
 
 @router.get("/health")
 @redis_cache.cached("health_check", expire=ASYNC_CACHE_TTL)
