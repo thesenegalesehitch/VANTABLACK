@@ -1,8 +1,9 @@
 import ipaddress
 import re
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Dict
 from fastapi import Request
 import os
+from core.cache.redis_manager import redis_cache
 
 class AntiBotSystem:
     """
@@ -16,7 +17,10 @@ class AntiBotSystem:
         r"YandexBot", r"Sogou", r"Exabot", r"facebot", r"facebookexternalhit",
         r"ia_archiver", r"curl", r"wget", r"python-requests", r"libwww-perl",
         r"urllib", r"Scrapy", r"Nmap", r"Zgrab", r"Masscan", r"Go-http-client",
-        r"censys", r"shodan", r"virustotal", r"PhishTank", r"Google-Read-Aloud"
+        r"censys", r"shodan", r"virustotal", r"PhishTank", r"Google-Read-Aloud",
+        r"Barkrowler", r"Bot", r"Crawler", r"Spider", r"Mediapartners-Google",
+        r"AdsBot-Google", r"Twitterbot", r"Slackbot-LinkExpanding", r"Applebot",
+        r"Discordbot", r"WhatsApp", r"TelegramBot", r"SkypeUriPreview"
     }
 
     # Plages IP connues de datacenters (Exemple simplifié - à enrichir avec une DB réelle)
@@ -30,12 +34,23 @@ class AntiBotSystem:
 
     def __init__(self):
         self.bot_regex = re.compile("|".join(self.BOT_USER_AGENTS), re.IGNORECASE)
-        self.datacenter_networks = [ipaddress.ip_network(cidr) for cidr in self.DATACENTER_RANGES]
+        self.datacenter_networks = []
+        # Load default ranges
+        for cidr in self.DATACENTER_RANGES:
+            try:
+                self.datacenter_networks.append(ipaddress.ip_network(cidr))
+            except ValueError:
+                pass
 
     def load_blacklist(self, file_path: str):
         """Charge une liste d'IPs/CIDR depuis un fichier texte (une entrée par ligne)."""
         if not os.path.exists(file_path):
-             print(f"[ANTIBOT Warning] Blacklist file not found: {file_path}")
+             # Create directory if it doesn't exist
+             os.makedirs(os.path.dirname(file_path), exist_ok=True)
+             # Create empty file
+             with open(file_path, 'w') as f:
+                 f.write("# Add malicious IP ranges here (CIDR format)\n")
+             print(f"[ANTIBOT Info] Created empty blacklist file: {file_path}")
              return
 
         try:
@@ -56,8 +71,8 @@ class AntiBotSystem:
 
     def is_bot_user_agent(self, user_agent: str) -> bool:
         """Vérifie si le User-Agent correspond à un bot connu."""
-        if not user_agent:
-            return True  # Pas de UA = suspect
+        if not user_agent or len(user_agent) < 5:
+            return True  # UA vide ou trop court = suspect
         return bool(self.bot_regex.search(user_agent))
 
     def is_datacenter_ip(self, ip: str) -> bool:
@@ -71,7 +86,7 @@ class AntiBotSystem:
             return False  # IP invalide
         return False
 
-    async def check_request(self, request: Request) -> dict:
+    async def check_request(self, request: Request) -> Dict[str, any]:
         """
         Analyse complète de la requête pour détecter les bots.
         Retourne un dict avec le résultat et la raison.
@@ -79,30 +94,49 @@ class AntiBotSystem:
         client_ip = request.client.host
         user_agent = request.headers.get("user-agent", "")
         
+        # Check Redis Cache first
+        cache_key = f"antibot:ip:{client_ip}"
+        cached_result = redis_cache.get(cache_key)
+        if cached_result:
+            return cached_result
+        
+        result = {"blocked": False, "reason": "Clean", "type": "clean"}
+
         # 1. Vérification User-Agent
         if self.is_bot_user_agent(user_agent):
-            return {"blocked": True, "reason": "Bot User-Agent detected", "type": "bot_ua"}
-
+            result = {"blocked": True, "reason": "Bot User-Agent detected", "type": "bot_ua"}
+        
         # 2. Vérification IP Datacenter
-        if self.is_datacenter_ip(client_ip):
-            return {"blocked": True, "reason": "Datacenter IP detected", "type": "datacenter_ip"}
+        elif self.is_datacenter_ip(client_ip):
+            result = {"blocked": True, "reason": "Datacenter IP detected", "type": "datacenter_ip"}
 
         # 3. Vérification Headers suspects (Headless Chrome, Automation tools)
-        if self._has_suspicious_headers(request):
-             return {"blocked": True, "reason": "Suspicious headers detected", "type": "suspicious_headers"}
+        elif self._has_suspicious_headers(request):
+             result = {"blocked": True, "reason": "Suspicious headers detected", "type": "suspicious_headers"}
 
-        return {"blocked": False, "reason": "Clean", "type": "clean"}
+        # Cache the result for 5 minutes
+        redis_cache.set(cache_key, result, expire=300)
+        
+        return result
 
     def _has_suspicious_headers(self, request: Request) -> bool:
         """Détecte les indicateurs de navigateurs automatisés (Puppeteer, Selenium, etc.)."""
         headers = request.headers
         
-        # Manque de headers standards
-        if "accept-language" not in headers:
+        # Manque de headers standards pour un navigateur moderne
+        required_headers = ["accept-language", "accept-encoding", "user-agent"]
+        for h in required_headers:
+            if h not in headers:
+                return True
+            
+        # Indicateurs explicites d'outils d'automatisation
+        if "webdriver" in headers.get("user-agent", "").lower():
+            return True
+        if headers.get("webdriver") == "true" or headers.get("navigator-webdriver") == "true":
             return True
             
-        # Indicateurs WebDriver
-        if headers.get("webdriver") == "true" or headers.get("navigator-webdriver") == "true":
+        # Headless Chrome specific
+        if "HeadlessChrome" in headers.get("user-agent", ""):
             return True
             
         return False

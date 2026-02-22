@@ -17,8 +17,14 @@ class BrowserFingerprint(BaseModel):
     webgl_vendor: Optional[str] = None
     webgl_renderer: Optional[str] = None
     canvas_hash: Optional[str] = None
+    audio_hash: Optional[str] = None
     fonts_detected: List[str] = Field(default_factory=list)
     touch_support: bool = False
+    max_touch_points: int = 0
+    hardware_concurrency: Optional[str] = None
+    device_memory: Optional[str] = None
+    pixel_ratio: float = 1.0
+    is_webdriver: bool = False
     
     # Indicateurs de mouvement
     mouse_movements: int = 0
@@ -39,8 +45,12 @@ class FingerprintValidator:
         # 1. Vérification Résolution (Headless souvent 800x600 ou 0x0)
         if fp.screen_width < 100 or fp.screen_height < 100:
             return False  # Trop petit -> Suspect (Headless)
+
+        # 2. Vérification Webdriver (Selenium, Puppeteer)
+        if fp.is_webdriver:
+            return False  # Bot détecté explicitement
             
-        # 2. Vérification WebGL (Souvent vide ou générique sur VM/Headless)
+        # 3. Vérification WebGL (Souvent vide ou générique sur VM/Headless)
         if not fp.webgl_renderer or "SwiftShader" in fp.webgl_renderer or "llvmpipe" in fp.webgl_renderer:
              # SwiftShader/llvmpipe sont des rendus software typiques de VM/Headless
              return False
@@ -53,6 +63,29 @@ class FingerprintValidator:
         # 4. Vérification Platform vs User-Agent
         if "MacIntel" in fp.platform and "Windows" in fp.user_agent:
             return False  # Incohérence -> Suspect (Spoofing UA)
+            
+        # 5. Vérification Fonts (Headless a souvent peu/pas de fonts)
+        if len(fp.fonts_detected) == 0 and "Linux" not in fp.platform and "Android" not in fp.user_agent:
+            # Linux peut parfois masquer les fonts, mais Windows/Mac ont toujours des fonts standard
+            return False
+            
+        # 6. Hardware Concurrency (Headless often reports undefined or low)
+        if fp.hardware_concurrency and fp.hardware_concurrency != 'unknown':
+            try:
+                concurrency = int(fp.hardware_concurrency)
+                if concurrency < 1:
+                     return False
+            except ValueError:
+                pass # Ignorer si format invalide
+
+        # 7. Device Memory (Headless often reports undefined or low)
+        if fp.device_memory and fp.device_memory != 'unknown':
+             try:
+                 memory = float(fp.device_memory)
+                 if memory < 0.25: # < 256MB
+                     return False
+             except ValueError:
+                 pass # Ignorer si format invalide
             
         return True
 
