@@ -3,10 +3,10 @@ name: Vantablack Core v5 CI
 on:
   push:
     branches:
-      - v5-hyperdrive-core
+      - main
   pull_request:
     branches:
-      - v5-hyperdrive-core
+      - main
 
 jobs:
   build-and-test:
