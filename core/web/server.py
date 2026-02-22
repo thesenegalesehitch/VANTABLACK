@@ -8,11 +8,13 @@ import os
 import shutil
 from datetime import datetime
 from core.qr_link_system import qr_link_system, QRConfig, QRCorrectionLevel
+from core.common import config
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 IMAGES_DIR = STATIC_DIR / "images"
+ASSETS_DIR = BASE_DIR.parent / "assets"
 
 
 def create_app() -> FastAPI:
@@ -20,9 +22,28 @@ def create_app() -> FastAPI:
 
     # Ensure directories exist
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+    if not ASSETS_DIR.exists():
+        ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Mount static files
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+    app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
+
+    # Tier 2 Authentication Middleware
+    if config.get("TIER2_ENABLED").lower() == "true":
+        @app.middleware("http")
+        async def tier2_auth_middleware(request: Request, call_next):
+            # Allow health check without auth (optional, but good for load balancers)
+            if request.url.path == "/v5/health" or request.url.path == "/health":
+                 return await call_next(request)
+            
+            secret = request.headers.get("X-Vantablack-Auth")
+            expected = config.get("TIER2_SECRET")
+            
+            if secret != expected:
+                return JSONResponse(status_code=403, content={"error": "Tier 2 Authentication Failed"})
+                
+            return await call_next(request)
 
     # Templates
     templates = Jinja2Templates(directory=str(TEMPLATES_DIR))

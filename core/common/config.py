@@ -20,10 +20,12 @@ DEFAULTS = {
     "RATE_LIMIT_PER_MINUTE": "120",
     "ALLOW_IPS": "",
     "DENY_IPS": "",
-    "UPSTREAM_HTTP": ""
+    "UPSTREAM_HTTP": "",
+    "TIER2_ENABLED": "false",
+    "TIER2_SECRET": "Tier2-Verified-Secret-123"
 }
 
-SENSITIVE_KEYS = {"SMTP_PASS", "DB_URL"}
+SENSITIVE_KEYS = {"SMTP_PASS", "DB_URL", "TIER2_SECRET"}
 
 def get(key: str) -> str:
     return os.environ.get(key, DEFAULTS.get(key, ""))
