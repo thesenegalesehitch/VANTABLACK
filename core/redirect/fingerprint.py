@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, HttpUrl
-from typing import Optional, List, Dict
-from fastapi import Request
+from typing import Optional, List, Dict, Union
 
 class BrowserFingerprint(BaseModel):
     """
@@ -21,8 +20,8 @@ class BrowserFingerprint(BaseModel):
     fonts_detected: List[str] = Field(default_factory=list)
     touch_support: bool = False
     max_touch_points: int = 0
-    hardware_concurrency: Optional[str] = None
-    device_memory: Optional[str] = None
+    hardware_concurrency: Optional[Union[str, int]] = None
+    device_memory: Optional[Union[str, float, int]] = None
     pixel_ratio: float = 1.0
     is_webdriver: bool = False
     
@@ -55,21 +54,23 @@ class FingerprintValidator:
              # SwiftShader/llvmpipe sont des rendus software typiques de VM/Headless
              return False
 
-        # 3. Vérification Comportement Humain (Mouvements souris/scroll)
+        # 4. Vérification Comportement Humain (Mouvements souris/scroll)
         # Un bot clique directement sans mouvement ou scroll (sauf bot très avancé)
-        if fp.mouse_movements < 5 and fp.scroll_events == 0 and fp.time_on_page < 500:
-            return False  # Trop rapide/statique -> Suspect
+        # Note: Sur une page de redirection rapide, l'utilisateur n'a pas le temps de bouger.
+        # On désactive cette vérification pour éviter les faux positifs sur les connexions rapides.
+        # if fp.mouse_movements < 5 and fp.scroll_events == 0 and fp.time_on_page < 500:
+        #    return False  # Trop rapide/statique -> Suspect
             
-        # 4. Vérification Platform vs User-Agent
+        # 5. Vérification Platform vs User-Agent
         if "MacIntel" in fp.platform and "Windows" in fp.user_agent:
             return False  # Incohérence -> Suspect (Spoofing UA)
             
-        # 5. Vérification Fonts (Headless a souvent peu/pas de fonts)
+        # 6. Vérification Fonts (Headless a souvent peu/pas de fonts)
         if len(fp.fonts_detected) == 0 and "Linux" not in fp.platform and "Android" not in fp.user_agent:
             # Linux peut parfois masquer les fonts, mais Windows/Mac ont toujours des fonts standard
             return False
             
-        # 6. Hardware Concurrency (Headless often reports undefined or low)
+        # 7. Hardware Concurrency (Headless often reports undefined or low)
         if fp.hardware_concurrency and fp.hardware_concurrency != 'unknown':
             try:
                 concurrency = int(fp.hardware_concurrency)
@@ -78,7 +79,7 @@ class FingerprintValidator:
             except ValueError:
                 pass # Ignorer si format invalide
 
-        # 7. Device Memory (Headless often reports undefined or low)
+        # 8. Device Memory (Headless often reports undefined or low)
         if fp.device_memory and fp.device_memory != 'unknown':
              try:
                  memory = float(fp.device_memory)

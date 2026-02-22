@@ -85,22 +85,34 @@ class RedisCacheManager:
     
     def set(self, key: str, value: Any, expire: int = 300) -> bool:
         """Stocker une valeur avec expiration"""
-        with self.get_client() as client:
-            serialized = json.dumps(value)
-            return client.setex(key, expire, serialized)
+        try:
+            with self.get_client() as client:
+                serialized = json.dumps(value)
+                return client.setex(key, expire, serialized)
+        except Exception as e:
+            print(f"Redis Set Error: {e}")
+            return False
     
     def get(self, key: str) -> Optional[Any]:
         """Récupérer une valeur"""
-        with self.get_client() as client:
-            result = client.get(key)
-            if result:
-                return json.loads(result)
+        try:
+            with self.get_client() as client:
+                result = client.get(key)
+                if result:
+                    return json.loads(result)
+                return None
+        except Exception as e:
+            print(f"Redis Get Error: {e}")
             return None
-    
+
     def delete(self, key: str) -> bool:
         """Supprimer une clé"""
-        with self.get_client() as client:
-            return client.delete(key)
+        try:
+            with self.get_client() as client:
+                return client.delete(key)
+        except Exception as e:
+            print(f"Redis Delete Error: {e}")
+            return False
             
     def scan_keys(self, pattern: str) -> List[str]:
         """Scanner les clés correspondant au pattern"""
@@ -114,8 +126,11 @@ class RedisCacheManager:
     
     def increment(self, key: str, amount: int = 1) -> int:
         """Incrémenter une valeur numérique"""
-        with self.get_client() as client:
-            return client.incrby(key, amount)
+        try:
+            with self.get_client() as client:
+                return client.incrby(key, amount)
+        except Exception:
+            return 0
     
     def get_stats(self) -> Dict[str, Any]:
         """Obtenir les statistiques du cache"""
@@ -136,6 +151,25 @@ class RedisCacheManager:
             if keys:
                 return client.delete(*keys)
             return 0
+
+    def acquire_lock(self, lock_name: str, acquire_timeout: int = 10, lock_timeout: int = 10) -> Any:
+        """
+        Acquérir un verrou distribué (Redis Lock).
+        Retourne l'objet lock si succès, False sinon.
+        Utilisation:
+            lock = redis_manager.acquire_lock("my_resource")
+            if lock:
+                try: ... finally: lock.release()
+        """
+        try:
+            client = self.get_client()
+            lock = client.lock(f"lock:{lock_name}", timeout=lock_timeout, blocking_timeout=acquire_timeout)
+            if lock.acquire():
+                return lock
+            return False
+        except Exception as e:
+            print(f"Redis Lock Error: {e}")
+            return False
 
 # Instance globale
 redis_cache = RedisCacheManager()

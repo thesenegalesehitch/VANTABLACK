@@ -32,7 +32,7 @@ class TestTemplateRendering:
         assert "victim@example.com" in content
         assert 'value="victim@example.com"' in content
         assert '<span id="user-email-display">victim@example.com</span>' in content
-        assert "Sign in" in content  # Check for the updated text we added
+        assert "Log in" in content  # Check for the updated text we added
 
     def test_google_template_rendering(self):
         """Test if the Google template is loaded and variables are substituted."""
@@ -53,7 +53,7 @@ class TestTemplateRendering:
         assert "target@gmail.com" in content
         assert 'value="target@gmail.com"' in content
         assert '<span id="user-email-display">target@gmail.com</span>' in content
-        assert "Sign in" in content 
+        assert "Log in" in content 
 
 if __name__ == "__main__":
     pytest.main([__file__])
