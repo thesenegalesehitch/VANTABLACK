@@ -31,10 +31,19 @@ class RedisCacheManager:
             with self.get_client() as client:
                 client.ping()
         except redis.ConnectionError as e:
-            raise ConnectionError(f"Failed to connect to Redis: {e}")
-    
+            # En dev/test, on peut ne pas avoir Redis. On log juste un warning.
+            print(f"Warning: Failed to connect to Redis: {e}")
+            self.connection_pool = None
+
     def get_client(self):
         """Obtenir un client Redis thread-safe"""
+        if self.connection_pool is None:
+             # Tentative de reconnexion ou fallback
+             try:
+                 self.connection_pool = redis.ConnectionPool.from_url(self.redis_url)
+             except:
+                 raise ConnectionError("Redis is not available")
+                 
         return redis.Redis(connection_pool=self.connection_pool)
     
     def cached(
