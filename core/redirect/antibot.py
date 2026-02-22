@@ -2,6 +2,7 @@ import ipaddress
 import re
 from typing import List, Optional, Set
 from fastapi import Request
+import os
 
 class AntiBotSystem:
     """
@@ -30,6 +31,28 @@ class AntiBotSystem:
     def __init__(self):
         self.bot_regex = re.compile("|".join(self.BOT_USER_AGENTS), re.IGNORECASE)
         self.datacenter_networks = [ipaddress.ip_network(cidr) for cidr in self.DATACENTER_RANGES]
+
+    def load_blacklist(self, file_path: str):
+        """Charge une liste d'IPs/CIDR depuis un fichier texte (une entrée par ligne)."""
+        if not os.path.exists(file_path):
+             print(f"[ANTIBOT Warning] Blacklist file not found: {file_path}")
+             return
+
+        try:
+            count = 0
+            with open(file_path, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    try:
+                        self.datacenter_networks.append(ipaddress.ip_network(line))
+                        count += 1
+                    except ValueError:
+                        continue # Ignorer les lignes invalides
+            print(f"[ANTIBOT] Loaded {count} rules from {file_path}")
+        except Exception as e:
+            print(f"[ANTIBOT Error] Failed to load blacklist: {e}")
 
     def is_bot_user_agent(self, user_agent: str) -> bool:
         """Vérifie si le User-Agent correspond à un bot connu."""
@@ -86,3 +109,5 @@ class AntiBotSystem:
 
 # Instance globale
 antibot = AntiBotSystem()
+# Chargement optionnel d'une blacklist externe
+antibot.load_blacklist("data/ip_blacklist.txt")

@@ -1,0 +1,15 @@
+# Liste noire d'IPs et de plages CIDR (Exemple)
+# Datacenters, Scanners, Tor Exit Nodes
+
+# AWS
+52.0.0.0/8
+54.0.0.0/8
+
+# Google Cloud
+35.190.0.0/17
+
+# DigitalOcean
+162.243.0.0/16
+
+# Tor Exit Nodes (Exemple)
+185.220.101.0/24
