@@ -1,0 +1,35 @@
+apiVersion: elbv2.k8s.aws/v2beta1
+kind: TargetGroupBinding
+metadata:
+  name: vantablack-tgb
+  namespace: vantablack
+spec:
+  serviceRef:
+    name: vantablack-api
+    port: 8000
+  targetGroupARN: arn:aws:elasticloadbalancing:us-west-2:123456789012:targetgroup/vantablack-tg/1234567890abcdef
+  targetType: ip
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vantablack-lb
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: vantablack
+    tier: api
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 8000
+    protocol: TCP
+    name: https

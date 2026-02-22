@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vantablack-api
+  labels:
+    app: vantablack
+    tier: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vantablack
+      tier: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: vantablack
+        tier: api
+    spec:
+      containers:
+      - name: api
+        image: vantablack-api:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: vantablack-secrets
+              key: database-url
+        - name: REDIS_URL
+          value: "redis://vantablack-redis:6379"
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /v5/health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /v5/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vantablack-api
+spec:
+  selector:
+    app: vantablack
+    tier: api
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP

@@ -8,14 +8,21 @@ Endpoints for:
 - Metrics Export (Prometheus)
 """
 
-from fastapi import APIRouter, HTTPException, Response, Request
+from fastapi import APIRouter, HTTPException, Response, Request, Depends
 from typing import Dict, List
 from core.common.metrics import MetricsManager
 from core.common.config import sanitized
+from core.cache.redis_manager import redis_cache
+from core.security.rate_limiter import rate_limiter
 
 router = APIRouter(prefix="/v5", tags=["Vantablack Core"])
 
+# Cache configuration
+CACHE_TTL = 300  # 5 minutes
+ASYNC_CACHE_TTL = 60  # 1 minute for async operations
+
 @router.get("/health")
+@redis_cache.cached("health_check", expire=ASYNC_CACHE_TTL)
 async def health_check():
     """System Health Check"""
     return {"status": "operational", "version": "5.0.0-hyperdrive"}
@@ -27,6 +34,7 @@ async def metrics():
     return Response(content=data, media_type=content_type)
 
 @router.get("/config")
+@redis_cache.cached("app_config", expire=CACHE_TTL)
 async def get_config():
     return {"config": sanitized()}
 

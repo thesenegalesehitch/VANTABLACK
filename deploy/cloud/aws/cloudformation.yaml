@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Vantablack Red Team Deployment on AWS
+
+Parameters:
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Subnet IDs
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: EC2 Key Pair
+  InstanceType:
+    Type: String
+    Default: t3.medium
+    AllowedValues:
+      - t3.medium
+      - t3.large
+      - m5.large
+    Description: EC2 Instance Type
+
+Resources:
+  VantablackSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Vantablack
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 8000
+        ToPort: 8000
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+
+  VantablackInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: ami-0c55b159cbfafe1f0 # Ubuntu 22.04 LTS
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+      - !Ref VantablackSecurityGroup
+      SubnetId: !Select [0, !Ref SubnetIds]
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update
+          apt-get install -y docker.io docker-compose
+          git clone https://github.com/your-repo/Vantablack.git /opt/vantablack
+          cd /opt/vantablack
+          docker-compose up -d
+
+Outputs:
+  InstanceId:
+    Description: Vantablack Instance ID
+    Value: !Ref VantablackInstance
+  PublicDNS:
+    Description: Public DNS Name
+    Value: !GetAtt VantablackInstance.PublicDnsName
+  PublicIP:
+    Description: Public IP Address
+    Value: !GetAtt VantablackInstance.PublicIp
