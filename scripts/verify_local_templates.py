@@ -74,8 +74,9 @@ def main():
         # Skips duplicated twitter/x pairing for template creation consistency
         if tid == "twitter":
             continue
-        slug_tmpl = f"{tid}-tmpl"
-        slug_live = f"{tid}-live"
+        base = tid.replace("_","-")
+        slug_tmpl = f"{base}-tmpl"
+        slug_live = f"{base}-live"
         create_or_update_campaign(slug_tmpl, tid, "template")
         create_or_update_campaign(slug_live, tid, "aitm")
         time.sleep(0.2)
