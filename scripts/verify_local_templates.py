@@ -35,14 +35,14 @@ BRAND_MARKERS = {
 
 def create_or_update_campaign(slug: str, template_id: str, mode: str):
     # Try to create campaign
-    data = {
+    form = {
         "name": f"Auto-{template_id}-{mode}",
         "template_id": template_id,
         "campaign_type": "template" if mode=="template" else "aitm",
         "custom_slug": slug
     }
     try:
-        r = requests.post(f"{BASE}/v5/campaigns/create", headers=TIER2, files=data, timeout=10)
+        r = requests.post(f"{BASE}/v5/campaigns/create", headers=TIER2, data=form, timeout=10)
         if r.status_code == 200:
             print(f"[CREATE] {slug} -> OK")
         else:
@@ -82,7 +82,8 @@ def main():
         markers = BRAND_MARKERS.get(tid, ["Sign","Log in"])
 
         # Template mode
-        url_tmpl = f"{BASE}/v5/r/{slug_tmpl}?template=1&allow=1"
+        # Use direct template login to avoid JS execution requirement
+        url_tmpl = f"{BASE}/v5/phish/{slug_tmpl}/login"
         ok_tmpl, code_tmpl, snip_tmpl = check_url(url_tmpl, markers)
         results.append(("TEMPLATE", tid, url_tmpl, ok_tmpl, code_tmpl))
         print(f"[TEMPLATE] {tid} -> {code_tmpl} {'OK' if ok_tmpl else 'FAIL'}")
@@ -106,4 +107,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
