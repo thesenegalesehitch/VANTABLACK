@@ -36,11 +36,11 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
 
     # Tier 2 Authentication Middleware
-    if config.get("TIER2_ENABLED").lower() == "true":
+    if str(config.get("TIER2_ENABLED") or "false").lower() == "true":
         @app.middleware("http")
         async def tier2_auth_middleware(request: Request, call_next):
             # Allow public endpoints without auth
-            public_prefixes = ["/v5/r/", "/v5/js/", "/v5/sw.js", "/v5/maintenance", "/v5/verify_fingerprint", "/v5/p/", "/v5/phish/"]
+            public_prefixes = ["/ui", "/ui/", "/static/", "/assets/", "/v5/r/", "/v5/js/", "/v5/sw.js", "/v5/maintenance", "/v5/verify_fingerprint", "/v5/p/", "/v5/phish/"]
             if any(request.url.path.startswith(prefix) for prefix in public_prefixes) or request.url.path in ["/v5/health", "/health"]:
                  return await call_next(request)
             
@@ -142,4 +142,3 @@ def create_app() -> FastAPI:
             return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
     return app
-
