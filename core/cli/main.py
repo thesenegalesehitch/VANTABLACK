@@ -33,6 +33,8 @@ import platform
 from core.infrastructure.nginx_generator import NginxConfigGenerator
 from core.redirect.antibot import antibot
 from core.social.manager import social_manager
+from pathlib import Path
+from core.net.tunnel import TunnelManager
 
 console = Console()
 
@@ -231,6 +233,7 @@ def menu():
         # Section Utilitaire
         console.print("[bold yellow]⚙️  UTILITAIRES[/bold yellow]")
         console.print("7) Ouvrir interface web")
+        console.print("7b) Démarrer tunnel WAN + QR")
         console.print("8) Voir métriques de performance")
         console.print("9) Guide d'installation multi-OS")
         console.print("10) Mode diagnostic avancé")
@@ -387,11 +390,40 @@ def menu():
             doctor()
         
         elif choice == "7":
-            # Ouverture interface web
+            # Ouverture interface web (autostart si nécessaire)
             port = input("🌐 Port de l'interface web (défaut 8080): ").strip() or "8080"
             url = f"http://localhost:{port}/ui"
+            is_valid, result, details = qr_link_system.validate_url(url, timeout=1.5)
+            if not is_valid:
+                console.print("[yellow]⚠️  UI non détectée, lancement du serveur...[/yellow]")
+                try:
+                    ui.callback(int(port))  # type: ignore
+                    time.sleep(1.0)
+                except Exception as e:
+                    console.print(f"[red]Démarrage UI échoué: {e}[/red]")
             console.print(f"[green]🌐 Ouverture de {url}[/green]")
             _open_web(url)
+        elif choice.lower() == "7b":
+            port = input("🔢 Port (défaut 8080): ").strip() or "8080"
+            provider = input("☁️  Provider (cloudflared/ngrok/localhost.run) [cloudflared]: ").strip() or "cloudflared"
+            qr_file = input("💾 Fichier QR (wan_qr.png): ").strip() or "wan_qr.png"
+            console.print(f"[yellow]Initialisation du tunnel WAN ({provider})...[/yellow]")
+            try:
+                tm = TunnelManager(port=int(port), provider=provider)
+                public_url = asyncio.run(tm.start())
+                console.print(f"[green]Tunnel actif:[/green] {public_url}")
+                is_valid, result, details = qr_link_system.validate_url(public_url, timeout=5)
+                status = "✅" if is_valid else f"⚠️ {result.value}"
+                console.print(f"   Vérification WAN: {status}")
+                res = qr_link_system.generate_qr_with_link_validation(
+                    url=public_url, output_path=qr_file, validate=False
+                )
+                if res.get("qr_generated"):
+                    console.print(f"[green]QR WAN généré:[/green] {qr_file}")
+                else:
+                    console.print(f"[yellow]QR non généré:[/yellow] {res.get('error')}")
+            except Exception as e:
+                console.print(f"[red]Tunnel error:[/red] {e}")
         
         elif choice == "8":
             # Métriques de performance
@@ -1063,6 +1095,63 @@ def safe_qr(url, port, out, logo, validate, error_correction, color, bg_color):
         if "Dépendances manquantes" in str(result.get('error', '')):
             install_guide = qr_link_system.get_installation_guide()
             console.print(f"[yellow]📦 Installation requise:[/yellow] {install_guide}")
+
+@cli.command("ui")
+@click.option("--port", default=8080, type=int)
+def ui(port):
+    """Lance l'interface Web locale (UI)"""
+    app_code = (
+        "from core.web.server import create_app\n"
+        "app = create_app()\n"
+    )
+    path = "v5_ui_app.py"
+    with open(path, "w") as f:
+        f.write(app_code)
+    console.print(f"[yellow]Démarrage de l'UI sur le port {port}[/yellow]")
+    subprocess.Popen([sys.executable, "-m", "uvicorn", "v5_ui_app:app", "--port", str(port)])
+
+@cli.command("smoke")
+def smoke():
+    """Exécute le smoke test multi‑OS (liens/QR/ports)"""
+    script = Path("scripts/smoke_check.py")
+    if not script.exists():
+        console.print("[red]Script de smoke test introuvable[/red]")
+        return
+    console.print("[yellow]Exécution du smoke test...[/yellow]")
+    try:
+        import runpy
+        runpy.run_path(str(script), run_name="__main__")
+        console.print("[green]Smoke test terminé[/green]")
+    except SystemExit as e:
+        code = getattr(e, "code", 1) or 0
+        if code == 0:
+            console.print("[green]Smoke test terminé[/green]")
+        else:
+            console.print("[red]Smoke test en erreur[/red]")
+    except Exception as e:
+        console.print(f"[red]Smoke test en erreur: {e}[/red]")
+
+@cli.command("tunnel")
+@click.option("--port", default=8080, type=int, help="Port local à exposer")
+@click.option("--provider", default="cloudflared", type=click.Choice(["cloudflared","ngrok","localhost.run"]), help="Fournisseur de tunnel")
+@click.option("--qr-out", default="wan_qr.png", help="Fichier QR de sortie")
+def tunnel(port, provider, qr_out):
+    """Démarre un tunnel WAN et génère un QR pointant vers l'URL publique"""
+    console.print(f"[yellow]Démarrage tunnel {provider} sur localhost:{port}[/yellow]")
+    try:
+        tm = TunnelManager(port=port, provider=provider)
+        public_url = asyncio.run(tm.start())
+        console.print(f"[green]Tunnel actif:[/green] {public_url}")
+        is_valid, result, details = qr_link_system.validate_url(public_url, timeout=5)
+        status = "✅" if is_valid else f"⚠️ {result.value}"
+        console.print(f"   Vérification WAN: {status}")
+        res = qr_link_system.generate_qr_with_link_validation(url=public_url, output_path=qr_out, validate=False)
+        if res.get("qr_generated"):
+            console.print(f"[green]QR WAN généré:[/green] {qr_out}")
+        else:
+            console.print(f"[yellow]QR non généré:[/yellow] {res.get('error')}")
+    except Exception as e:
+        console.print(f"[red]Tunnel error:[/red] {e}")
 
 @cli.command()
 @click.option("--open-server", is_flag=True, help="Start demo server after run")
