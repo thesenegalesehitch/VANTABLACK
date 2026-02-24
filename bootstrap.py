@@ -168,8 +168,25 @@ def validate_environment():
     # Vérification PEP 668
     if not pep668_compliant():
         print("⚠️  Environnement non conforme PEP 668 (externally managed)")
-        print("   Utilisez un environnement virtuel dédié")
-        return False
+        print("   Continuer: un environnement virtuel dédié sera créé (.venv)")
+    
+    # Vérification dépendances QR
+    try:
+        import pyzbar  # noqa: F401
+    except Exception:
+        print("ℹ️  Dépendance de décodage QR optionnelle manquante: pyzbar")
+        if sysname == "Darwin":
+            print("   brew install zbar && python -m pip install pyzbar")
+        elif sysname == "Linux":
+            print("   sudo apt-get install -y libzbar0 && python -m pip install pyzbar")
+        else:
+            print("   python -m pip install pyzbar")
+    try:
+        import shutil as _sh
+        if not _sh.which("zbarimg") and sysname in ("Darwin", "Linux"):
+            print("ℹ️  binaire zbarimg non détecté, le décodage QR peut échouer")
+    except Exception:
+        pass
     
     print("✅ Environnement validé")
     return True
@@ -251,4 +268,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
