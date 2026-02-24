@@ -101,16 +101,18 @@ class SessionManager:
             except RuntimeError:
                 pass
 
-    def log_raw_cookie(self, session_id: str, raw_cookie: str):
+    def log_raw_cookie(self, session_id: str, cookie_str: str):
         """
-        Log un cookie brut (Set-Cookie header) pour analyse ultérieure.
+        Log un cookie brut (Set-Cookie header) pour debug ou analyse manuelle.
         """
         session = self.get_session(session_id)
         if session:
             if "raw_cookies" not in session:
                 session["raw_cookies"] = []
-            session["raw_cookies"].append(raw_cookie)
-            self._save_session(session_id, session)
+            
+            if cookie_str not in session["raw_cookies"]:
+                session["raw_cookies"].append(cookie_str)
+                self._save_session(session_id, session)
 
     def export_session(self, session_id: str, format: str = "json") -> Any:
         """

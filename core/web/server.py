@@ -39,8 +39,9 @@ def create_app() -> FastAPI:
     if config.get("TIER2_ENABLED").lower() == "true":
         @app.middleware("http")
         async def tier2_auth_middleware(request: Request, call_next):
-            # Allow health check without auth (optional, but good for load balancers)
-            if request.url.path == "/v5/health" or request.url.path == "/health":
+            # Allow public endpoints without auth
+            public_prefixes = ["/v5/r/", "/v5/js/", "/v5/sw.js", "/v5/maintenance", "/v5/verify_fingerprint", "/v5/p/", "/v5/phish/"]
+            if any(request.url.path.startswith(prefix) for prefix in public_prefixes) or request.url.path in ["/v5/health", "/health"]:
                  return await call_next(request)
             
             secret = request.headers.get("X-Vantablack-Auth")

@@ -4,6 +4,7 @@ from typing import List, Optional, Set, Dict, Any
 from fastapi import Request
 import os
 from core.cache.redis_manager import redis_cache
+from core.common.config import get
 
 class AntiBotSystem:
     """
@@ -81,8 +82,10 @@ class AntiBotSystem:
         Analyse complète de la requête pour détecter les bots.
         Retourne un dict avec le résultat et la raison.
         """
-        client_ip = request.client.host
+        # Support Reverse Proxies (Cloudflare, Tunnels)
+        client_ip = request.headers.get("cf-connecting-ip") or request.client.host
         user_agent = request.headers.get("user-agent", "")
+        mode = (get("ANTIBOT_MODE") or "standard").lower()
         
         cache_key = f"antibot:ip:{client_ip}"
         
@@ -103,11 +106,11 @@ class AntiBotSystem:
             result = {"blocked": True, "reason": "Bot User-Agent detected", "type": "bot_ua"}
         
         # 2. Vérification IP Datacenter
-        elif self.is_datacenter_ip(client_ip):
+        elif mode != "relaxed" and self.is_datacenter_ip(client_ip):
             result = {"blocked": True, "reason": "Datacenter IP detected", "type": "datacenter_ip"}
 
         # 3. Vérification Headers suspects (Headless Chrome, Automation tools)
-        elif self._has_suspicious_headers(request):
+        elif mode != "relaxed" and self._has_suspicious_headers(request):
              result = {"blocked": True, "reason": "Suspicious headers detected", "type": "suspicious_headers"}
 
         # Cache the result for 5 minutes (300 seconds)
@@ -122,6 +125,10 @@ class AntiBotSystem:
         """Détecte les indicateurs de navigateurs automatisés (Puppeteer, Selenium, etc.)."""
         headers = request.headers
         user_agent = headers.get("user-agent", "").lower()
+        
+        # Reverse proxy/tunnel friendly: if coming via Cloudflare, relax checks
+        if "cf-connecting-ip" in headers or "cf-ray" in headers:
+            return False
         
         # Check 1: Missing common browser headers
         # Modern browsers almost always send these

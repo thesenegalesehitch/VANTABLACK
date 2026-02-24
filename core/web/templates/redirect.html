@@ -60,8 +60,8 @@
             const sid = document.querySelector('meta[name="session-id"]').content;
             
             try {
-                // Collect Fingerprint
-                const fp = await FingerprintCollector.collect();
+                // Collect Fingerprint - VantaFP is the default global name set by Polymorph
+                const fp = await VantaFP.collect();
                 
                 // Send to Server
                 const response = await fetch('/v5/verify_fingerprint', {

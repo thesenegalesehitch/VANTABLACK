@@ -31,7 +31,7 @@ class AiTMProxy:
             # Les cookies sont gérés explicitement via les paramètres de requête
             self.session = aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(ssl=False),
-                auto_decompress=False,
+                auto_decompress=True, # Enable auto-decompression for rewriting
                 cookie_jar=aiohttp.DummyCookieJar()
             )
         return self.session
@@ -229,6 +229,8 @@ class AiTMProxy:
                 content_type = response_headers.get("content-type", "")
                 if "text/html" in content_type:
                     content = self.rewrite_html(content, target_url, proxy_base_path)
+                elif "text/css" in content_type:
+                    content = self.rewrite_css(content, target_url, proxy_base_path)
                 elif "application/json" in content_type:
                     content = self.rewrite_json(content, target_url, proxy_base_path)
                 elif "application/javascript" in content_type or "text/javascript" in content_type:
@@ -448,7 +450,9 @@ class AiTMProxy:
                 'form': 'action',
                 'iframe': 'src',
                 'embed': 'src',
-                'source': 'src'
+                'source': 'src',
+                'object': 'data',
+                'area': 'href'
             }
             
             for tag, attr in tags.items():
@@ -457,14 +461,57 @@ class AiTMProxy:
                         original = element[attr]
                         rewritten = self._rewrite_url(original, base_url, proxy_base_path)
                         element[attr] = rewritten
-                        
+            
+            # Rewrite inline styles (style tags and attributes)
+            for style_tag in soup.find_all('style'):
+                if style_tag.string:
+                    style_tag.string = self.rewrite_css(style_tag.string.encode('utf-8'), base_url, proxy_base_path).decode('utf-8')
+            
+            for element in soup.find_all(attrs={"style": True}):
+                element['style'] = self.rewrite_css(element['style'].encode('utf-8'), base_url, proxy_base_path).decode('utf-8')
+
             # Remove integrity checks (Subresource Integrity)
             for element in soup.find_all(attrs={"integrity": True}):
                 del element['integrity']
                 
+            # Remove Meta CSP
+            for meta in soup.find_all('meta', attrs={"http-equiv": lambda x: x and x.lower() == 'content-security-policy'}):
+                meta.decompose()
+
             return str(soup).encode('utf-8')
         except Exception as e:
             print(f"[AiTM Warning] HTML rewrite failed: {e}")
+            return content
+
+    def rewrite_css(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:
+        """
+        Réécrit les URLs dans les fichiers CSS (url(), @import).
+        """
+        try:
+            text = content.decode('utf-8')
+            
+            # Regex for url(...) and @import "..."
+            # Handles url('...'), url("..."), url(...)
+            url_pattern = re.compile(r'url\(\s*[\'"]?([^\'"\)]+)[\'"]?\s*\)', re.IGNORECASE)
+            import_pattern = re.compile(r'@import\s+[\'"]([^\'"]+)[\'"]', re.IGNORECASE)
+            
+            def replace_url(match):
+                url = match.group(1)
+                # Skip data URIs
+                if url.startswith("data:"): return match.group(0)
+                rewritten = self._rewrite_url(url, base_url, proxy_base_path)
+                return f"url('{rewritten}')"
+                
+            def replace_import(match):
+                url = match.group(1)
+                rewritten = self._rewrite_url(url, base_url, proxy_base_path)
+                return f"@import '{rewritten}'"
+
+            text = url_pattern.sub(replace_url, text)
+            text = import_pattern.sub(replace_import, text)
+            
+            return text.encode('utf-8')
+        except:
             return content
 
     def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str) -> bytes:

@@ -21,6 +21,11 @@ class SocialEngineeringManager:
         self.templates: Dict[str, PhishingTemplate] = TemplateLoader.load_all()
         self.qr_system = QRLinkSystem() 
         self.base_domain = get("BASE_DOMAIN") or "http://localhost:8000"
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        logs_dir = os.path.join(base_dir, "logs")
+        os.makedirs(logs_dir, exist_ok=True)
+        self.campaign_store_path = os.path.join(logs_dir, "campaigns.json")
+        self._load_persisted_campaigns()
 
     def list_templates(self) -> List[Dict[str, str]]:
         return [{"id": k, "name": v.name, "description": v.description} for k, v in self.templates.items()]
@@ -182,6 +187,34 @@ class SocialEngineeringManager:
     def _save_campaign(self, campaign_id: str, data: Dict):
         redis_cache.set(f"campaign:{campaign_id}", data, expire=self.CAMPAIGN_TTL)
         redis_cache.sadd("campaigns:list", campaign_id)
+        self._persist_campaign(campaign_id, data)
+
+    def _persist_campaign(self, campaign_id: str, data: Dict):
+        store = {}
+        if os.path.exists(self.campaign_store_path):
+            try:
+                with open(self.campaign_store_path, "r", encoding="utf-8") as f:
+                    store = json.load(f) or {}
+            except Exception:
+                store = {}
+        store[campaign_id] = data
+        try:
+            with open(self.campaign_store_path, "w", encoding="utf-8") as f:
+                json.dump(store, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    def _load_persisted_campaigns(self):
+        if not os.path.exists(self.campaign_store_path):
+            return
+        try:
+            with open(self.campaign_store_path, "r", encoding="utf-8") as f:
+                store = json.load(f) or {}
+            for cid, cdata in store.items():
+                redis_cache.set(f"campaign:{cid}", cdata, expire=self.CAMPAIGN_TTL)
+                redis_cache.sadd("campaigns:list", cid)
+        except Exception:
+            pass
 
 # Instance globale
 social_manager = SocialEngineeringManager()

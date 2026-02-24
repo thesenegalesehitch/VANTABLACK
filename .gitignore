@@ -68,6 +68,13 @@ captures_*.csv
 # Generated Assets
 attack_qr_*.png
 qr_codes/
+core/assets/qr_codes/
+
+# Runtime state (do not commit)
+.env
+core/logs/
+core/logs/*.jsonl
+data/sessions.json
 
 # Backups
 *.bak

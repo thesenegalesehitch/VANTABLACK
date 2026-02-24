@@ -1,34 +1,54 @@
-from pydantic import BaseModel, Field, HttpUrl
-from typing import Optional, List, Dict, Union
+from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Union, Any
+
+class ScreenInfo(BaseModel):
+    width: int = 0
+    height: int = 0
+    availWidth: int = 0
+    availHeight: int = 0
+    colorDepth: int = 0
+    pixelRatio: float = 1.0
+
+class WindowInfo(BaseModel):
+    width: int = 0
+    height: int = 0
+
+class TimezoneInfo(BaseModel):
+    offset: int = 0
+    name: str = "unknown"
+
+class WebGLInfo(BaseModel):
+    vendor: Optional[str] = None
+    renderer: Optional[str] = None
+    extensions: Optional[List[str]] = None
+    shadingLanguageVersion: Optional[str] = None
+    version: Optional[str] = None
+    precision: Optional[Dict[str, Any]] = None
+
+class InteractionInfo(BaseModel):
+    mouseMoves: int = 0
+    scrollEvents: int = 0
+    keyPresses: int = 0
+    timeOnPage: int = 0
 
 class BrowserFingerprint(BaseModel):
     """
-    Structure de données pour l'empreinte digitale du navigateur.
-    Collecté via JavaScript côté client.
+    Structure de données pour l'empreinte digitale du navigateur (V5).
     """
-    user_agent: str
-    screen_width: int = Field(ge=0)
-    screen_height: int = Field(ge=0)
-    color_depth: int = Field(ge=0)
-    platform: str
+    userAgent: str
     language: str
-    timezone_offset: int
-    webgl_vendor: Optional[str] = None
-    webgl_renderer: Optional[str] = None
-    canvas_hash: Optional[str] = None
-    audio_hash: Optional[str] = None
-    fonts_detected: List[str] = Field(default_factory=list)
-    touch_support: bool = False
-    max_touch_points: int = 0
-    hardware_concurrency: Optional[Union[str, int]] = None
-    device_memory: Optional[Union[str, float, int]] = None
-    pixel_ratio: float = 1.0
-    is_webdriver: bool = False
-    
-    # Indicateurs de mouvement
-    mouse_movements: int = 0
-    scroll_events: int = 0
-    time_on_page: int = 0  # ms
+    platform: str
+    hardwareConcurrency: Union[str, int] = "unknown"
+    deviceMemory: Union[str, float, int] = "unknown"
+    screen: ScreenInfo
+    window: WindowInfo
+    timezone: TimezoneInfo
+    botSignals: List[str] = []
+    canvasHash: Optional[str] = None
+    audioHash: Optional[str] = None
+    webgl: Optional[WebGLInfo] = None
+    webglHash: Optional[str] = None
+    interaction: InteractionInfo
 
 class FingerprintValidator:
     """
@@ -41,53 +61,49 @@ class FingerprintValidator:
         Retourne True si valide (humain), False si suspect (bot).
         """
         
-        # 1. Vérification Résolution (Headless souvent 800x600 ou 0x0)
-        if fp.screen_width < 100 or fp.screen_height < 100:
-            return False  # Trop petit -> Suspect (Headless)
+        # 1. Bot Signals (Explicit)
+        if fp.botSignals:
+            # If any bot signal is present, block
+            print(f"[FP Validator] Bot Signals Detected: {fp.botSignals}")
+            return False
 
-        # 2. Vérification Webdriver (Selenium, Puppeteer)
-        if fp.is_webdriver:
-            return False  # Bot détecté explicitement
-            
-        # 3. Vérification WebGL (Souvent vide ou générique sur VM/Headless)
-        if not fp.webgl_renderer or "SwiftShader" in fp.webgl_renderer or "llvmpipe" in fp.webgl_renderer:
-             # SwiftShader/llvmpipe sont des rendus software typiques de VM/Headless
+        # 2. Screen Dimensions (Headless often 800x600 or 0x0)
+        if fp.screen.width < 100 or fp.screen.height < 100:
              return False
 
-        # 4. Vérification Comportement Humain (Mouvements souris/scroll)
-        # Un bot clique directement sans mouvement ou scroll (sauf bot très avancé)
-        # Note: Sur une page de redirection rapide, l'utilisateur n'a pas le temps de bouger.
-        # On désactive cette vérification pour éviter les faux positifs sur les connexions rapides.
-        # if fp.mouse_movements < 5 and fp.scroll_events == 0 and fp.time_on_page < 500:
-        #    return False  # Trop rapide/statique -> Suspect
-            
-        # 5. Vérification Platform vs User-Agent
-        if "MacIntel" in fp.platform and "Windows" in fp.user_agent:
-            return False  # Incohérence -> Suspect (Spoofing UA)
-            
-        # 6. Vérification Fonts (Headless a souvent peu/pas de fonts)
-        if len(fp.fonts_detected) == 0 and "Linux" not in fp.platform and "Android" not in fp.user_agent:
-            # Linux peut parfois masquer les fonts, mais Windows/Mac ont toujours des fonts standard
-            return False
-            
-        # 7. Hardware Concurrency (Headless often reports undefined or low)
-        if fp.hardware_concurrency and fp.hardware_concurrency != 'unknown':
-            try:
-                concurrency = int(fp.hardware_concurrency)
-                if concurrency < 1:
-                     return False
-            except ValueError:
-                pass # Ignorer si format invalide
+        if fp.screen.width < fp.screen.availWidth or fp.screen.height < fp.screen.availHeight:
+             # Impossible physically
+             return False
 
-        # 8. Device Memory (Headless often reports undefined or low)
-        if fp.device_memory and fp.device_memory != 'unknown':
+        # 3. WebGL Check
+        if fp.webgl:
+            renderer = (fp.webgl.renderer or "").lower()
+            vendor = (fp.webgl.vendor or "").lower()
+            if "swiftshader" in renderer or "llvmpipe" in renderer or "software" in renderer:
+                 return False
+            if "google" in vendor and "google" in renderer and "intel" not in renderer and "nvidia" not in renderer and "amd" not in renderer:
+                 # Often indicative of cloud headless instance (though Chrome sometimes reports Google Inc.)
+                 # Checking for specific lack of GPU branding
+                 pass
+
+        # 4. Consistency Check (Platform vs UA)
+        if "MacIntel" in fp.platform and "Windows" in fp.userAgent:
+             return False
+             
+        # 5. Hardware Concurrency
+        if fp.hardwareConcurrency != 'unknown':
+            try:
+                concurrency = int(fp.hardwareConcurrency)
+                if concurrency < 1: return False
+            except: pass
+
+        # 6. Device Memory
+        if fp.deviceMemory != 'unknown':
              try:
-                 memory = float(fp.device_memory)
-                 if memory < 0.25: # < 256MB
-                     return False
-             except ValueError:
-                 pass # Ignorer si format invalide
-            
+                 memory = float(fp.deviceMemory)
+                 if memory < 0.25: return False
+             except: pass
+             
         return True
 
 # Instance globale

