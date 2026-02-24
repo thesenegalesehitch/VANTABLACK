@@ -69,6 +69,7 @@ captures_*.csv
 attack_qr_*.png
 qr_codes/
 core/assets/qr_codes/
+core/web/static/images/qr_*.png
 
 # Runtime state (do not commit)
 .env
