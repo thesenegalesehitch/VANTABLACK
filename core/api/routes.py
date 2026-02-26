@@ -33,6 +33,19 @@ async def get_metrics():
     metrics, content_type = MetricsManager().get_latest_metrics()
     return Response(content=metrics, media_type=content_type)
 
+@router.get("/guide", response_class=HTMLResponse)
+async def get_guide():
+    html = """
+    <html>
+      <head><title>Vantablack Guide</title></head>
+      <body>
+        <h1>Guide</h1>
+        <p>Consultez /v5/config et /v5/metrics pour la configuration et les métriques.</p>
+      </body>
+    </html>
+    """
+    return HTMLResponse(content=html)
+
 # --- Smart Redirection & AiTM ---
 
 @router.get("/r/{campaign_id}")
