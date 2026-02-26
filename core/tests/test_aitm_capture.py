@@ -38,8 +38,8 @@ class TestAiTMCapture:
         # "otp_code" matches "code" in sensitive_keys
         self.proxy.session_manager.capture_credential.assert_any_call(session_id, "otp_code", "123456")
 
-    def test_capture_json_credentials_nested_ignored(self):
-        # The current implementation only iterates top-level keys in JSON dict
+    def test_capture_json_credentials_nested(self):
+        # The implementation should capture credentials even in nested objects
         session_id = "test_session_789"
         data = {
             "meta": {
@@ -52,14 +52,15 @@ class TestAiTMCapture:
 
         self.proxy._capture_credentials(session_id, body, content_type)
 
-        # Verify calls
+        # Verify calls - both top-level and nested credentials should be captured
         self.proxy.session_manager.capture_credential.assert_any_call(session_id, "user", "victim@example.com")
-        # Nested password should NOT be captured by current simple implementation
-        # (This documents current limitation/behavior)
-        # We check that it was NOT called with the nested password
+        self.proxy.session_manager.capture_credential.assert_any_call(session_id, "password", "HiddenPassword")
+        
+        # Verify both values were captured
         calls_args = [call.args for call in self.proxy.session_manager.capture_credential.call_args_list]
         captured_values = [args[2] for args in calls_args]
-        assert "HiddenPassword" not in captured_values
+        assert "victim@example.com" in captured_values
+        assert "HiddenPassword" in captured_values
 
     def test_capture_malformed_json(self):
         session_id = "test_session_err"
