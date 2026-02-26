@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional, List, Dict, Union, Any
 
 class ScreenInfo(BaseModel):
@@ -43,12 +43,93 @@ class BrowserFingerprint(BaseModel):
     screen: ScreenInfo
     window: WindowInfo
     timezone: TimezoneInfo
-    botSignals: List[str] = []
+    botSignals: List[str] = Field(default_factory=list)
     canvasHash: Optional[str] = None
     audioHash: Optional[str] = None
     webgl: Optional[WebGLInfo] = None
     webglHash: Optional[str] = None
     interaction: InteractionInfo
+    
+    @model_validator(mode="before")
+    def _compat_transform(cls, values: Any):
+        if not isinstance(values, dict):
+            return values
+        data = dict(values)
+        if "user_agent" in data and "userAgent" not in data:
+            data["userAgent"] = data.pop("user_agent")
+        if "device_memory" in data and "deviceMemory" not in data:
+            data["deviceMemory"] = data.pop("device_memory")
+        if "hardware_concurrency" in data and "hardwareConcurrency" not in data:
+            data["hardwareConcurrency"] = data.pop("hardware_concurrency")
+        if "canvas_hash" in data and "canvasHash" not in data:
+            data["canvasHash"] = data.pop("canvas_hash")
+        if "audio_hash" in data and "audioHash" not in data:
+            data["audioHash"] = data.pop("audio_hash")
+        if "webgl_hash" in data and "webglHash" not in data:
+            data["webglHash"] = data.pop("webgl_hash")
+        # Screen
+        if "screen" not in data:
+            sw = data.pop("screen_width", None)
+            sh = data.pop("screen_height", None)
+            aw = data.pop("avail_width", None) or data.pop("availWidth", None)
+            ah = data.pop("avail_height", None) or data.pop("availHeight", None)
+            cd = data.pop("color_depth", None)
+            pr = data.pop("pixel_ratio", None)
+            if any(v is not None for v in (sw, sh, aw, ah, cd, pr)):
+                data["screen"] = {
+                    "width": sw or 0,
+                    "height": sh or 0,
+                    "availWidth": aw or (sw or 0),
+                    "availHeight": ah or (sh or 0),
+                    "colorDepth": cd or 0,
+                    "pixelRatio": pr or 1.0,
+                }
+        # Window
+        if "window" not in data:
+            ww = data.pop("window_width", None)
+            wh = data.pop("window_height", None)
+            if ww is not None or wh is not None:
+                data["window"] = {"width": ww or 0, "height": wh or 0}
+            elif "screen" in data:
+                # Default window size to screen size if available
+                scr = data["screen"]
+                data["window"] = {"width": scr.get("width", 0), "height": scr.get("height", 0)}
+        # Timezone
+        if "timezone" not in data:
+            toff = data.pop("timezone_offset", None)
+            tzname = data.pop("timezone_name", None)
+            if toff is not None or tzname is not None:
+                data["timezone"] = {"offset": toff or 0, "name": tzname or "unknown"}
+        # WebGL
+        if "webgl" not in data:
+            vendor = data.pop("webgl_vendor", None)
+            renderer = data.pop("webgl_renderer", None)
+            if vendor is not None or renderer is not None:
+                data["webgl"] = {"vendor": vendor, "renderer": renderer}
+        # Interaction
+        if "interaction" not in data:
+            mm = data.pop("mouse_movements", None) or data.pop("mouseMoves", None)
+            se = data.pop("scroll_events", None) or data.pop("scrollEvents", None)
+            kp = data.pop("key_presses", None) or data.pop("keyPresses", None)
+            top = data.pop("time_on_page", None) or data.pop("timeOnPage", None)
+            if any(v is not None for v in (mm, se, kp, top)):
+                data["interaction"] = {
+                    "mouseMoves": mm or 0,
+                    "scrollEvents": se or 0,
+                    "keyPresses": kp or 0,
+                    "timeOnPage": top or 0,
+                }
+        # Webdriver flag -> botSignals
+        is_wd = data.pop("is_webdriver", None)
+        if is_wd is True:
+            bs = data.get("botSignals") or []
+            if "webdriver" not in bs:
+                bs.append("webdriver")
+            data["botSignals"] = bs
+        # Ignore extras
+        data.pop("fonts_detected", None)
+        data.pop("touch_support", None)
+        return data
 
 class FingerprintValidator:
     """

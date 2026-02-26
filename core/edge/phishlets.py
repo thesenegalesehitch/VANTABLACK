@@ -80,7 +80,7 @@ class BlockRule(BaseModel):
 class PathRewrite(BaseModel):
     pattern: str
     replace: str
-    methods: List[str] = ["GET", "POST"]
+    methods: List[str] = Field(default_factory=lambda: ["GET", "POST"])
 
 class CookieRewrite(BaseModel):
     name: str
@@ -94,22 +94,22 @@ class PhishletConfig(BaseModel):
     author: str
     min_ver: str
     proxy_hosts: List[ProxyHost]
-    sub_filters: List[SubFilter] = []
+    sub_filters: List[SubFilter] = Field(default_factory=list)
     auth_tokens: List[Union[AuthToken, Dict[str, Any]]]
-    credentials: Dict[str, CredentialField] = {}
+    credentials: Dict[str, CredentialField] = Field(default_factory=dict)
     login: Optional[LoginConfig] = None
-    js_inject: List[JsInject] = []
+    js_inject: List[JsInject] = Field(default_factory=list)
     
     # Legacy fields (optional)
     auth_urls: Optional[List[str]] = None
     landing_path: Optional[List[str]] = None
     injections: Optional[List[Any]] = None
-    headers: Optional[List[HeaderRule]] = None
-    path_rewrites: Optional[List[PathRewrite]] = None
-    cookie_rewrites: Optional[List[CookieRewrite]] = None
-    blocklist: Optional[List[BlockRule]] = None
-    form_actions: Optional[List[FormAction]] = None
-    bridges: Optional[List[Bridge]] = None
+    headers: List[HeaderRule] = Field(default_factory=list)
+    path_rewrites: List[PathRewrite] = Field(default_factory=list)
+    cookie_rewrites: List[CookieRewrite] = Field(default_factory=list)
+    blocklist: List[BlockRule] = Field(default_factory=list)
+    form_actions: List[FormAction] = Field(default_factory=list)
+    bridges: List[Bridge] = Field(default_factory=list)
 
 class PhishletLoader:
     def __init__(self):
@@ -180,4 +180,3 @@ class PhishletLoader:
 
 # Alias for backward compatibility
 PhishletManager = PhishletLoader
-

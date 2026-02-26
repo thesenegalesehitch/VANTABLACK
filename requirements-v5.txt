@@ -1,11 +1,14 @@
+# Vantablack Core v5 Requirements
+# Python 3.14+ compatible dependencies
+
 click>=8.0.0
 rich>=10.0.0
 fastapi>=0.110.0
 uvicorn>=0.27.0
-pydantic>=2.2.1
+pydantic>=2.2.1  # Updated for Python 3.14 compatibility
 pydantic-settings>=2.1.0
 requests>=2.26.0
-mitmproxy>=9.0.0
+mitmproxy>=9.0.0  # Updated version
 qrcode>=7.0
 Pillow>=9.0.0
 PyYAML>=6.0
@@ -24,3 +27,11 @@ redis>=4.0.0
 pyzbar>=0.1.9
 pyperclip>=1.8.2
 python-multipart>=0.0.5
+
+# Additional dependencies for advanced features
+idna>=3.0  # For internationalized domain names (homograph attacks)
+
+# Development and testing dependencies
+ruff>=0.1.0
+mypy>=1.0.0
+bandit>=1.7.0

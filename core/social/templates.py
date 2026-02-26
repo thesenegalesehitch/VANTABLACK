@@ -1,4 +1,5 @@
 import os
+import re
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, List
 
@@ -57,9 +58,11 @@ class PhishingTemplate(ABC):
             context["company"] = "Security"
 
         for key, value in context.items():
-            if value is None: value = ""
-            html = html.replace(f"{{{{ {key} }}}}", str(value))
-            html = html.replace(f"{{{{{key}}}}}", str(value)) # Support sans espaces
+            if value is None:
+                value = ""
+            # Remplacement tolérant aux espaces et sauts de ligne
+            pattern = re.compile(r"\{\{\s*" + re.escape(key) + r"\s*\}\}", flags=re.MULTILINE)
+            html = pattern.sub(str(value), html)
         return html
 
 class MicrosoftLoginTemplate(PhishingTemplate):

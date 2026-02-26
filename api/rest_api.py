@@ -15,7 +15,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Dict, List, Any, Optional, Union
 from datetime import datetime, timedelta
 import uuid
@@ -45,14 +45,14 @@ class TemplateRequest(BaseModel):
     responsive: bool = Field(True, description="Responsive design")
     custom_variables: Dict[str, Any] = Field(default_factory=dict, description="Custom variables")
     
-    @validator('platform')
+    @field_validator('platform')
     def validate_platform(cls, v):
         valid_platforms = ['twitter', 'google', 'facebook', 'microsoft', 'linkedin', 'instagram', 'amazon', 'paypal']
         if v.lower() not in valid_platforms:
             raise ValueError(f"Platform must be one of: {', '.join(valid_platforms)}")
         return v.lower()
     
-    @validator('template_type')
+    @field_validator('template_type')
     def validate_template_type(cls, v):
         valid_types = ['login', 'register', 'payment', 'survey', 'contact', 'download', 'verification']
         if v not in valid_types:
@@ -72,11 +72,11 @@ class CampaignRequest(BaseModel):
     mutation_enabled: bool = Field(True, description="Enable mutation")
     behavioral_tracking: bool = Field(True, description="Enable behavioral tracking")
     
-    @validator('end_date')
-    def validate_dates(cls, v, values):
-        if 'start_date' in values and v <= values['start_date']:
+    @model_validator(mode='after')
+    def validate_dates(self):
+        if self.end_date <= self.start_date:
             raise ValueError("End date must be after start date")
-        return v
+        return self
 
 
 class AnalysisRequest(BaseModel):
@@ -844,7 +844,7 @@ async def http_exception_handler(request, exc):
             success=False,
             message=exc.detail,
             data={"status_code": exc.status_code}
-        ).dict()
+        ).model_dump()
     )
 
 
