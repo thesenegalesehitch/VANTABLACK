@@ -146,6 +146,22 @@ class PhishletLoader:
                     ))
                 data["proxy_hosts"] = new_hosts
 
+            # Handle legacy auth_tokens
+            if data.get("auth_tokens") and isinstance(data["auth_tokens"], list):
+                new_tokens = []
+                for token in data["auth_tokens"]:
+                    if isinstance(token, dict) and "name" in token:
+                        # Convert legacy format to new format
+                        new_tokens.append(AuthToken(
+                            domain="",  # Default domain
+                            keys=[token["name"]],  # Use name as key
+                            type=token.get("type"),  # Preserve type for legacy
+                            name=token.get("name")  # Preserve name for legacy
+                        ))
+                    else:
+                        new_tokens.append(token)
+                data["auth_tokens"] = new_tokens
+
             cfg = PhishletConfig(**data)
             try:
                 from core.common.metrics import PHISHLET_LOAD

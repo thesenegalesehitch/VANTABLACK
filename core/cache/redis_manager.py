@@ -1,6 +1,7 @@
 import redis
 import json
 import time
+import asyncio
 from typing import Any, Optional, Dict, List, Set
 from functools import wraps
 from core.common.config import get
@@ -92,7 +93,36 @@ class RedisCacheManager:
                         pass
                 
                 return result
-            return wrapper
+            
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                cache_key = f"{prefix}{key}:{str(args)}:{str(kwargs)}"
+                
+                # Try to get from cache
+                try:
+                    cached_result = self.get(cache_key)
+                    if cached_result is not None:
+                        return cached_result
+                except Exception:
+                    pass
+                
+                # Execute async function
+                result = await func(*args, **kwargs)
+                
+                # Check condition for caching
+                if condition is None or condition(result):
+                    try:
+                        self.set(cache_key, result, expire)
+                    except Exception:
+                        pass
+                
+                return result
+            
+            # Return the appropriate wrapper based on function type
+            if asyncio.iscoroutinefunction(func):
+                return async_wrapper
+            else:
+                return wrapper
         return decorator
     
     def set(self, key: str, value: Any, expire: int = 300) -> bool:

