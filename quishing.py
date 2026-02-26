@@ -16,7 +16,7 @@ def generate_quishing_payload(url, output_file="attack.png", logo_path=None, fg=
     """
     Generate a malicious QR Code (Quishing)
     """
-    print(f"{GREEN}[*] {t('generating_qr_logo', path=url)}{RESET}")
+    print(f"{GREEN}[*] {t('generating_qr_logo')}: {url}{RESET}")
     
     qr = qrcode.QRCode(
         version=1,
@@ -85,7 +85,8 @@ def generate_quishing_payload(url, output_file="attack.png", logo_path=None, fg=
     try:
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
-    except:
+    except Exception as e:
+        print(f"Warning: Text measurement failed: {e}")
         text_width = draw.textlength(text, font=font)
         
     draw.text(((width - text_width) / 2, height + 15), text, fill="black", font=font)

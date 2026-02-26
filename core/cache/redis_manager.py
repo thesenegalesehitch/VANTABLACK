@@ -53,7 +53,8 @@ class RedisCacheManager:
         if self.connection_pool is None:
              try:
                  self.connection_pool = redis.ConnectionPool.from_url(self.redis_url)
-             except:
+             except Exception as e:
+                 print(f"Warning: Redis connection failed: {e}")
                  self._use_memory = True
                  return None
                  

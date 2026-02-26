@@ -108,9 +108,26 @@ class QuickStart:
         print(f"{Colors.BLUE}🧪 Exécution des tests...{Colors.RESET}")
         return self.run_command(cmd)
     
+    def display_banner(self):
+        """Affiche la bannière personnalisée"""
+        print(f"{Colors.BOLD}{Colors.MAGENTA}")
+        print("  █████╗ ██╗     ███████╗██╗  ██╗ ")
+        print(" ██╔══██╗██║     ██╔════╝╚██╗██╔╝ ")
+        print(" ███████║██║     █████╗   ╚███╔╝  ")
+        print(" ██╔══██║██║     ██╔══╝   ██╔██╗  ")
+        print(" ██║  ██║███████╗███████╗██╔╝ ██╗ ")
+        print(" ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝ ")
+        print("")
+        print("        V A N T A B L A C K")
+        print("     THESENEGALESEHITCH")
+        print("")
+        print("═══════════════════════════════════════════")
+        print(f"{Colors.RESET}")
+
     def show_menu(self):
         """Affiche le menu principal"""
         while True:
+            self.display_banner()
             print(f"\n{Colors.BOLD}{Colors.MAGENTA}=== VANTABLACK CORE v5 - DÉMARRAGE RAPIDE ==={Colors.RESET}")
             print(f"{Colors.GREEN}1.{Colors.RESET} Installation complète automatique")
             print(f"{Colors.GREEN}2.{Colors.RESET} Créer environnement virtuel")
@@ -119,6 +136,7 @@ class QuickStart:
             print(f"{Colors.GREEN}5.{Colors.RESET} Générer QR code")
             print(f"{Colors.GREEN}6.{Colors.RESET} Exécuter tests")
             print(f"{Colors.GREEN}7.{Colors.RESET} Menu avancé (setup.py)")
+            print(f"{Colors.GREEN}8.{Colors.RESET} Changer la langue")
             print(f"{Colors.GREEN}0.{Colors.RESET} Quitter")
             
             choice = input(f"\n{Colors.YELLOW}➤ Choisissez une option (0-7): {Colors.RESET}").strip()

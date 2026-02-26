@@ -114,7 +114,8 @@ def install_system_tools():
                 elif 'arch' in content:
                     install_commands.append("sudo pacman -Syu --noconfirm git python python-pip")
                     install_commands.append("yay -S cloudflared")
-        except:
+        except Exception as e:
+            print(f"Warning: Failed to detect Arch Linux: {e}")
             pass
     
     # Exécuter les commandes d'installation

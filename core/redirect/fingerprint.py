@@ -183,7 +183,7 @@ class FingerprintValidator:
              try:
                  memory = float(fp.deviceMemory)
                  if memory < 0.25: return False
-             except: pass
+             except Exception: pass
              
         return True
 
