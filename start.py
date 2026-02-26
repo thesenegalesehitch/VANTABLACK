@@ -108,9 +108,47 @@ class QuickStart:
         print(f"{Colors.BLUE}🧪 Exécution des tests...{Colors.RESET}")
         return self.run_command(cmd)
     
+    def display_banner(self):
+        """Affiche la bannière personnalisée"""
+        print(f"{Colors.BOLD}{Colors.MAGENTA}")
+        print("  █████╗ ██╗     ███████╗██╗  ██╗ ")
+        print(" ██╔══██╗██║     ██╔════╝╚██╗██╔╝ ")
+        print(" ███████║██║     █████╗   ╚███╔╝  ")
+        print(" ██╔══██║██║     ██╔══╝   ██╔██╗  ")
+        print(" ██║  ██║███████╗███████╗██╔╝ ██╗ ")
+        print(" ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝ ")
+        print("")
+        print("        V A N T A B L A C K")
+        print("     THESENEGALESEHITCH")
+        print("")
+        print("═══════════════════════════════════════════")
+        print(f"{Colors.RESET}")
+
+    def change_language(self):
+        """Change la langue de l'interface"""
+        print(f"{Colors.BOLD}🌐 Changement de langue{Colors.RESET}")
+        print(f"{Colors.GREEN}1.{Colors.RESET} Français")
+        print(f"{Colors.GREEN}2.{Colors.RESET} English")
+        
+        choice = input(f"{Colors.YELLOW}➤ Choisissez une langue (1-2): {Colors.RESET}").strip()
+        
+        if choice == "1":
+            # Français
+            from core.utils.i18n import i18n
+            i18n.set_language("fr")
+            print(f"{Colors.GREEN}✅ Langue changée: Français{Colors.RESET}")
+        elif choice == "2":
+            # English
+            from core.utils.i18n import i18n
+            i18n.set_language("en")
+            print(f"{Colors.GREEN}✅ Language changed: English{Colors.RESET}")
+        else:
+            print(f"{Colors.RED}❌ Option invalide{Colors.RESET}")
+
     def show_menu(self):
         """Affiche le menu principal"""
         while True:
+            self.display_banner()
             print(f"\n{Colors.BOLD}{Colors.MAGENTA}=== VANTABLACK CORE v5 - DÉMARRAGE RAPIDE ==={Colors.RESET}")
             print(f"{Colors.GREEN}1.{Colors.RESET} Installation complète automatique")
             print(f"{Colors.GREEN}2.{Colors.RESET} Créer environnement virtuel")
@@ -119,9 +157,10 @@ class QuickStart:
             print(f"{Colors.GREEN}5.{Colors.RESET} Générer QR code")
             print(f"{Colors.GREEN}6.{Colors.RESET} Exécuter tests")
             print(f"{Colors.GREEN}7.{Colors.RESET} Menu avancé (setup.py)")
+            print(f"{Colors.GREEN}8.{Colors.RESET} Changer la langue")
             print(f"{Colors.GREEN}0.{Colors.RESET} Quitter")
             
-            choice = input(f"\n{Colors.YELLOW}➤ Choisissez une option (0-7): {Colors.RESET}").strip()
+            choice = input(f"\n{Colors.YELLOW}➤ Choisissez une option (0-8): {Colors.RESET}").strip()
             
             if choice == "1":
                 self.full_setup()
@@ -141,7 +180,14 @@ class QuickStart:
             elif choice == "6":
                 self.run_tests()
             elif choice == "7":
-                self.run_command(f"{sys.executable} setup.py")
+                print(f"{Colors.BLUE}🚀 Lancement du menu avancé...{Colors.RESET}")
+                print(f"{Colors.YELLOW}ℹ️  Le menu avancé s'ouvre dans une nouvelle session{Colors.RESET}")
+                # Lancement non-bloquant avec os.system pour éviter le blocage
+                import os
+                os.system(f"{sys.executable} setup.py")
+                print(f"{Colors.GREEN}✅ Retour au menu principal{Colors.RESET}")
+            elif choice == "8":
+                self.change_language()
             elif choice == "0":
                 print(f"{Colors.GREEN}👋 Au revoir!{Colors.RESET}")
                 break

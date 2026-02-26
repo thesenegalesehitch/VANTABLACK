@@ -1,8 +1,0 @@
-Target: Jane Doe
-Role: DevOps Engineer
-Company: Example Corp
-Email: jane.doe@example.com
-Social: @janedoe (X), linkedin.com/in/janedoe
-Tech Stack: AWS, Kubernetes, Terraform, Python
-Interests: Cyber Security, Open Source, Hiking
-Recent Posts: "Just deployed my first cluster!", "Loving the new K8s features."

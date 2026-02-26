@@ -1,39 +1,78 @@
+"""
+Vantablack Core v5 - Internationalization System
+Système de traduction français/anglais pour l'interface utilisateur
+"""
+
+from typing import Dict, Any
 import json
-import os
+from pathlib import Path
 
-class I18n:
-    def __init__(self, default_lang="en"):
-        self.lang = default_lang
-        self.translations = {}
-        self.load_translations()
-
-    def load_translations(self):
-        locales_dir = os.path.join(os.path.dirname(__file__), "../locales")
-        for filename in os.listdir(locales_dir):
-            if filename.endswith(".json"):
-                lang_code = filename.split(".")[0]
-                with open(os.path.join(locales_dir, filename), "r", encoding="utf-8") as f:
-                    self.translations[lang_code] = json.load(f)
-
-    def set_language(self, lang):
+class I18N:
+    def __init__(self):
+        self.project_root = Path(__file__).parent.parent.parent
+        self.locales_dir = self.project_root / "core" / "locales"
+        self.current_language = "fr"  # Default language
+        self.translations = self._load_translations()
+    
+    def _load_translations(self) -> Dict[str, Dict[str, str]]:
+        """Charge les traductions depuis les fichiers JSON"""
+        translations = {}
+        
+        # Charger français
+        fr_file = self.locales_dir / "fr.json"
+        if fr_file.exists():
+            with open(fr_file, 'r', encoding='utf-8') as f:
+                translations["fr"] = json.load(f)
+        
+        # Charger anglais
+        en_file = self.locales_dir / "en.json"
+        if en_file.exists():
+            with open(en_file, 'r', encoding='utf-8') as f:
+                translations["en"] = json.load(f)
+        
+        return translations
+    
+    def set_language(self, lang: str):
+        """Définit la langue courante"""
         if lang in self.translations:
-            self.lang = lang
-            return True
-        return False
+            self.current_language = lang
+        else:
+            self.current_language = "en"  # Fallback to English
+    
+    def get(self, key: str, default: str = None) -> str:
+        """Retourne la traduction pour la clé donnée"""
+        if self.current_language in self.translations:
+            return self.translations[self.current_language].get(key, default or key)
+        return default or key
+    
+    def get_banner(self) -> str:
+        """Retourne la bannière dans la langue courante"""
+        banner = """
+  █████╗ ██╗     ███████╗██╗  ██╗ 
+ ██╔══██╗██║     ██╔════╝╚██╗██╔╝ 
+ ███████║██║     █████╗   ╚███╔╝  
+ ██╔══██║██║     ██╔══╝   ██╔██╗  
+ ██║  ██║███████╗███████╗██╔╝ ██╗ 
+ ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝ 
 
-    def t(self, key, **kwargs):
-        """Translate a key to the current language."""
-        text = self.translations.get(self.lang, {}).get(key, key)
+        V A N T A B L A C K
+     THESENEGALESEHITCH
+"""
+        
+        if self.current_language == "fr":
+            return banner + "\n═══════════════════════════════════════════\nChargement des modules...\n═══════════════════════════════════════════"
+        else:
+            return banner + "\n═══════════════════════════════════════════\nLoading modules...\n═══════════════════════════════════════════"
+
+# Instance globale
+i18n = I18N()
+
+def t(key: str, default: str = None, **kwargs) -> str:
+    """Fonction helper pour accéder aux traductions avec formatage"""
+    translation = i18n.get(key, default)
+    if translation and kwargs:
         try:
-            return text.format(**kwargs)
-        except KeyError:
-            return text
-
-# Global instance
-i18n = I18n()
-
-def set_lang(lang):
-    i18n.set_language(lang)
-
-def t(key, **kwargs):
-    return i18n.t(key, **kwargs)
+            return translation.format(**kwargs)
+        except (KeyError, ValueError):
+            return translation
+    return translation

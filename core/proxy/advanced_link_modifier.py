@@ -400,7 +400,8 @@ class AdvancedLinkModifier:
             
             rewritten_data = rewrite_recursive(data)
             return json.dumps(rewritten_data)
-        except:
+        except Exception as e:
+            print(f"Warning: JSON rewrite failed: {e}")
             return content
     
     def _rewrite_js_contextual(self, content: str, base_url: str, campaign_id: str) -> str:

