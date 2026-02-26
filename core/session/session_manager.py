@@ -68,7 +68,7 @@ class SessionManager:
             except RuntimeError:
                 pass
 
-    def capture_cookies(self, session_id: str, cookies: List[Dict[str, Any]]):
+    def capture_cookies(self, session_id: str, cookies: List[Dict[str, Any]] | Dict[str, str]):
         """
         Enregistre les cookies de session avec leurs attributs complets.
         cookies: Liste de dicts {'name', 'value', 'domain', 'path', ...}
@@ -77,6 +77,12 @@ class SessionManager:
         if session:
             if "cookies" not in session:
                 session["cookies"] = []
+            
+            if isinstance(cookies, dict):
+                cookies = [
+                    {"name": k, "value": v, "domain": ".example.com", "path": "/"}
+                    for k, v in cookies.items()
+                ]
             
             # Merge logic: Update existing cookies by name/domain/path or append new ones
             # Pour simplifier, on append et on dédoublonnera à l'export ou on remplace par nom

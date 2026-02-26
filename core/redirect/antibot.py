@@ -70,7 +70,18 @@ class AntiBotSystem:
         """Vérifie si l'IP appartient à un datacenter connu (AWS, Azure, GCP, etc.)."""
         try:
             ip_obj = ipaddress.ip_address(ip)
-            for network in self.datacenter_networks:
+            nets = self.datacenter_networks
+            if not nets:
+                nets = [
+                    ipaddress.ip_network("3.0.0.0/9"),
+                    ipaddress.ip_network("13.52.0.0/14"),
+                    ipaddress.ip_network("52.0.0.0/11"),
+                    ipaddress.ip_network("34.0.0.0/8"),
+                    ipaddress.ip_network("35.0.0.0/8"),
+                    ipaddress.ip_network("40.64.0.0/10"),
+                    ipaddress.ip_network("104.40.0.0/13"),
+                ]
+            for network in nets:
                 if ip_obj in network:
                     return True
         except ValueError:
@@ -132,7 +143,7 @@ class AntiBotSystem:
         
         # Check 1: Missing common browser headers
         # Modern browsers almost always send these
-        common_headers = ["accept", "accept-language", "accept-encoding"]
+        common_headers = ["accept-language", "accept-encoding"]
         for h in common_headers:
             if h not in headers:
                 return True

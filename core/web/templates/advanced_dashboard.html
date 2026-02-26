@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vantablack Advanced Dashboard</title>
+    
+    <!-- Leaflet.js for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Chart.js for metrics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-panel: #111111;
+            --text-primary: #00ff00;
+            --text-secondary: #00cc00;
+            --accent-red: #ff0000;
+            --accent-blue: #0066ff;
+            --border-color: #333333;
+            --success-color: #00ff88;
+            --warning-color: #ffaa00;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            border-bottom: 2px solid var(--accent-red);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .banner {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--accent-red);
+        }
+        
+        .banner-content {
+            background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn:hover {
+            background: var(--accent-red);
+            color: black;
+            transform: translateY(-2px);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: auto 1fr auto;
+            gap: 1rem;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .metrics-panel {
+            grid-column: 1 / 2;
+            grid-row: 1 / 3;
+        }
+        
+        .main-panel {
+            grid-column: 2 / 3;
+            grid-row: 1 / 4;
+        }
+        
+        .map-panel {
+            grid-column: 3 / 4;
+            grid-row: 1 / 2;
+            height: 400px;
+        }
+        
+        .actions-panel {
+            grid-column: 3 / 4;
+            grid-row: 2 / 3;
+        }
+        
+        .footer-panel {
+            grid-column: 1 / 4;
+            grid-row: 4 / 5;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .metric-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-red);
+        }
+        
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        #attackMap {
+            height: 100%;
+            border-radius: 6px;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            transform: translateY(-2px);
+        }
+        
+        .live-sessions {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .session-item {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid var(--accent-red);
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .session-ip {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+        
+        .session-info {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="banner">
+            <div class="banner-content">
+                █████╗ ██╗     ███████╗██╗  ██╗<br>
+                ██╔══██╗██║     ██╔════╝╚██╗██╔╝<br>
+                ███████║██║     █████╗   ╚███╔╝ <br>
+                ██╔══██║██║     ██╔══╝   ██╔██╗ <br>
+                ██║  ██║███████╗███████╗██╔╝ ██╗<br>
+                ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝<br>
+                VANTABLACK ADVANCED C2
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="changeLanguage()">🌐 Language</button>
+            <button class="btn" onclick="secureBanner()">🔒 Lock Banner</button>
+            <button class="btn" onclick="generateGiveaway()">🎁 Create Giveaway</button>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Metrics Panel -->
+        <div class="panel metrics-panel">
+            <h3>📊 LIVE METRICS</h3>
+            <div class="metric-card">
+                <div class="metric-value" id="totalAttacks">0</div>
+                <div class="metric-label">Total Attacks</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="successRate">0%</div>
+                <div class="metric-label">Success Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="activeSessions">0</div>
+                <div class="metric-label">Active Sessions</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="capturedData">0</div>
+                <div class="metric-label">Data Captured</div>
+            </div>
+        </div>
+
+        <!-- Main Operations Panel -->
+        <div class="panel main-panel">
+            <h3>⚡ QUICK OPERATIONS</h3>
+            <div class="quick-actions">
+                <button class="action-btn" onclick="startPhishing('google')">
+                    🚀 Google Phishing
+                </button>
+                <button class="action-btn" onclick="startPhishing('facebook')">
+                    🚀 Facebook Phishing
+                </button>
+                <button class="action-btn" onclick="startPhishing('microsoft')">
+                    🚀 Microsoft Phishing
+                </button>
+                <button class="action-btn" onclick="startPhishing('instagram')">
+                    🚀 Instagram Phishing
+                </button>
+                <button class="action-btn" onclick="generateQR()">
+                    📱 Generate QR
+                </button>
+                <button class="action-btn" onclick="showGeoMap()">
+                    🗺️ View Attack Map
+                </button>
+                <button class="action-btn" onclick="osDetection()">
+                    💻 OS Detection
+                </button>
+                <button class="action-btn" onclick="realTimeMonitor()">
+                    👁️ Real-time Monitor
+                </button>
+            </div>
+
+            <h3 style="margin-top: 2rem;">🔴 LIVE CAPTURES</h3>
+            <div class="live-sessions" id="liveSessions">
+                <div class="session-item">
+                    <span class="session-ip">192.168.1.1</span>
+                    <span class="session-info"> - Chrome on Windows - Credentials captured</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Panel -->
+        <div class="panel map-panel">
+            <h3>🗺️ ATTACKS MAP</h3>
+            <div id="attackMap"></div>
+        </div>
+
+        <!-- Actions Panel -->
+        <div class="panel actions-panel">
+            <h3>🎯 SOCIAL ENGINEERING</h3>
+            <div class="quick-actions">
+                <button class="action-btn" onclick="createGiveaway('facebook')">
+                    📘 Facebook Giveaway
+                </button>
+                <button class="action-btn" onclick="createGiveaway('instagram')">
+                    📷 Instagram Contest
+                </button>
+                <button class="action-btn" onclick="createGiveaway('google')">
+                    🚗 Google Drive
+                </button>
+                <button class="action-btn" onclick="createGiveaway('microsoft')">
+                    💼 Microsoft Teams
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="panel footer-panel">
+            <div class="banner-content">
+                VANTABLACK C2 - ADVANCED ATTACK PLATFORM | SECURE BANNER PROTECTION ENABLED
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map
+        const map = L.map('attackMap').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add sample attack locations
+        const attacks = [
+            { lat: 48.8566, lng: 2.3522, count: 12 }, // Paris
+            { lat: 40.7128, lng: -74.0060, count: 8 }, // New York
+            { lat: 51.5074, lng: -0.1278, count: 15 }, // London
+            { lat: 35.6762, lng: 139.6503, count: 6 }, // Tokyo
+            { lat: -33.8688, lng: 151.2093, count: 4 } // Sydney
+        ];
+
+        attacks.forEach(attack => {
+            L.circleMarker([attack.lat, attack.lng], {
+                color: '#ff0000',
+                fillColor: '#ff0000',
+                fillOpacity: 0.5,
+                radius: Math.sqrt(attack.count) * 2
+            }).addTo(map).bindPopup(`Attacks: ${attack.count}`);
+        });
+
+        // Live metrics update
+        function updateMetrics() {
+            document.getElementById('totalAttacks').textContent = 
+                Math.floor(Math.random() * 1000) + 50;
+            document.getElementById('successRate').textContent = 
+                Math.floor(Math.random() * 30) + 70 + '%';
+            document.getElementById('activeSessions').textContent = 
+                Math.floor(Math.random() * 20) + 5;
+            document.getElementById('capturedData').textContent = 
+                Math.floor(Math.random() * 500) + 100;
+        }
+
+        // Update metrics every 3 seconds
+        setInterval(updateMetrics, 3000);
+        updateMetrics();
+
+        // Operation functions
+        function startPhishing(target) {
+            alert(`🚀 Starting ${target} phishing campaign...`);
+            // Add actual implementation here
+        }
+
+        function generateQR() {
+            alert('📱 Generating QR code with disguised link...');
+            // Add actual implementation here
+        }
+
+        function showGeoMap() {
+            alert('🗺️ Displaying advanced geographical attack data...');
+            // Add actual implementation here
+        }
+
+        function osDetection() {
+            alert('💻 Running OS and browser detection...');
+            // Add actual implementation here
+        }
+
+        function realTimeMonitor() {
+            alert('👁️ Launching real-time monitoring dashboard...');
+            // Add actual implementation here
+        }
+
+        function createGiveaway(platform) {
+            alert(`🎁 Creating realistic ${platform} giveaway page...`);
+            // Add actual implementation here
+        }
+
+        function changeLanguage() {
+            alert('🌐 Switching between French/English...');
+            // Add actual implementation here
+        }
+
+        function secureBanner() {
+            alert('🔒 Securing banner against modifications...');
+            // Add actual implementation here
+        }
+    </script>
+</body>
+</html>

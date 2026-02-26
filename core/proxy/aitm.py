@@ -431,7 +431,6 @@ class AiTMProxy:
             if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
                 return f"{proxy_base_path}{url}"
             if proxy_base_path == "/v5/proxy":
-                from urllib.parse import quote
                 return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
             # Default: path-only
             return url
@@ -448,7 +447,6 @@ class AiTMProxy:
                 path = parsed.path or ""
                 if parsed.query:
                     # If queries exist, fall back to query-style to preserve semantics
-                    from urllib.parse import quote
                     encoded = quote(url, safe='/?&=')
                     return f"{proxy_base_path}?url={encoded}"
                 return f"{proxy_base_path}{path}"
@@ -456,25 +454,20 @@ class AiTMProxy:
             is_ws = url.startswith(("ws://", "wss://"))
             endpoint = "/ws" if is_ws else ""
             if proxy_base_path == "/v5/proxy":
-                from urllib.parse import quote
                 encoded = quote(url, safe='/?&=')
                 return f"{proxy_base_path}{endpoint}?url={encoded}"
             # Default: path-only (preserve query)
             return (parsed.path or url) + (f"?{parsed.query}" if parsed.query else "")
         
         # Handle relative non-root URLs (e.g., "socket")
-        try:
-            full_upstream_url = urljoin(base_url, url)
-            if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
-                parsed = urlparse(full_upstream_url)
-                return f"{proxy_base_path}{parsed.path}"
-            if proxy_base_path == "/v5/proxy":
-                return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
-            # Default path-only (preserve query)
+        full_upstream_url = urljoin(base_url, url)
+        if proxy_base_path and proxy_base_path.startswith("/v5/p/"):
             parsed = urlparse(full_upstream_url)
-            return (parsed.path or url) + (f"?{parsed.query}" if parsed.query else "")
-        except Exception:
-            return url
+            return f"{proxy_base_path}{parsed.path}"
+        if proxy_base_path == "/v5/proxy":
+            return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
+        parsed = urlparse(full_upstream_url)
+        return (parsed.path or url) + (f"?{parsed.query}" if parsed.query else "")
 
     def rewrite_html(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
         """

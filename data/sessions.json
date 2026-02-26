@@ -2710,5 +2710,18 @@
     "is_authenticated": false,
     "created_at": "2026-02-26T17:35:43.383919",
     "last_activity": "2026-02-26T17:35:43.383928"
+  },
+  "f3c35002-a429-425d-bb89-b630d86176ee": {
+    "session_id": "f3c35002-a429-425d-bb89-b630d86176ee",
+    "campaign_id": "manual",
+    "phishlet_name": "Microsoft 365",
+    "remote_ip": "0.0.0.0",
+    "user_agent": "unknown",
+    "credentials": [],
+    "tokens": {},
+    "custom_data": {},
+    "is_authenticated": false,
+    "created_at": "2026-02-26T20:14:48.201860",
+    "last_activity": "2026-02-26T20:14:48.201870"
   }
 }

