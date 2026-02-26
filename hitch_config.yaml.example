@@ -7,6 +7,15 @@ version: "3.1.0"
 description: "Industrial Phishing Orchestrator - Red Team Edition"
 
 # ===========================================
+# API & UI SECURITY
+# ===========================================
+cors:
+  # List of allowed origins for the API and UI, separated by commas.
+  # For production, lock this down to your redirector and UI domains.
+  # Example: "https://my-redirector.com,https://my-dashboard.com"
+  allowed_origins: "http://localhost:3000,http://127.0.0.1:3000"
+
+# ===========================================
 # NOTIFICATIONS
 # ===========================================
 

@@ -33,23 +33,53 @@ class AntiAnalysisPlugin:
         return True
 
     def inject_js_checks(self, html_content: str) -> str:
-        """Inject client-side anti-analysis checks"""
+        """Inject advanced client-side anti-analysis and anti-bot checks."""
         js_code = """
         (function() {
-            // Detect headless browser
-            if (navigator.webdriver) {
-                // Silent exit or redirect
-                window.location.href = "https://www.google.com";
+            const redirectUrl = "https://www.google.com/search?q=news";
+            let mouseMovements = 0;
+
+            // --- Evasion Techniques ---
+
+            // 1. Headless Browser & WebDriver Detection
+            if (navigator.webdriver || (window.document.documentElement.getAttribute("webdriver"))) {
+                console.warn("Evasion: WebDriver detected.");
+                window.location.href = redirectUrl;
+                return;
             }
-            
-            // Detect automation tools
-            if (window.document.documentElement.getAttribute("webdriver")) {
-                window.location.href = "https://www.google.com";
+
+            // 2. Screen Resolution Check (common VM/sandbox resolutions)
+            const unusualResolutions = ["800x600", "1024x768", "1280x800"];
+            const currentResolution = `${screen.width}x${screen.height}`;
+            if (unusualResolutions.includes(currentResolution)) {
+                console.warn(`Evasion: Unusual screen resolution detected: ${currentResolution}`);
+                // This is a soft check, so we might just log it instead of redirecting.
             }
-            
-            // Time-based analysis detection (mouse movement entropy)
-            // Real users move mouse in curves, bots in straight lines or instant jumps
-            // (Simplified implementation)
+
+            // 3. Mouse Movement Entropy
+            document.addEventListener('mousemove', () => {
+                mouseMovements++;
+            }, { once: true }); // Only need to know they moved it at least once
+
+            // 4. Time-on-Page & Interaction Check
+            const startTime = Date.now();
+            const minTimeOnPage = 2000; // 2 seconds
+
+            const originalSubmit = HTMLFormElement.prototype.submit;
+            HTMLFormElement.prototype.submit = function() {
+                const timeOnPage = Date.now() - startTime;
+                
+                if (timeOnPage < minTimeOnPage || mouseMovements === 0) {
+                    console.warn(`Evasion: Form submission blocked. Time: ${timeOnPage}ms, Mouse Moves: ${mouseMovements}`);
+                    // Don't submit the form, just redirect.
+                    window.location.href = redirectUrl;
+                    return;
+                }
+                
+                // If checks pass, submit the form normally.
+                originalSubmit.apply(this, arguments);
+            };
+
         })();
         """
         return self.api.inject_script(html_content, script_content=js_code)

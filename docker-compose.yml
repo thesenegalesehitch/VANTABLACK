@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://vantablack:password@postgres:5432/vantablack
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
@@ -16,24 +16,13 @@ services:
       - ./storage:/app/storage
     restart: unless-stopped
 
-  # Frontend Web App
-  vantablack-web:
-    build:
-      context: ./web/frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://localhost:8000
-    restart: unless-stopped
-
   # Database
   postgres:
     image: postgres:15
     environment:
-      - POSTGRES_DB=vantablack
-      - POSTGRES_USER=vantablack
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -49,7 +38,7 @@ services:
       context: .
       dockerfile: Dockerfile.worker
     environment:
-      - DATABASE_URL=postgresql://vantablack:password@postgres:5432/vantablack
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
@@ -72,7 +61,7 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
     restart: unless-stopped

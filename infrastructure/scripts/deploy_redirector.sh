@@ -1,100 +1,101 @@
 #!/bin/bash
-# Vantablack Tier 2 Deployment Script
-# ===================================
-# This script deploys a Vantablack Redirector (Tier 2) on a fresh Linux server.
-# It installs Nginx, configures it as a reverse proxy to the Core (Tier 3),
-# and sets up basic security.
+#
+# Vantablack - Automated Redirector Deployment Script
+# ==================================================
+# This script generates an Nginx configuration for a Tier 2 redirector.
 
 set -e
 
 # --- Configuration ---
-CORE_HOST=""
-CORE_PORT="8000"
-NGINX_CONF="/etc/nginx/nginx.conf"
-REDIRECTOR_CONF="infrastructure/nginx/redirector.conf"
+NGINX_CONFIG_PATH="/etc/nginx/sites-available/redirector.conf"
+NGINX_SYMLINK_PATH="/etc/nginx/sites-enabled/redirector.conf"
 
-# --- Colors ---
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+# --- Functions ---
+print_usage() {
+    echo "Usage: $0 --domain <your_domain> --upstream-ip <c2_server_ip>"
+    echo "  --domain: The domain name for the redirector (e.g., phishing.com)."
+    echo "  --upstream-ip: The IP address of the Vantablack C2 server."
+}
 
-echo -e "${GREEN}>>> Vantablack Tier 2 Deployment <<<${NC}"
+generate_nginx_config() {
+    local domain=$1
+    local upstream_ip=$2
 
-# --- Check Root ---
-if [ "$EUID" -ne 0 ]; then 
-  echo -e "${RED}[!] Please run as root${NC}"
-  exit 1
-fi
+    cat << EOF
+server {
+    listen 80;
+    server_name $domain;
 
-# --- Inputs ---
-read -p "Enter Vantablack Core IP/Hostname (Tier 3): " CORE_HOST
-if [ -z "$CORE_HOST" ]; then
-    echo -e "${RED}[!] Core Host is required${NC}"
-    exit 1
-fi
+    # Redirect all HTTP traffic to HTTPS
+    location / {
+        return 301 https://\$host\$request_uri;
+    }
+}
 
-read -p "Enter Core Port [8000]: " input_port
-CORE_PORT=${input_port:-8000}
+server {
+    listen 443 ssl http2;
+    server_name $domain;
 
-# --- Install Nginx ---
-echo -e "${GREEN}[*] Installing Nginx...${NC}"
-if [ -f /etc/debian_version ]; then
-    apt-get update -qq
-    apt-get install -y nginx curl certbot python3-certbot-nginx
-elif [ -f /etc/redhat-release ]; then
-    yum install -y epel-release
-    yum install -y nginx curl certbot python3-certbot-nginx
-else
-    echo -e "${RED}[!] Unsupported OS. Please install Nginx manually.${NC}"
-    exit 1
-fi
+    # SSL Configuration (to be filled by Certbot)
+    # ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem;
+    # include /etc/letsencrypt/options-ssl-nginx.conf;
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
-# --- Configure Nginx ---
-echo -e "${GREEN}[*] Configuring Redirector...${NC}"
-if [ ! -f "$REDIRECTOR_CONF" ]; then
-    echo -e "${RED}[!] Configuration file $REDIRECTOR_CONF not found! Run from project root.${NC}"
-    # Fallback: create minimal config inline if file missing
-    cat > nginx.conf <<EOF
-user www-data;
-worker_processes auto;
-events { worker_connections 1024; }
-http {
-    include /etc/nginx/mime.types;
-    upstream core { server $CORE_HOST:$CORE_PORT; }
-    server {
-        listen 80;
-        location / {
-            proxy_pass http://core;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-        }
+    location / {
+        proxy_pass http://$upstream_ip:8443; # Assuming Vantablack runs on 8443
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        # WebSocket Support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
     }
 }
 EOF
-    cp nginx.conf $NGINX_CONF
-    rm nginx.conf
-else
-    # Replace placeholders and copy
-    sed "s/CORE_HOST/$CORE_HOST/g" $REDIRECTOR_CONF | sed "s/CORE_PORT/$CORE_PORT/g" > temp_nginx.conf
-    mv temp_nginx.conf $NGINX_CONF
+}
+
+# --- Main Logic ---
+if [ "$#" -ne 4 ]; then
+    print_usage
+    exit 1
 fi
 
-# --- Test & Reload ---
-echo -e "${GREEN}[*] Testing Configuration...${NC}"
-nginx -t
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --domain) DOMAIN="$2"; shift ;;
+        --upstream-ip) UPSTREAM_IP="$2"; shift ;;
+        *) echo "Unknown parameter passed: $1"; print_usage; exit 1 ;;
+    esac
+    shift
+done
 
-echo -e "${GREEN}[*] Reloading Nginx...${NC}"
-systemctl enable nginx
-systemctl restart nginx
-
-# --- SSL Setup (Optional) ---
-read -p "Do you want to setup SSL via Certbot (Let's Encrypt)? [y/N]: " setup_ssl
-if [[ "$setup_ssl" =~ ^[Yy]$ ]]; then
-    read -p "Enter Domain Name (e.g., login.microsoft-security.com): " domain_name
-    if [ ! -z "$domain_name" ]; then
-        certbot --nginx -d $domain_name --non-interactive --agree-tos -m admin@$domain_name --redirect
-    fi
+if [ -z "$DOMAIN" ] || [ -z "$UPSTREAM_IP" ]; then
+    echo "Error: Both --domain and --upstream-ip are required."
+    print_usage
+    exit 1
 fi
 
-echo -e "${GREEN}[SUCCESS] Tier 2 Redirector Deployed!${NC}"
-echo -e "Traffic -> This Server -> $CORE_HOST:$CORE_PORT"
+echo "[+] Generating Nginx configuration for domain: $DOMAIN"
+CONFIG_CONTENT=$(generate_nginx_config "$DOMAIN" "$UPSTREAM_IP")
+
+echo "[+] Writing configuration to temporary file..."
+TMP_CONFIG_FILE=$(mktemp)
+echo "$CONFIG_CONTENT" > "$TMP_CONFIG_FILE"
+
+echo "[+] Validating generated Nginx configuration..."
+nginx -t -c "$TMP_CONFIG_FILE"
+
+echo "[+] Configuration is valid. You can now copy it to your Nginx server."
+echo "    sudo cp $TMP_CONFIG_FILE $NGINX_CONFIG_PATH"
+echo "    sudo ln -s $NGINX_CONFIG_PATH $NGINX_SYMLINK_PATH"
+echo "    sudo systemctl restart nginx"
+echo ""
+echo "[+] Don't forget to obtain an SSL certificate for your domain:"
+echo "    sudo certbot --nginx -d $DOMAIN"
+echo ""
+echo "[+] Temporary config file is at: $TMP_CONFIG_FILE"
+

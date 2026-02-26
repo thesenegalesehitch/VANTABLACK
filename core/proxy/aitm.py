@@ -453,8 +453,8 @@ class AiTMProxy:
                 from urllib.parse import quote
                 encoded = quote(url, safe='/?&=')
                 return f"{proxy_base_path}{endpoint}?url={encoded}"
-            # Default: path-only
-            return parsed.path or url
+            # Default: path-only (preserve query)
+            return (parsed.path or url) + (f"?{parsed.query}" if parsed.query else "")
         
         # Handle relative non-root URLs (e.g., "socket")
         try:
@@ -464,13 +464,13 @@ class AiTMProxy:
                 return f"{proxy_base_path}{parsed.path}"
             if proxy_base_path == "/v5/proxy":
                 return f"{proxy_base_path}?url={quote(full_upstream_url, safe='/?&=')}"
-            # Default path-only
+            # Default path-only (preserve query)
             parsed = urlparse(full_upstream_url)
-            return parsed.path or url
+            return (parsed.path or url) + (f"?{parsed.query}" if parsed.query else "")
         except Exception:
             return url
 
-    def rewrite_html(self, content: bytes, base_url: str, proxy_base_path: str = "/v5/proxy") -> bytes:
+    def rewrite_html(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
         """
         Parse et réécrit les liens dans le HTML (href, src, action).
         """
@@ -534,7 +534,7 @@ class AiTMProxy:
             print(f"[AiTM Warning] HTML rewrite failed: {e}")
             return content
 
-    def rewrite_css(self, content: bytes, base_url: str, proxy_base_path: str = "/v5/proxy") -> bytes:
+    def rewrite_css(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
         """
         Réécrit les URLs dans les fichiers CSS (url(), @import).
         """
@@ -565,7 +565,7 @@ class AiTMProxy:
         except:
             return content
 
-    def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str = "/v5/proxy") -> bytes:
+    def rewrite_json(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
         """
         Réécrit les URLs dans une réponse JSON.
         """
@@ -576,7 +576,7 @@ class AiTMProxy:
         except:
             return content
 
-    def rewrite_js(self, content: bytes, base_url: str, proxy_base_path: str = "/v5/proxy") -> bytes:
+    def rewrite_js(self, content: bytes, base_url: str, proxy_base_path: str = "") -> bytes:
         """
         Réécrit les URLs dans les fichiers JS (Regex simple).
         """

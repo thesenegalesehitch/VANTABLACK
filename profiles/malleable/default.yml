@@ -1,0 +1,34 @@
+# Vantablack Malleable C2 Profile - Default
+# ==========================================
+# This profile defines the network indicators for the Vantablack framework.
+# Use this to customize endpoints, script names, and other IOCs to evade detection.
+
+# HTTP Traffic Configuration
+http-config:
+  # Headers sent in the server's responses
+  headers:
+    Server: "Apache"
+    X-Powered-by: "PHP/7.4.3"
+  
+# Endpoints for various services
+endpoints:
+  api_base: "/api/v1"
+  telemetry: "/telemetry/track"
+  login_submit: "/auth/login"
+
+# Javascript file names
+js_files:
+  fingerprint: "fp.js"
+  phantasm_engine: "engine.js"
+  behavior_tracker: "tracker.js"
+
+# Cookie and Local Storage names
+storage_keys:
+  session_cookie: "session_id"
+  csrf_token_name: "csrf_token"
+
+# POST request parameters
+post_params:
+  username: "user"
+  password: "pwd"
+  token: "tkn"

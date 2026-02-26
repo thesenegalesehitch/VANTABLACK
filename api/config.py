@@ -35,6 +35,9 @@ class DatabaseSettings(BaseSettings):
     auto_backup: bool = True
     backup_interval: int = 3600
 
+class CORSSettings(BaseSettings):
+    allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+
 class LoggingSettings(BaseSettings):
     level: str = "INFO"
     file: str = "vanta.log"
@@ -60,6 +63,7 @@ class Settings(BaseSettings):
     description: str = "Industrial Phishing Orchestrator - Red Team Edition"
     secret_key: str = "change_me_in_production"
     
+    cors: CORSSettings = CORSSettings()
     telegram: TelegramSettings = TelegramSettings()
     discord: DiscordSettings = DiscordSettings()
     evasion: EvasionSettings = EvasionSettings()
@@ -88,6 +92,7 @@ class Settings(BaseSettings):
             # But we can construct it.
             
             # Extract nested sections
+            cors_data = data.get("cors", {})
             telegram_data = data.get("telegram", {})
             discord_data = data.get("discord", {})
             evasion_data = data.get("evasion", {})
@@ -115,6 +120,7 @@ class Settings(BaseSettings):
                 name=data.get("name", "VANTABLACK"),
                 version=data.get("version", "4.0.0"),
                 description=data.get("description", "Industrial Phishing Orchestrator"),
+                cors=CORSSettings(**cors_data),
                 telegram=TelegramSettings(**telegram_data),
                 discord=DiscordSettings(**discord_data),
                 evasion=EvasionSettings(**evasion_data),
