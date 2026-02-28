@@ -19,6 +19,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 from collections import defaultdict
 import math
+import hashlib
 
 
 @dataclass
@@ -329,9 +330,9 @@ class ABTestManager:
         config = self.active_tests[test_id]
         results = self.test_results[test_id]
         
-        total_impressions = sum(metrics.impressions for metrics in results.values())
-        total_conversions = sum(metrics.conversions for metrics in metrics.values())
-        total_revenue = sum(metrics.revenue for metrics in metrics.values())
+        total_impressions = sum(m.impressions for m in results.values())
+        total_conversions = sum(m.conversions for m in results.values())
+        total_revenue = sum(m.revenue for m in results.values())
         
         # Calculate lift over baseline (first variant)
         baseline_variant = config.template_variants[0]
@@ -569,8 +570,10 @@ class ABTestManager:
         # Effect size in standard deviations
         effect_size = min_effect_size / std_dev if std_dev > 0 else 1
         
-        # Power calculation
-        power = 1 - stats.norm.cdf(z_alpha - effect_size * math.sqrt(total_samples / 2))
+        # Power calculation using standard normal CDF via erf
+        def _norm_cdf(x: float) -> float:
+            return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+        power = 1 - _norm_cdf(z_alpha - effect_size * math.sqrt(total_samples / 2))
         
         return max(0.0, min(1.0, power))
     
