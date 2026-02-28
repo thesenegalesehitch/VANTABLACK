@@ -7,6 +7,7 @@ from typing import Optional
 import os
 import shutil
 from datetime import datetime
+import uuid
 from core.qr_link_system import qr_link_system, QRConfig, QRCorrectionLevel
 from core.common import config
 from core.api.dashboard import router as dashboard_router
@@ -34,6 +35,13 @@ def create_app() -> FastAPI:
     # API Routers
     app.include_router(dashboard_router, prefix="/v5")
     app.include_router(api_router)
+
+    @app.middleware("http")
+    async def request_id_middleware(request: Request, call_next):
+        rid = request.headers.get("x-request-id") or str(uuid.uuid4())
+        response = await call_next(request)
+        response.headers["X-Request-Id"] = rid
+        return response
 
     # Tier 2 Authentication Middleware
     if str(config.get("TIER2_ENABLED") or "false").lower() == "true":

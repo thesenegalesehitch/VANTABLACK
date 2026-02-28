@@ -1,37 +1,38 @@
-# Vantablack Core v5 — Red Team Operations Suite (Clean Edition)
+# 🕶️ Vantablack Core v5 — Framework Avancé de Test d'Intrusion
 
-Vantablack Core v5 is a modular, research‑oriented framework for red‑team training and security experimentation. This "Clean" edition focuses on safe, lawful use with built‑in safeguards, local self‑audit flows, and clear guidance to prevent misuse.
+**Framework modulaire de recherche et de formation à la sécurité offensive** - Édition "Clean" avec protections intégrées
 
-> Important: Use only in environments you own or explicitly control, with proper authorization. The maintainers do not condone, encourage, or support illegal activity.
+> ⚠️ **Avertissement Important** : Utilisation exclusive sur des environnements autorisés. Conformité légale obligatoire.
 
-## 🚀 NOUVELLES FONCTIONNALITÉS (v5.1)
+## 🚀 Capacités Techniques Avancées (v5.1+)
 
-### 🌍 **Tous les Réseaux Sociaux Mondiaux**
-- ✅ **WhatsApp, Telegram, Snapchat, Twitch**
-- ✅ **WeChat, LINE, VKontakte (VK), Spotify**
-- ✅ **Facebook, Instagram, Twitter/X, Google**
-- ✅ **Microsoft, LinkedIn, Amazon, Apple**
-- ✅ **Discord, Dropbox, GitHub, PayPal**
-- ✅ **Reddit, Slack, TikTok, Yahoo**
+### 🌍 **Couverture Mondiale Complète**
+- **📱 Messageries Instantanées** : WhatsApp, Telegram, Signal, LINE, WeChat
+- **💼 Professionnel** : Microsoft 365, Google Workspace, LinkedIn, Slack
+- **🛒 E-commerce** : Amazon, Apple ID, PayPal, eBay
+- **🎮 Gaming & Streaming** : Discord, Twitch, Steam, Epic Games
+- **🌐 Réseaux Sociaux** : Facebook, Instagram, Twitter/X, TikTok, Reddit
+- **☁️ Cloud Storage** : Dropbox, Google Drive, OneDrive, iCloud
 
-### 🎯 **Système de Monitoring Temps Réel**
-- 🔍 **Affichage instantané** des captures dans le terminal
-- 👤 **Détection OS** (Windows, macOS, Linux, Android, iOS)
-- 🌐 **Analyse navigateur** (Chrome, Firefox, Safari, Edge)
-- 📍 **Géolocalisation** et détection VPN
-- 💡 **Instructions d'utilisation** pour chaque capture
+### 🔍 **Système de Reconnaissance Avancée**
+- **🖥️ Fingerprinting Polymorphique** : Collecte complète des empreintes navigateur
+- **🌐 Géolocalisation Précise** : IP, timezone, langue, résolution d'écran
+- **🔧 Détection Technique** : OS, navigateur, plugins, WebGL, Canvas
+- **🤖 Anti-Bot Intelligent** : Détection automatique des automates et scanners
+- **📊 Analytics Temps Réel** : Dashboard live avec métriques détaillées
 
-### 🎁 **Générateur de Pages Personnalisées**
-- 🎯 **Pages Giveaway** avec comptes à rebours
-- 🔐 **Pages Login** professionnelles indiscernables
-- 🎨 **Templates automatiques** pour campagnes
-- 🚀 **Génération de phishlets** associés
+### 🎨 **Ingénierie Sociale Avancée**
+- **📝 Templates Haute Fidélité** : Reproduction pixel-perfect des plateformes cibles
+- **⚡ Génération Dynamique** : Pages adaptatives en fonction du contexte
+- **🎯 Campagnes Personnalisées** : Création de scénarios ciblés spécifiques
+- **🔗 Système de Redirection Intelligent** : Routage adaptatif basé sur le fingerprinting
 
-### ⚡ **Installation Automatique**
-- 🤖 **Détection OS** automatique (macOS, Linux, Windows)
-- 📦 **Installation dépendances** système et Python
-- 🐍 **Environnement virtuel** auto-configuré
-- 🧪 **Tests de validation** complets
+### ⚡ **Infrastructure Professionnelle**
+- **🏗️ Architecture Modulaire** : Composants indépendants et extensibles
+- **🔒 Sécurité Renforcée** : Validation de type, analyse statique, sandboxing
+- **🚀 Performances Optimisées** : Async/await, connexions persistantes, caching Redis
+- **📦 CI/CD Intégré** : Tests automatisés, validation de qualité, déploiement
+- **🐳 Containerisation** : Docker, Kubernetes, déploiement cloud-ready
 
 ## 🚀 Démarrage Ultra-Rapide
 
@@ -55,9 +56,10 @@ python -m pip install -r requirements.txt
 python install_deps.py
 ```
 
-### Menu Interactif Complet :
+### Serveur UI (Dashboard)
 ```bash
-python setup.py
+python -m uvicorn core.web.server:create_app --reload --port 8000
+# UI: http://localhost:8000/ui
 ```
 
 ## 📋 Plateformes Supportées
@@ -104,12 +106,12 @@ python generator.py
 # → Créer giveaways, pages login, campagnes
 ```
 
-### Lancer une Attaque Ciblée :
+### Lancer un serveur de test ciblé :
 ```bash
-# Serveur phishing simple
+# Serveur de test simple
 python phishing_server.py --target google --port 8080
 
-# Avec furtivité avancée
+# Mode furtif (démo)
 python phishing_server.py --target microsoft --stealth --lang fr
 
 # Giveaway personnalisé
@@ -121,7 +123,7 @@ python generator.py → Option 1
 python quishing.py --url https://votre-lure.trycloudflare.com/login --logo google.png
 ```
 
-## 🔍 Fonctionnalités de Détection
+## 🔍 Fonctionnalités de Détection (Recherche)
 
 ### 📊 Analyse de l'Attaquant :
 - **OS Fingerprinting** : Détection précise du système
@@ -175,6 +177,15 @@ python -m pytest core/tests/ -v
 python -m pytest core/tests/test_fingerprint_validator.py -v
 ```
 
+### Vérifications Qualité
+```bash
+# Type checking
+mypy core/ --ignore-missing-imports
+
+# Analyse sécurité (non bloquante)
+bandit -q -r core -x core/assets,core/web/static
+```
+
 ### Problèmes Courants :
 - **Dépendances manquantes** : `python install_deps.py`
 - **Environnement virtuel** : `python -m venv .venv`
@@ -196,6 +207,12 @@ Vantablack_Clean/
 ├── ⚡ generator.py        # Générateur de pages
 └── ⚡ install_deps.py    # Installation dépendances
 ```
+
+## 📖 Documentation
+
+- Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- Quickstart: [docs/QUICKSTART.md](docs/QUICKSTART.md)
+- Sécurité & usage responsable: [docs/SECURITY.md](docs/SECURITY.md)
 
 ## 📞 Support
 

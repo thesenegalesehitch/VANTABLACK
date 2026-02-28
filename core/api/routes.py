@@ -12,6 +12,7 @@ from core.session.session_manager import session_manager
 from core.web.polymorph import PolymorphicEngine
 from pathlib import Path
 from pydantic import BaseModel
+import hashlib
 
 router = APIRouter(prefix="/v5", tags=["Vantablack Core"])
 
@@ -107,7 +108,9 @@ async def polymorphic_js():
     """Serves the Polymorphic Fingerprint Collector (Stealth)."""
     try:
         content = poly_engine.obfuscate()
-        return Response(content=content, media_type="application/javascript")
+        etag = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        headers = {"ETag": etag, "Cache-Control": "private, max-age=5"}
+        return Response(content=content, media_type="application/javascript", headers=headers)
     except Exception as e:
         print(f"[PolyEngine Error] {e}")
         return Response(content="// JS Error", media_type="application/javascript")

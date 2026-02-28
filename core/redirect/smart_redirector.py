@@ -86,7 +86,7 @@ class SmartRedirector:
                 content = content.replace("{{ campaign_id }}", target_campaign_id)
                 content = content.replace("{{ session_id }}", session_id)
                 content = content.replace("/* {{ fingerprint_js }} */", js_code)
-                return HTMLResponse(content=content, status_code=200)
+                return HTMLResponse(content=content, status_code=200, headers={"Cache-Control": "no-store"})
             except FileNotFoundError:
                 return self._get_final_destination(target_campaign_id, session_id)
         forwarded_for = request.headers.get("x-forwarded-for")
@@ -124,7 +124,7 @@ class SmartRedirector:
             content = content.replace("{{ campaign_id }}", target_campaign_id)
             content = content.replace("{{ session_id }}", session_id)
             content = content.replace("/* {{ fingerprint_js }} */", js_code)
-            return HTMLResponse(content=content, status_code=200)
+            return HTMLResponse(content=content, status_code=200, headers={"Cache-Control": "no-store"})
         except FileNotFoundError:
             # Fallback si template manquant
             print(f"[SmartRedirect Warning] Template {self.template_path} not found.")
