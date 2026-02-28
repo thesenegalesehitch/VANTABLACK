@@ -12,7 +12,7 @@ class PhishingTemplate(ABC):
         self.description = description
         
     @abstractmethod
-    def render(self, context: Dict[str, str] = None) -> str:
+    def render(self, context: Optional[Dict[str, str]] = None) -> str:
         """Rend le contenu HTML du template."""
         pass
         
@@ -46,7 +46,7 @@ class PhishingTemplate(ABC):
             print(f"Error loading template {filename}: {e}")
             return "<h1>Template Error</h1>"
 
-    def _apply_context(self, html: str, context: Dict[str, str] = None) -> str:
+    def _apply_context(self, html: str, context: Optional[Dict[str, str]] = None) -> str:
         """Remplace les variables {{ key }} par les valeurs du contexte."""
         if not context:
             context = {}
@@ -69,7 +69,7 @@ class MicrosoftLoginTemplate(PhishingTemplate):
     def __init__(self):
         super().__init__("Microsoft 365", "Faux login Microsoft 365 pour capture d'identifiants.")
 
-    def render(self, context: Dict[str, str] = None) -> str:
+    def render(self, context: Optional[Dict[str, str]] = None) -> str:
         html = self._load_html("microsoft.html")
         return self._apply_context(html, context)
         
@@ -81,7 +81,7 @@ class GoogleLoginTemplate(PhishingTemplate):
     def __init__(self):
         super().__init__("Google Workspace", "Faux login Google pour capture d'identifiants.")
 
-    def render(self, context: Dict[str, str] = None) -> str:
+    def render(self, context: Optional[Dict[str, str]] = None) -> str:
         html = self._load_html("google.html")
         return self._apply_context(html, context)
 
@@ -93,7 +93,7 @@ class GenericUpdateTemplate(PhishingTemplate):
     def __init__(self):
         super().__init__("Generic Update", "Page de maintenance générique demandant une reconnexion.")
 
-    def render(self, context: Dict[str, str] = None) -> str:
+    def render(self, context: Optional[Dict[str, str]] = None) -> str:
         html = self._load_html("generic.html")
         return self._apply_context(html, context)
 
@@ -111,7 +111,7 @@ class DynamicPhishingTemplate(PhishingTemplate):
         self.filename = filename
         self._target_url = target_url
 
-    def render(self, context: Dict[str, str] = None) -> str:
+    def render(self, context: Optional[Dict[str, str]] = None) -> str:
         html = self._load_html(self.filename)
         return self._apply_context(html, context)
 
@@ -147,7 +147,7 @@ class TemplateLoader:
     
     @staticmethod
     def load_all() -> Dict[str, PhishingTemplate]:
-        templates = {}
+        templates: Dict[str, PhishingTemplate] = {}
         
         # Base path to high_fidelity templates
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

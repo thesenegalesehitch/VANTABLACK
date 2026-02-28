@@ -3,7 +3,7 @@ Vantablack Core v5 - Internationalization System
 Système de traduction français/anglais pour l'interface utilisateur
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import json
 from pathlib import Path
 
@@ -39,7 +39,7 @@ class I18N:
         else:
             self.current_language = "en"  # Fallback to English
     
-    def get(self, key: str, default: str = None) -> str:
+    def get(self, key: str, default: Optional[str] = None) -> str:
         """Retourne la traduction pour la clé donnée"""
         if self.current_language in self.translations:
             return self.translations[self.current_language].get(key, default or key)
@@ -67,7 +67,7 @@ class I18N:
 # Instance globale
 i18n = I18N()
 
-def t(key: str, default: str = None, **kwargs) -> str:
+def t(key: str, default: Optional[str] = None, **kwargs) -> str:
     """Fonction helper pour accéder aux traductions avec formatage"""
     translation = i18n.get(key, default)
     if translation and kwargs:
