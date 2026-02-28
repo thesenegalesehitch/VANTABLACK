@@ -11,6 +11,18 @@ import sys
 from datetime import datetime
 from core.utils.i18n import i18n, t
 from core.proxy.relay import SessionRelay
+try:
+    from start import Colors  # reuse CLI color palette if available
+except Exception:
+    class Colors:
+        GREEN = ''
+        YELLOW = ''
+        RED = ''
+        BLUE = ''
+        CYAN = ''
+        MAGENTA = ''
+        RESET = ''
+        BOLD = ''
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

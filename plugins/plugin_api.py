@@ -295,10 +295,8 @@ class PluginAPI:
         # Create plugin-specific handler if needed
         if not logger.handlers:
             handler = logging.StreamHandler()
-            formatter = logging.Formatter(
-                f'[{asctime}] [{levelname}] [plugin:{plugin_id}] {message}',
-                style='{'
-            )
+            fmt = f'[{{asctime}}] [{{levelname}}] [plugin:{plugin_id}] {{message}}'
+            formatter = logging.Formatter(fmt, style='{')
             handler.setFormatter(formatter)
             logger.addHandler(handler)
             logger.setLevel(logging.INFO)
